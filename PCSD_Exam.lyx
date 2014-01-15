@@ -61,8 +61,79 @@
 
 \begin_body
 
-\begin_layout Standard
+\begin_layout Title
+PCSD
+\begin_inset Newline newline
+\end_inset
 
+Final Exam
+\end_layout
+
+\begin_layout Author
+Arni Asgeirsson - lwf986
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Section
+Exercises
+\end_layout
+
+\begin_layout Subsection
+Question 1: Proximity
+\end_layout
+
+\begin_layout Subsection
+Question 2: Parallelism
+\end_layout
+
+\begin_layout Section
+Programming Task
+\end_layout
+
+\begin_layout Subsection
+Question 1
+\end_layout
+
+\begin_layout Subsection
+Question 2
+\end_layout
+
+\begin_layout Subsection
+Question 3
+\end_layout
+
+\begin_layout Subsection
+Question 4
+\end_layout
+
+\begin_layout Subsection
+Question 5
 \end_layout
 
 \end_body

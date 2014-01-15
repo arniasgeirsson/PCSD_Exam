@@ -9,7 +9,8 @@
 
 .DS_Store
 *~
-workspace*
-Week Assignments*
+workspace/*
+Week Assignments/*
 .todogroup
 *#
+Tools/*

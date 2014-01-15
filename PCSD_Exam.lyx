@@ -116,6 +116,32 @@ Question 2: Parallelism
 Programming Task
 \end_layout
 
+\begin_layout Standard
+I use JDK 6
+\end_layout
+
+\begin_layout Standard
+Developed in Eclipse version Kepler ?
+\end_layout
+
+\begin_layout Standard
+JUnit version for my tests?
+\end_layout
+
+\begin_layout Standard
+I use Jetty version 9.1.1v20140108
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Download link http://download.eclipse.org/jetty/stable-9/dist/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Question 1
 \end_layout

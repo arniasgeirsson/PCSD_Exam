@@ -36,4 +36,10 @@ public interface ItemSupplier {
 	public List<ItemQuantity> getOrdersPerItem(Set<Integer> itemIds)
 			throws InvalidItemException;
 
+	// TODO added this function for the sake of testing
+	public void clear();
+
+	// TODO added this function for the sake of testing
+	public int getSupplierID();
+
 }

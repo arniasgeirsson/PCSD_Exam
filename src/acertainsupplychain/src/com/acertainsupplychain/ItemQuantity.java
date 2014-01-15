@@ -36,5 +36,25 @@ public final class ItemQuantity {
 	public int getQuantity() {
 		return quantity;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (obj == this)
+			return true;
+		if (!(obj instanceof ItemQuantity))
+			return false;
+
+		ItemQuantity item = (ItemQuantity) obj;
+		return itemId == item.getItemId() && quantity == item.getQuantity();
+	}
+
+	// TODO
+	// http://stackoverflow.com/questions/27581/overriding-equals-and-hashcode-in-java
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
 }

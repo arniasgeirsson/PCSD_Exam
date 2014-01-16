@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,16 +22,28 @@ import com.acertainsupplychain.ItemQuantity;
 import com.acertainsupplychain.ItemSupplier;
 import com.acertainsupplychain.OrderProcessingException;
 import com.acertainsupplychain.OrderStep;
-import com.acertainsupplychain.impl.ItemSupplierImpl;
+import com.acertainsupplychain.clients.ItemSupplierHTTPProxy;
+import com.acertainsupplychain.server.ItemSupplierHTTPServer;
+import com.acertainsupplychain.utility.ItemSupplierUtility;
 
 @RunWith(JUnit4.class)
-public class ItemSupplierSimple {
+public class ItemSupplierAdvanced {
 
 	private static ItemSupplier supplier;
+	private static Process itemSupplierProcess;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		supplier = new ItemSupplierImpl(0);
+		int port = 8014;
+		itemSupplierProcess = ItemSupplierUtility.startProcess(
+				ItemSupplierHTTPServer.class, Integer.toString(port));
+		supplier = new ItemSupplierHTTPProxy(0, port);
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		((ItemSupplierHTTPProxy) supplier).stop();
+		ItemSupplierUtility.stopProcess(itemSupplierProcess);
 	}
 
 	@After
@@ -39,10 +52,10 @@ public class ItemSupplierSimple {
 	}
 
 	// Testing clear
-	@Test
-	public void testClear() {
-		// TODO doesn't make sense, just argue that it is correct.
-	}
+	// @Test
+	// public void testClear() {
+	// // TODO doesn't make sense, just argue that it is correct.
+	// }
 
 	// TODO split it up ?
 	@Test
@@ -490,6 +503,7 @@ public class ItemSupplierSimple {
 		try {
 			supplier.executeStep(step);
 		} catch (Exception e) {
+			// e.printStackTrace();
 			fail();
 		}
 	}
@@ -499,6 +513,7 @@ public class ItemSupplierSimple {
 		try {
 			return supplier.getOrdersPerItem(itemIds);
 		} catch (Exception e) {
+			// e.printStackTrace();
 			fail();
 		}
 		return null;

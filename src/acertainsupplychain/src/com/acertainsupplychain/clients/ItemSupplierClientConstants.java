@@ -1,0 +1,31 @@
+/**
+ * 
+ */
+package com.acertainsupplychain.clients;
+
+// TODO Inspired by the weekly assignments
+
+/**
+ * TODO BookStoreClientConstants stores the constants used by the
+ * CertainBookStore proxy and client classes
+ * 
+ * @author bonii
+ * 
+ */
+public final class ItemSupplierClientConstants {
+
+	public static final int ORDERMANAGER_MAX_THREADSPOOL_SIZE = 10;
+	public static final String GETWORKFLOWSTATUS_PARAM = "workflowID";
+
+	public static final int CLIENT_MAX_CONNECTION_ADDRESS = 200;
+	public static final int CLIENT_MAX_THREADSPOOL_THREADS = 250;
+	public static final int CLIENT_MAX_TIMEOUT_MILLISECS = 30000;
+
+	public static final String strERR_CLIENT_REQUEST_SENDING = "ERR_CLIENT_REQUEST_SENDING";
+	public static final String strERR_CLIENT_REQUEST_EXCEPTION = "ERR_CLIENT_REQUEST_EXCEPTION";
+	public static final String strERR_CLIENT_REQUEST_TIMEOUT = "CLIENT_REQUEST_TIMEOUT";
+	public static final String strERR_CLIENT_RESPONSE_DECODING = "CLIENT_RESPONSE_DECODING";
+	public static final String strERR_CLIENT_UNKNOWN = "CLIENT_UNKNOWN";
+	public static final String strERR_CLIENT_ENCODING = "CLIENT_ENCODING";
+
+}

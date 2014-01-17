@@ -57,4 +57,9 @@ public final class ItemQuantity {
 		return super.hashCode();
 	}
 
+	@Override
+	public String toString() {
+		return "ItemQuantity: [" + itemId + "," + quantity + "]";
+	}
+
 }

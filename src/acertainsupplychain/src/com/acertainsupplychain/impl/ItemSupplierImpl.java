@@ -45,11 +45,10 @@ public class ItemSupplierImpl implements ItemSupplier {
 				throw new OrderProcessingException("Supplier with id ["
 						+ supplierID + "]: No items in the given OrderStep can"
 						+ " be NULL.");
-		}
-
-		// TODO as one can only buy stuff a negative amount should not be valid
-		// TODO 0 is not okay either, as it does not make sense to buy nothing
-		for (ItemQuantity item : step.getItems()) {
+			// TODO as one can only buy stuff a negative amount should not be
+			// valid
+			// TODO 0 is not okay either, as it does not make sense to buy
+			// nothing
 			if (item.getQuantity() < 1)
 				throw new OrderProcessingException("Supplier with id ["
 						+ supplierID + "]: You cannot order a non-positive "

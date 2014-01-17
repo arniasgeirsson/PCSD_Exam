@@ -1,6 +1,7 @@
 package com.acertainsupplychain;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * The OrderManager interface abstracts an integration broker for a supply chain
@@ -46,5 +47,19 @@ public interface OrderManager {
 	 */
 	public List<StepStatus> getOrderWorkflowStatus(int orderWorkflowId)
 			throws InvalidWorkflowException;
+
+	// TODO for the sake of testing
+	public void clear();
+
+	// TODO, can be passed along to lessen the interaction with the orderManager
+	public ItemSupplier jobGetSupplier(int supplierID);
+
+	// TODO used?
+	public List<OrderStep> jobGetWorkFlow(int workflowID);
+
+	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status);
+
+	public void waitForJobsToFinish() throws InterruptedException,
+			ExecutionException;
 
 }

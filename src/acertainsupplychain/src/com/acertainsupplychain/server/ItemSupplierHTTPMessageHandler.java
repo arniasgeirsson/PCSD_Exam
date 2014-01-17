@@ -4,6 +4,7 @@
 package com.acertainsupplychain.server;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -16,6 +17,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import com.acertainsupplychain.ItemSupplier;
 import com.acertainsupplychain.OrderProcessingException;
 import com.acertainsupplychain.OrderStep;
+import com.acertainsupplychain.clients.ItemSupplierClientConstants;
 import com.acertainsupplychain.impl.ItemSupplierImpl;
 import com.acertainsupplychain.utility.ItemSupplierMessageTag;
 import com.acertainsupplychain.utility.ItemSupplierResponse;
@@ -33,10 +35,10 @@ import com.acertainsupplychain.utility.ItemSupplierUtility;
  */
 public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 
-	private final ItemSupplier supplier;
+	private ItemSupplier supplier;
 
 	public ItemSupplierHTTPMessageHandler() {
-		supplier = new ItemSupplierImpl(0);
+		supplier = null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -73,6 +75,26 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 			System.out.println("Unknown message tag");
 		} else {
 			switch (messageTag) {
+
+			case INIT_ITEMSUPPLIER:
+
+				String supplierIDString = URLDecoder
+						.decode(request
+								.getParameter(ItemSupplierClientConstants.INIT_ITEMSUPPLIER_PARAM),
+								"UTF-8");
+
+				int supplierID = Integer.parseInt(supplierIDString);
+				if (supplier == null) {
+					supplier = new ItemSupplierImpl(supplierID);
+				}
+
+				itemSupplierResponse = new ItemSupplierResponse();
+
+				response.getWriter()
+						.println(
+								ItemSupplierUtility
+										.serializeObjectToXMLString(itemSupplierResponse));
+				break;
 
 			case EXECUTESTEP:
 				xml = ItemSupplierUtility.extractPOSTDataFromRequest(request);

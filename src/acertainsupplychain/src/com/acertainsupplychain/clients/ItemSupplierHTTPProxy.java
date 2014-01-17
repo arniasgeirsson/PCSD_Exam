@@ -3,6 +3,8 @@
  */
 package com.acertainsupplychain.clients;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
@@ -67,6 +69,42 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		// seconds timeout if server reply, the request expires
 		client.setTimeout(ItemSupplierClientConstants.CLIENT_MAX_TIMEOUT_MILLISECS);
 		client.start();
+
+		initializeItemSupplier(supplierID);
+	}
+
+	// TODO use post or get?
+	private void initializeItemSupplier(int supplierID) {
+		ContentExchange exchange = new ContentExchange();
+		exchange.setMethod("GET"); // TODO correct?
+
+		String urlEncodedsupplierID = null;
+
+		try {
+			urlEncodedsupplierID = URLEncoder.encode(
+					Integer.toString(supplierID), "UTF-8"); // TODO
+															// constant?
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			// throw new InvalidWorkflowException(
+			// "Unsupported encoding exception", e);
+		}
+
+		String urlString = getItemSupplierAddress() + "/"
+				+ ItemSupplierMessageTag.INIT_ITEMSUPPLIER + "?"
+				+ ItemSupplierClientConstants.INIT_ITEMSUPPLIER_PARAM + "="
+				+ urlEncodedsupplierID;
+		exchange.setURL(urlString);
+
+		try {
+			ItemSupplierUtility.sendAndRecv(client, exchange);
+		} catch (OrderProcessingException e) {
+			// TODO what to do? Wrap inside InvalidItemException, or change API?
+			// -> Change API
+			System.out.println("381 -- -- - -- - - -What to do?");
+			e.printStackTrace();
+			// throw new InvalidWorkflowException("", e);
+		}
 	}
 
 	// private void initializeReplicationAwareMappings() throws IOException {

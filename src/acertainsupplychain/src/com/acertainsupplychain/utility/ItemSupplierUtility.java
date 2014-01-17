@@ -212,7 +212,6 @@ public final class ItemSupplierUtility {
 		String classpath = System.getProperty("java.class.path");
 		String path = System.getProperty("java.home") + separator + "bin"
 				+ separator + "java";
-		// String command = path + "-cp" + classpath + clazz.getCanonicalName();
 		List<String> commandList = new ArrayList<String>();
 		commandList.add(path);
 		commandList.add("-cp");
@@ -230,7 +229,6 @@ public final class ItemSupplierUtility {
 		// ready
 		Thread.yield();
 		Thread.sleep(1000);
-		// System.out.println("[" + path + "]\n[" + command + "]\nwait");
 		return process;
 	}
 

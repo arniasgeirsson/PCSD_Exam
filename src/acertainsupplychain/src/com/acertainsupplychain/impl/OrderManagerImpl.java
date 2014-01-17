@@ -11,6 +11,7 @@ import com.acertainsupplychain.ItemSupplier;
 import com.acertainsupplychain.OrderManager;
 import com.acertainsupplychain.OrderProcessingException;
 import com.acertainsupplychain.OrderStep;
+import com.acertainsupplychain.clients.ItemSupplierHTTPProxy;
 
 public class OrderManagerImpl implements OrderManager {
 
@@ -135,19 +136,22 @@ public class OrderManagerImpl implements OrderManager {
 
 	// TODO untested
 	@Override
-	public ItemSupplier jobGetSupplier(int supplierID) {
+	public ItemSupplier jobGetSupplier(int supplierID)
+			throws OrderProcessingException {
 		return suppliers.get(supplierID);
 	}
 
 	// TODO untested
 	@Override
-	public List<OrderStep> jobGetWorkFlow(int workflowID) {
+	public List<OrderStep> jobGetWorkFlow(int workflowID)
+			throws OrderProcessingException {
 		return workflows.get(workflowID);
 	}
 
 	// TODO untested
 	@Override
-	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status) {
+	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)
+			throws OrderProcessingException {
 		List<StepStatus> newStatus = this.status.get(workflowID);
 		newStatus.set(stepIndex, status);
 		this.status.put(workflowID, newStatus);
@@ -155,9 +159,25 @@ public class OrderManagerImpl implements OrderManager {
 
 	// TODO untested
 	@Override
-	public void waitForJobsToFinish() throws InterruptedException,
-			ExecutionException {
-		scheduler.waitForJobsToFinish();
+	public void waitForJobsToFinish() throws OrderProcessingException {
+		try {
+			scheduler.waitForJobsToFinish();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new OrderProcessingException(e);
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+			throw new OrderProcessingException(e);
+		}
+	}
+
+	@Override
+	public void stopItemSupplierProxies() {
+		for (ItemSupplier supplier : suppliers.values()) {
+			if (supplier instanceof ItemSupplierHTTPProxy) {
+				((ItemSupplierHTTPProxy) supplier).stop();
+			}
+		}
 	}
 
 }

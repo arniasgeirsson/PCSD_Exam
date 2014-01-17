@@ -1,7 +1,6 @@
 package com.acertainsupplychain;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * The OrderManager interface abstracts an integration broker for a supply chain
@@ -52,14 +51,18 @@ public interface OrderManager {
 	public void clear();
 
 	// TODO, can be passed along to lessen the interaction with the orderManager
-	public ItemSupplier jobGetSupplier(int supplierID);
+	public ItemSupplier jobGetSupplier(int supplierID)
+			throws OrderProcessingException;
 
-	// TODO used?
-	public List<OrderStep> jobGetWorkFlow(int workflowID);
+	public List<OrderStep> jobGetWorkFlow(int workflowID)
+			throws OrderProcessingException;
 
-	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status);
+	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)
+			throws OrderProcessingException;
 
-	public void waitForJobsToFinish() throws InterruptedException,
-			ExecutionException;
+	// TODO how to test it? Do random tests and never will the state ever be
+	// Registered after this call?
+	public void waitForJobsToFinish() throws OrderProcessingException;
 
+	public void stopItemSupplierProxies();
 }

@@ -21,14 +21,25 @@ public class OrderManagerJob implements Runnable {
 	@Override
 	public void run() {
 		// loop until no steps are left:
-		List<OrderStep> steps = parent.jobGetWorkFlow(workflowID);
+		List<OrderStep> steps;
+		try {
+			steps = parent.jobGetWorkFlow(workflowID);
+		} catch (OrderProcessingException e) {
+			e.printStackTrace();
+			return;
+		}
 		int size = steps.size();
 		for (int i = 0; i < size; i++) {
 			OrderStep orderStep = steps.get(i);
 			// - fetch next step
 			// - call the supplier
-			ItemSupplier supplier = parent.jobGetSupplier(orderStep
-					.getSupplierId());
+			ItemSupplier supplier = null;
+			try {
+				supplier = parent.jobGetSupplier(orderStep.getSupplierId());
+			} catch (OrderProcessingException e) {
+				e.printStackTrace();
+				return;
+			}
 			StepStatus status = StepStatus.SUCCESSFUL;
 			try {
 				// - wait for responds
@@ -39,7 +50,12 @@ public class OrderManagerJob implements Runnable {
 			}
 
 			// - update status in db
-			parent.jobSetStatus(workflowID, i, status);
+			try {
+				parent.jobSetStatus(workflowID, i, status);
+			} catch (OrderProcessingException e) {
+				e.printStackTrace();
+				return;
+			}
 		}
 	}
 }

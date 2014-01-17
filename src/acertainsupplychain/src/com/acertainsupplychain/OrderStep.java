@@ -40,4 +40,9 @@ public final class OrderStep {
 		return items;
 	}
 
+	@Override
+	public String toString() {
+		return "OrderStep: [" + supplierId + "," + items + "]";
+	}
+
 }

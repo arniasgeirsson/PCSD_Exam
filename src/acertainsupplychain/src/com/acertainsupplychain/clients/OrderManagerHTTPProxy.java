@@ -274,7 +274,7 @@ public class OrderManagerHTTPProxy implements OrderManager {
 	// TODO use post or get?
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<OrderStep> jobGetWorkFlow(int workflowID)
+	public List<OrderStep> jobGetWorkflow(int workflowID)
 			throws OrderProcessingException {
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("GET"); // TODO correct?

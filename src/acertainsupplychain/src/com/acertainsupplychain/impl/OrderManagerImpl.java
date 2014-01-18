@@ -222,7 +222,7 @@ public class OrderManagerImpl implements OrderManager {
 
 	// TODO untested
 	@Override
-	public List<OrderStep> jobGetWorkFlow(int workflowID)
+	public List<OrderStep> jobGetWorkflow(int workflowID)
 			throws OrderProcessingException {
 		if (!workflows.containsKey(workflowID))
 			throw new OrderProcessingException("TODO");

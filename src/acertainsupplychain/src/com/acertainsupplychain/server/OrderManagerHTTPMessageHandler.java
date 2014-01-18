@@ -229,7 +229,7 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 				itemSupplierResponse = new ItemSupplierResponse();
 				try {
 					itemSupplierResponse.setResult(new ItemSupplierResult(
-							orderManager.jobGetWorkFlow(workflowID)));
+							orderManager.jobGetWorkflow(workflowID)));
 				} catch (OrderProcessingException ex) {
 					itemSupplierResponse.setException(ex);
 				}

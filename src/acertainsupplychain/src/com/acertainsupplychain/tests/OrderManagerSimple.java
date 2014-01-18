@@ -994,7 +994,7 @@ public class OrderManagerSimple {
 				workflowLocal);
 
 		try {
-			workflow = orderManager.jobGetWorkFlow(workflowID);
+			workflow = orderManager.jobGetWorkflow(workflowID);
 		} catch (Exception e) {
 			fail();
 		}
@@ -1004,7 +1004,7 @@ public class OrderManagerSimple {
 		// 2. Test that a workflow that has not been returned throws proper
 		// exception
 		try {
-			orderManager.jobGetWorkFlow(workflowID + 1);
+			orderManager.jobGetWorkflow(workflowID + 1);
 			fail();
 		} catch (OrderProcessingException e) {
 		} catch (Exception e) {
@@ -1014,7 +1014,7 @@ public class OrderManagerSimple {
 		// TODO must also make sure that the state of the orderManager is the
 		// correct one
 		try {
-			workflow = orderManager.jobGetWorkFlow(workflowID);
+			workflow = orderManager.jobGetWorkflow(workflowID);
 		} catch (Exception e) {
 			fail();
 		}

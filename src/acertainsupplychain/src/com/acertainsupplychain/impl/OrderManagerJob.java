@@ -23,7 +23,7 @@ public class OrderManagerJob implements Runnable {
 		// loop until no steps are left:
 		List<OrderStep> steps;
 		try {
-			steps = parent.jobGetWorkFlow(workflowID);
+			steps = parent.jobGetWorkflow(workflowID);
 		} catch (OrderProcessingException e) {
 			e.printStackTrace();
 			return;

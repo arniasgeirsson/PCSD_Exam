@@ -54,7 +54,7 @@ public interface OrderManager {
 	public ItemSupplier jobGetSupplier(int supplierID)
 			throws OrderProcessingException;
 
-	public List<OrderStep> jobGetWorkFlow(int workflowID)
+	public List<OrderStep> jobGetWorkflow(int workflowID)
 			throws OrderProcessingException;
 
 	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)

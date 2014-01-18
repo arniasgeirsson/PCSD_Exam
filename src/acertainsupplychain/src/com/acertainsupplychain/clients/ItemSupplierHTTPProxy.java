@@ -71,6 +71,7 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 															// constant?
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
+			// TODO have to handle the error somehow?
 			// throw new InvalidWorkflowException(
 			// "Unsupported encoding exception", e);
 		}
@@ -87,7 +88,7 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 			// TODO what to do? Wrap inside InvalidItemException, or change API?
 			// -> Change API
 			System.out.println("381 -- -- - -- - - -What to do?");
-			e.printStackTrace();
+			// e.printStackTrace();
 			// throw new InvalidWorkflowException("", e);
 		}
 	}
@@ -100,7 +101,6 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		try {
 			client.stop();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

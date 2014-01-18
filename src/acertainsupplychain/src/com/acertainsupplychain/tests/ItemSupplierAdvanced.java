@@ -292,28 +292,29 @@ public class ItemSupplierAdvanced {
 
 		assertEquals(localList, TestUtility.getOrdersPerItem(supplier, itemIds));
 
-		// 4. Try to add with empty list
-		// supplier.clear();
-		items.clear();
-		// localList.clear();
+		// // 4. Try to add with empty list
+		// // supplier.clear();
+		// items.clear();
+		// // localList.clear();
+		//
+		// // items.add(new ItemQuantity(0, 10));
+		// // items.add(new ItemQuantity(1, 20));
+		// // localList.add(new ItemQuantity(0, 10));
+		// // localList.add(new ItemQuantity(1, 20));
+		// // itemIds = extractItemIds(localList);
+		//
+		// step = new OrderStep(supplier.getSupplierID(), items);
+		//
+		// try {
+		// supplier.executeStep(step);
+		// } catch (Exception e) {
+		// fail();
+		// }
+		//
+		// assertEquals(localList, TestUtility.getOrdersPerItem(supplier,
+		// itemIds));
 
-		// items.add(new ItemQuantity(0, 10));
-		// items.add(new ItemQuantity(1, 20));
-		// localList.add(new ItemQuantity(0, 10));
-		// localList.add(new ItemQuantity(1, 20));
-		// itemIds = extractItemIds(localList);
-
-		step = new OrderStep(supplier.getSupplierID(), items);
-
-		try {
-			supplier.executeStep(step);
-		} catch (Exception e) {
-			fail();
-		}
-
-		assertEquals(localList, TestUtility.getOrdersPerItem(supplier, itemIds));
-
-		// 5. Try to add item with negative item id to show that it is allowed
+		// 4. Try to add item with negative item id to show that it is allowed
 		supplier.clear();
 		items.clear();
 		localList.clear();
@@ -459,6 +460,32 @@ public class ItemSupplierAdvanced {
 		items.add(new ItemQuantity(0, 10));
 		items.add(null);
 		items.add(new ItemQuantity(1, 6));
+
+		OrderStep step = new OrderStep(supplier.getSupplierID(), items);
+
+		try {
+			supplier.executeStep(step);
+			fail();
+		} catch (OrderProcessingException e) {
+		} catch (Exception e) {
+			fail();
+		}
+
+		// Make sure that the state of the supplier is the same as before the
+		// exception occurred
+		assertEquals(localList, TestUtility.getOrdersPerItem(supplier, itemIds));
+	}
+
+	@Test
+	public final void testExecuteStep_EmptyItems() {
+		// Initialize the state of the supplier pre exception and make sure it
+		// is in the state we expect
+		List<ItemQuantity> localList = TestUtility
+				.setUpPreExceptionSupplierState(supplier);
+		Set<Integer> itemIds = TestUtility.extractItemIds(localList);
+		assertEquals(localList, TestUtility.getOrdersPerItem(supplier, itemIds));
+
+		List<ItemQuantity> items = new ArrayList<ItemQuantity>();
 
 		OrderStep step = new OrderStep(supplier.getSupplierID(), items);
 

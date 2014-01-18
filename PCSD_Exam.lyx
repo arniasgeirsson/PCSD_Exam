@@ -100,6 +100,27 @@ LatexCommand tableofcontents
 Introduction
 \end_layout
 
+\begin_layout Standard
+- Introduction to this report
+\end_layout
+
+\begin_layout Standard
+- Introduction to the given assignment
+\end_layout
+
+\begin_layout Standard
+- Overview of the hand-in.
+\end_layout
+
+\begin_layout Standard
+- Overview of the appendix
+\end_layout
+
+\begin_layout Standard
+- How is the general structure of this report? (does it make sense in this
+ one?)
+\end_layout
+
 \begin_layout Section
 Exercises
 \end_layout
@@ -114,6 +135,10 @@ Question 2: Parallelism
 
 \begin_layout Section
 Programming Task
+\end_layout
+
+\begin_layout Paragraph
+Development Environment
 \end_layout
 
 \begin_layout Standard
@@ -139,27 +164,174 @@ Download link http://download.eclipse.org/jetty/stable-9/dist/
 
 \end_inset
 
+ -> No, I use the ones from assignment 4 (same as all assignments)
+\end_layout
 
+\begin_layout Standard
+Use xsteam 1.4.5, same as assignments (actually 1.4.6 atm)
+\end_layout
+
+\begin_layout Paragraph
+Additions to the provided API (what and why)
+\end_layout
+
+\begin_layout Paragraph
+High-Level Design Decisions and Modularity
+\end_layout
+
+\begin_layout Standard
+First, you will document the main organization of modules and data in your
+ system.
 \end_layout
 
 \begin_layout Subsection
-Question 1
+Question 1 (LG1, LG2, LG3, LG5): Describe your overall implementation of
+ the OrderManager and ItemSupplier, including the following aspects in your
+ answer:
+\end_layout
+
+\begin_layout Subsubsection
+(1) Considering your use of logging, what RPC semantics are effectively
+ implemented between clients and OrderManager or ItemSupplier? What RPC
+ semantics are effectively implemented between OrderManager and ItemSupplier?
+ Explain.
+\end_layout
+
+\begin_layout Subsubsection
+(1) How did you make workflow processing asynchronous at the OrderManager?
+\end_layout
+
+\begin_layout Subsubsection
+(1) How did you handle failures of individual components? In particular,
+ how do you handle failure propagation?
+\end_layout
+
+\begin_layout Paragraph
+Atomicity and Fault-Tolerance
+\end_layout
+
+\begin_layout Standard
+Now, you will argue for your implementation and testing choices regarding
+ atomicity and fault-tolerance.
 \end_layout
 
 \begin_layout Subsection
-Question 2
+Question 2 (LG3, LG4, LG5): An ItemSupplier executes operations originated
+ at multiple instances of OrderManager as well as local clients.
+ Describe how you ensured atomicity of these operations.
+ In particular, mention the following aspects in your answer:
+\end_layout
+
+\begin_layout Standard
+NOTE: The method you design for atomicity does not need to be complex, as
+ long as you argue convincingly for its correctness, its trade-off in complexity
+ of implementation and performance, and how it fits in the system as a whole.
+\end_layout
+
+\begin_layout Subsubsection
+(1) Which method did you use for ensuring serializability at each item supplier
+ (e.g., locking, optimistic approach, or simple queueing of operations)? Describe
+ your method at a high level.
+\end_layout
+
+\begin_layout Subsubsection
+(1) Argue for the correctness of your method; to do so, show how your method
+ is logically equivalent to a trivial solution based on a single global
+ lock or to a well-known locking protocol (e.g., a variant of two-phase locking).
+\end_layout
+
+\begin_layout Subsubsection
+(2) Argue for the performance of your method; to do so, explain your assumptions
+ about the workload the service is exposed to and why you believe other
+ alternatives you considered (e.g.., locking, optimistic approach, or simple
+ queueing of operations) would be better or worse than your choice.
 \end_layout
 
 \begin_layout Subsection
-Question 3
+Question 3 (LG4, LG5): In your implementation, you were not required to
+ implement a procedure for log-based recovery of individual components.
+ Explain how you would recover from a failure of:
+\end_layout
+
+\begin_layout Standard
+For each of the two scenarios, explain any necessary interaction with other
+ components to achieve recovery by replaying the log.
+ Also explain how you would use the log during recovery, i.e., how is the
+ information in the log used to rebuild data structures in main memory,
+ and why is it sufficient.
+\end_layout
+
+\begin_layout Subsubsection
+(1) an OrderManager
+\end_layout
+
+\begin_layout Subsubsection
+(1) an ItemSupplier
+\end_layout
+
+\begin_layout Paragraph
+Testing
 \end_layout
 
 \begin_layout Subsection
-Question 4
+Question 4 (LG4, LG5): Describe your high-level strategy to test your implementa
+tion.
+ In particular, mention the following aspects in your answer:
+\end_layout
+
+\begin_layout Subsubsection
+(1) How you tested execution of workflows by the OrderManager, considering
+ asynchronicity of execution.
+\end_layout
+
+\begin_layout Subsubsection
+(1) How you tested that operations were indeed atomic at the ItemSupplier.
+\end_layout
+
+\begin_layout Subsubsection
+(1) How you tested error conditions and failures of the multiple components.
+\end_layout
+
+\begin_layout Paragraph
+Experiments
+\end_layout
+
+\begin_layout Standard
+Finally, you will evaluate the scalability of one component of your system
+ experimentally.
 \end_layout
 
 \begin_layout Subsection
-Question 5
+Question 5 (LG6): Design, describe the setup for, and execute an experiment
+ that shows how well your implementation of a single ItemSupplier behaves
+ as concurrency is increased.
+ You will need to argue for a basic workload mix involving calls from order
+ managers as well as local clients.
+ Given a mix, you should report how the throughtput of the service scales
+ as more local clients / order managers are added.
+ Remember to thoroughly document your setup.
+ In particular, mention the following aspects in your answer:
+\end_layout
+
+\begin_layout Subsubsection
+(2) Setup: Document the hardware, data size and distribution, and workload
+ characteristics you have used to make your measurements.
+ In addition, describe your measurement procedure, e.g., procedure to generate
+ workload calls, use of timers, and numbers of repetitions, along with short
+ arguments for your decisions.
+ Also make sure to document your hardware configuration and how you expect
+ this configuration to affect the scalability results you obtain.
+\end_layout
+
+\begin_layout Subsubsection
+(1, + Figure) Results: According to your setup, show a graph with your throughpu
+t measurements for a single ItemSupplier on the y-axis and the number of
+ local clients / order managers on the x-axis, maintaining the workload
+ mix you argued for in your setup.
+ How does the observed throughput scale with the number of local clients
+ / order managers? Describe the trends observed and any other effects.
+ Explain why you observe these trends and how much that matches your expectation
+s.
 \end_layout
 
 \end_body

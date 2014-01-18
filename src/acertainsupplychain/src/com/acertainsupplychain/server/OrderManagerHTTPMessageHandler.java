@@ -89,10 +89,8 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(ex);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case GETWORKFLOWSTATUS:
@@ -108,19 +106,13 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(ex);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case CLEAR:
 				orderManager.clear();
-				itemSupplierResponse = new ItemSupplierResponse();
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, new ItemSupplierResponse());
 				break;
 
 			case INIT_ORDERMANAGER:
@@ -142,10 +134,8 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(e);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case INIT_ORDERMANAGER_PROXY:
@@ -178,10 +168,8 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 							.setException(new OrderProcessingException(e));
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case JOBGETSUPID:
@@ -196,10 +184,8 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(ex);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 			case JOBGETWORKFLOW:
 				itemSupplierResponse = new ItemSupplierResponse();
@@ -213,10 +199,8 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(ex);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case JOBSETSTATUS:
@@ -238,10 +222,8 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(ex);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case WAITFORJOBS:
@@ -252,19 +234,13 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 				} catch (OrderProcessingException e) {
 					itemSupplierResponse.setException(e);
 				}
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+
+				writeResponse(response, itemSupplierResponse);
 				break;
 
 			case ORDERMANAGER_STOP:
 				orderManager.stopItemSupplierProxies();
-				itemSupplierResponse = new ItemSupplierResponse();
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, new ItemSupplierResponse());
 				break;
 
 			default:
@@ -275,6 +251,13 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 		// Mark the request as handled so that the HTTP response can be sent
 		baseRequest.setHandled(true);
 
+	}
+
+	// TODO safe to use Object type instead of ItemSupplierResponse ?
+	private void writeResponse(HttpServletResponse response,
+			Object responseObject) throws IOException {
+		response.getWriter().println(
+				ItemSupplierUtility.serializeObjectToXMLString(responseObject));
 	}
 
 }

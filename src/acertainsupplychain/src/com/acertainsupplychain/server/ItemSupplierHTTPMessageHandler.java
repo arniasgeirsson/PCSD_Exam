@@ -81,10 +81,8 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(e);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case EXECUTESTEP:
@@ -100,10 +98,8 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(ex);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case GETORDERS:
@@ -120,19 +116,13 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 					itemSupplierResponse.setException(ex);
 				}
 
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
+
 				break;
 
 			case CLEAR:
 				supplier.clear();
-				itemSupplierResponse = new ItemSupplierResponse();
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, new ItemSupplierResponse());
 				break;
 
 			case GETSUPID:
@@ -140,11 +130,7 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 
 				itemSupplierResponse.setResult(new ItemSupplierResult(supplier
 						.getSupplierID()));
-
-				response.getWriter()
-						.println(
-								ItemSupplierUtility
-										.serializeObjectToXMLString(itemSupplierResponse));
+				writeResponse(response, itemSupplierResponse);
 				break;
 
 			default:
@@ -156,4 +142,12 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 		baseRequest.setHandled(true);
 
 	}
+
+	// TODO safe to use Object type instead of ItemSupplierResponse ?
+	private void writeResponse(HttpServletResponse response,
+			Object responseObject) throws IOException {
+		response.getWriter().println(
+				ItemSupplierUtility.serializeObjectToXMLString(responseObject));
+	}
+
 }

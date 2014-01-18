@@ -3,6 +3,8 @@ package com.acertainsupplychain.utility;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Properties;
 
 public class FileLogger {
@@ -88,13 +90,17 @@ public class FileLogger {
 		return folder + title;
 	}
 
-	// TODO seems like a silly function
-	public void logToFile(String log, boolean addLineBreak) {
+	public void logToFile(String log, boolean addTimeStamp) {
 		String string = log;
-		if (addLineBreak) {
-			string = log + "\n";
+		if (addTimeStamp) {
+			string = "[" + getTimeStamp() + "] " + log;
 		}
 		logToFile(string);
+	}
+
+	private String getTimeStamp() {
+		Date date = new Date();
+		return new Timestamp(date.getTime()).toString();
 	}
 
 	public void logToFile(String log) {

@@ -7,13 +7,6 @@ import java.util.Properties;
 
 public class FileLogger {
 
-	public static void main(String[] args) {
-		FileLogger logger = null;
-		logger = new FileLogger("test", "arni\n");
-
-		logger.logToFile("asds1");
-	}
-
 	private final String fullPath;
 	private final static String FILE_TYPE = "txt";
 
@@ -37,7 +30,6 @@ public class FileLogger {
 		}
 
 		fullPath = createFullPath(title, FILE_TYPE);
-		System.out.println(fullPath);
 		// Create the file if it does not exist
 		logToFile("", false);
 	}

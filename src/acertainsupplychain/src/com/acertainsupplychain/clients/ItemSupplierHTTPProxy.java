@@ -3,8 +3,6 @@
  */
 package com.acertainsupplychain.clients;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
@@ -66,14 +64,11 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		String urlEncodedsupplierID = null;
 
 		try {
-			urlEncodedsupplierID = URLEncoder.encode(
-					Integer.toString(supplierID), "UTF-8"); // TODO
-															// constant?
-		} catch (UnsupportedEncodingException e) {
+			urlEncodedsupplierID = ItemSupplierUtility
+					.encodeInteger(supplierID);
+		} catch (OrderProcessingException e) {
 			e.printStackTrace();
 			// TODO have to handle the error somehow?
-			// throw new InvalidWorkflowException(
-			// "Unsupported encoding exception", e);
 		}
 
 		String urlString = getItemSupplierAddress() + "/"

@@ -3,8 +3,6 @@
  */
 package com.acertainsupplychain.clients;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -197,19 +195,15 @@ public class OrderManagerHTTPProxy implements OrderManager {
 	@Override
 	public List<StepStatus> getOrderWorkflowStatus(int orderWorkflowId)
 			throws InvalidWorkflowException {
-		// String itemIdsXMLString = ItemSupplierUtility
-		// .serializeObjectToXMLString(itemIds);
-		// Buffer requestContent = new ByteArrayBuffer(itemIdsXMLString);
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("GET"); // TODO correct?
 
 		String urlEncodedOrderWorkflowID = null;
 
 		try {
-			urlEncodedOrderWorkflowID = URLEncoder.encode(
-					Integer.toString(orderWorkflowId), "UTF-8"); // TODO
-																	// constant?
-		} catch (UnsupportedEncodingException e) {
+			urlEncodedOrderWorkflowID = ItemSupplierUtility
+					.encodeInteger(orderWorkflowId);
+		} catch (OrderProcessingException e) {
 			throw new InvalidWorkflowException(
 					"Unsupported encoding exception", e);
 		}
@@ -241,15 +235,8 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("GET"); // TODO correct?
 
-		String urlEncodedSupplierID = null;
-
-		try {
-			urlEncodedSupplierID = URLEncoder.encode(
-					Integer.toString(supplierID), "UTF-8"); // TODO constant?
-		} catch (UnsupportedEncodingException e) {
-			throw new InvalidWorkflowException(
-					"Unsupported encoding exception", e);
-		}
+		String urlEncodedSupplierID = ItemSupplierUtility
+				.encodeInteger(supplierID);
 
 		String urlString = getOrderManagerAddress() + "/"
 				+ ItemSupplierMessageTag.JOBGETSUPID + "?"
@@ -279,15 +266,8 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("GET"); // TODO correct?
 
-		String urlEncodedWorkflowID = null;
-
-		try {
-			urlEncodedWorkflowID = URLEncoder.encode(
-					Integer.toString(workflowID), "UTF-8"); // TODO constant?
-		} catch (UnsupportedEncodingException e) {
-			throw new InvalidWorkflowException(
-					"Unsupported encoding exception", e);
-		}
+		String urlEncodedWorkflowID = ItemSupplierUtility
+				.encodeInteger(workflowID);
 
 		String urlString = getOrderManagerAddress() + "/"
 				+ ItemSupplierMessageTag.JOBGETWORKFLOW + "?"
@@ -316,25 +296,10 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("GET"); // TODO correct?
 
-		String urlEncodedWorkflowID = null;
-
-		try {
-			urlEncodedWorkflowID = URLEncoder.encode(
-					Integer.toString(workflowID), "UTF-8"); // TODO constant?
-		} catch (UnsupportedEncodingException e) {
-			throw new OrderProcessingException(
-					"Unsupported encoding exception", e);
-		}
-
-		String urlEncodedStepIndex = null;
-
-		try {
-			urlEncodedStepIndex = URLEncoder.encode(
-					Integer.toString(stepIndex), "UTF-8"); // TODO constant?
-		} catch (UnsupportedEncodingException e) {
-			throw new InvalidWorkflowException(
-					"Unsupported encoding exception", e);
-		}
+		String urlEncodedWorkflowID = ItemSupplierUtility
+				.encodeInteger(workflowID);
+		String urlEncodedStepIndex = ItemSupplierUtility
+				.encodeInteger(stepIndex);
 
 		String urlString = getOrderManagerAddress() + "/"
 				+ ItemSupplierMessageTag.JOBSETSTATUS + "?"

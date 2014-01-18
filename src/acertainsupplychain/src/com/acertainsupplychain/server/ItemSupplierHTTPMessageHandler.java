@@ -4,7 +4,6 @@
 package com.acertainsupplychain.server;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -57,38 +56,30 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 		ItemSupplierResponse itemSupplierResponse;
 		OrderStep step;
 		Set<Integer> itemIds;
+		Integer supplierID;
 
-		// // Need to do request multi-plexing
-		// if (!ItemSupplierUtility.isEmpty(requestURI)
-		// && requestURI.toLowerCase().startsWith("/stock")) {
-		// messageTag = ItemSupplierUtility.convertURItoMessageTag(requestURI
-		// .substring(6)); // the request is from store
-		// // manager, more
-		// // sophisticated security
-		// // features could be added
-		// // here
-		// } else {
 		messageTag = ItemSupplierUtility.convertURItoMessageTag(requestURI);
-		// }
-		// the RequestURI before the switch
+
 		if (messageTag == null) {
 			System.out.println("Unknown message tag");
 		} else {
 			switch (messageTag) {
 
 			case INIT_ITEMSUPPLIER:
-
-				String supplierIDString = URLDecoder
-						.decode(request
-								.getParameter(ItemSupplierClientConstants.INIT_ITEMSUPPLIER_PARAM),
-								"UTF-8");
-
-				int supplierID = Integer.parseInt(supplierIDString);
-				if (supplier == null) {
-					supplier = new ItemSupplierImpl(supplierID);
-				}
-
 				itemSupplierResponse = new ItemSupplierResponse();
+
+				try {
+					supplierID = ItemSupplierUtility
+							.decodeInteger(request
+									.getParameter(ItemSupplierClientConstants.INIT_ITEMSUPPLIER_PARAM));
+
+					if (supplier == null) {
+						supplier = new ItemSupplierImpl(supplierID);
+					}
+
+				} catch (OrderProcessingException e) {
+					itemSupplierResponse.setException(e);
+				}
 
 				response.getWriter()
 						.println(
@@ -155,61 +146,6 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 								ItemSupplierUtility
 										.serializeObjectToXMLString(itemSupplierResponse));
 				break;
-
-			// case BUYBOOKS:
-			// xml = ItemSupplierUtility.extractPOSTDataFromRequest(request);
-			// Set<BookCopy> bookCopiesToBuy = (Set<BookCopy>)
-			// ItemSupplierUtility
-			// .deserializeXMLStringToObject(xml);
-			//
-			// // Make the purchase
-			// bookStoreresponse = new ItemSupplierResponse();
-			// try {
-			// bookStoreresponse.setResult(MasterCertainBookStore
-			// .getInstance().buyBooks(bookCopiesToBuy));
-			// } catch (BookStoreException ex) {
-			// bookStoreresponse.setException(ex);
-			// }
-			// response.getWriter().println(
-			// ItemSupplierUtility
-			// .serializeObjectToXMLString(bookStoreresponse));
-			// break;
-			//
-			// case GETBOOKS:
-			// xml = ItemSupplierUtility.extractPOSTDataFromRequest(request);
-			// Set<Integer> isbnSet = (Set<Integer>) ItemSupplierUtility
-			// .deserializeXMLStringToObject(xml);
-			//
-			// bookStoreresponse = new ItemSupplierResponse();
-			// try {
-			// bookStoreresponse.setResult(MasterCertainBookStore
-			// .getInstance().getBooks(isbnSet));
-			// } catch (BookStoreException ex) {
-			// bookStoreresponse.setException(ex);
-			// }
-			// response.getWriter().println(
-			// ItemSupplierUtility
-			// .serializeObjectToXMLString(bookStoreresponse));
-			// break;
-			//
-			// case EDITORPICKS:
-			// numBooksString = URLDecoder
-			// .decode(request
-			// .getParameter(BookStoreConstants.BOOK_NUM_PARAM),
-			// "UTF-8");
-			// bookStoreresponse = new ItemSupplierResponse();
-			// try {
-			// numBooks = ItemSupplierUtility
-			// .convertStringToInt(numBooksString);
-			// bookStoreresponse.setResult(MasterCertainBookStore
-			// .getInstance().getEditorPicks(numBooks));
-			// } catch (BookStoreException ex) {
-			// bookStoreresponse.setException(ex);
-			// }
-			// response.getWriter().println(
-			// ItemSupplierUtility
-			// .serializeObjectToXMLString(bookStoreresponse));
-			// break;
 
 			default:
 				System.out.println("Unhandled message tag");

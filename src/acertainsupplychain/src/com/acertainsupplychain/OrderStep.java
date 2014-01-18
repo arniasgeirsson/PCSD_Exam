@@ -45,4 +45,24 @@ public final class OrderStep {
 		return "OrderStep: [" + supplierId + "," + items + "]";
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (obj == this)
+			return true;
+		if (!(obj instanceof OrderStep))
+			return false;
+
+		OrderStep item = (OrderStep) obj;
+
+		return supplierId == item.supplierId && items.equals(item.items);
+	}
+
+	// TODO
+	// http://stackoverflow.com/questions/27581/overriding-equals-and-hashcode-in-java
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
 }

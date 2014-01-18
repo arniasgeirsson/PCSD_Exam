@@ -45,7 +45,6 @@ public class OrderManagerJob implements Runnable {
 				// - wait for responds
 				supplier.executeStep(orderStep);
 			} catch (OrderProcessingException e) {
-				e.printStackTrace();
 				status = StepStatus.FAILED;
 			}
 

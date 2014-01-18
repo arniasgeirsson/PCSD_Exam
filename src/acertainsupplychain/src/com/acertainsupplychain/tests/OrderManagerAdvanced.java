@@ -26,7 +26,6 @@ import com.acertainsupplychain.OrderStep;
 import com.acertainsupplychain.clients.ItemSupplierHTTPProxy;
 import com.acertainsupplychain.clients.OrderManagerHTTPProxy;
 import com.acertainsupplychain.impl.ItemSupplierImpl;
-import com.acertainsupplychain.impl.OrderManagerImpl;
 import com.acertainsupplychain.server.ItemSupplierHTTPServer;
 import com.acertainsupplychain.server.OrderManagerHTTPServer;
 import com.acertainsupplychain.utility.ItemSupplierUtility;
@@ -40,6 +39,7 @@ public class OrderManagerAdvanced {
 
 	private static List<Process> itemSupplierProcesses;
 	private static Process orderManagerProcess;
+	private static int port = 8079;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -48,7 +48,7 @@ public class OrderManagerAdvanced {
 		itemSupplierProcesses = new ArrayList<Process>();
 
 		Map<Integer, Integer> suppliers = new HashMap<Integer, Integer>();
-		int port = 8079;
+
 		for (Integer supplierID : supplierIDs) {
 			// Start a new itemSupplier server
 			Process itemSupplierProcess = ItemSupplierUtility.startProcess(
@@ -64,7 +64,7 @@ public class OrderManagerAdvanced {
 		// Start new OrderManger server
 		orderManagerProcess = ItemSupplierUtility.startProcess(
 				OrderManagerHTTPServer.class, Integer.toString(++port));
-		orderManager = new OrderManagerHTTPProxy(port, suppliers);
+		orderManager = new OrderManagerHTTPProxy(0, port, suppliers);
 	}
 
 	@AfterClass
@@ -107,54 +107,122 @@ public class OrderManagerAdvanced {
 		}
 	}
 
+	// TODO, do they make sense in advanced test? -> yes, refactor
 	@Test
 	public final void testOrderManager_NullSupplierMap() {
 		Map<Integer, ItemSupplier> suppliers = null;
+		Process process = null;
+
 		try {
-			new OrderManagerImpl(suppliers);
-			fail();
-		} catch (OrderProcessingException e) {
+			process = ItemSupplierUtility.startProcess(
+					OrderManagerHTTPServer.class, Integer.toString(++port));
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
+
+		boolean successFullTest = false;
+
+		try {
+
+			new OrderManagerHTTPProxy(0, suppliers, port);
+		} catch (OrderProcessingException e) {
+			successFullTest = true;
+		} catch (Exception e) {
+		}
+
+		ItemSupplierUtility.stopProcess(process);
+
+		assertTrue(successFullTest);
 	}
 
+	// TODO, do they make sense in advanced test? -> yes, refactor
 	@Test
 	public final void testOrderManager_EmptySupplierMap() {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
+		Process process = null;
+
 		try {
-			new OrderManagerImpl(suppliers);
-			fail();
-		} catch (OrderProcessingException e) {
+			process = ItemSupplierUtility.startProcess(
+					OrderManagerHTTPServer.class, Integer.toString(++port));
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
+
+		boolean successFullTest = false;
+
+		try {
+
+			new OrderManagerHTTPProxy(0, suppliers, port);
+		} catch (OrderProcessingException e) {
+			successFullTest = true;
+		} catch (Exception e) {
+		}
+
+		ItemSupplierUtility.stopProcess(process);
+
+		assertTrue(successFullTest);
 	}
 
+	// TODO, do they make sense in advanced test? -> yes, refactor
 	@Test
 	public final void testOrderManager_NullSupplier() {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
 		suppliers.put(1, null);
+		Process process = null;
+
 		try {
-			new OrderManagerImpl(suppliers);
-			fail();
-		} catch (OrderProcessingException e) {
+			process = ItemSupplierUtility.startProcess(
+					OrderManagerHTTPServer.class, Integer.toString(++port));
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
+
+		boolean successFullTest = false;
+
+		try {
+
+			new OrderManagerHTTPProxy(0, suppliers, port);
+		} catch (OrderProcessingException e) {
+			successFullTest = true;
+		} catch (Exception e) {
+		}
+
+		ItemSupplierUtility.stopProcess(process);
+
+		assertTrue(successFullTest);
 	}
 
+	// TODO, do they make sense in advanced test? -> yes, refactor
 	@Test
 	public final void testOrderManager_IDmismatch() {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
 		suppliers.put(1, new ItemSupplierImpl(2));
+		Process process = null;
+
 		try {
-			new OrderManagerImpl(suppliers);
-			fail();
-		} catch (OrderProcessingException e) {
+			process = ItemSupplierUtility.startProcess(
+					OrderManagerHTTPServer.class, Integer.toString(++port));
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
+
+		boolean successFullTest = false;
+
+		try {
+
+			new OrderManagerHTTPProxy(0, suppliers, port);
+		} catch (OrderProcessingException e) {
+			successFullTest = true;
+		} catch (Exception e) {
+		}
+
+		ItemSupplierUtility.stopProcess(process);
+
+		assertTrue(successFullTest);
 	}
 
 	@Test

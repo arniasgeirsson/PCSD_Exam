@@ -5,7 +5,6 @@ package com.acertainsupplychain.clients;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,8 +52,8 @@ public class OrderManagerHTTPProxy implements OrderManager {
 	/**
 	 * Initialize the client object
 	 */
-	public OrderManagerHTTPProxy(Map<Integer, ItemSupplier> suppliers, int port)
-			throws Exception {
+	public OrderManagerHTTPProxy(int orderManagerID,
+			Map<Integer, ItemSupplier> suppliers, int port) throws Exception {
 		orderManagerAddress = "http://localhost:" + port;
 
 		// initializeReplicationAwareMappings();
@@ -69,11 +68,11 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		client.setTimeout(ItemSupplierClientConstants.CLIENT_MAX_TIMEOUT_MILLISECS);
 		client.start();
 
-		initializeOrderManager(suppliers);
+		initializeOrderManager(orderManagerID, suppliers);
 	}
 
-	public OrderManagerHTTPProxy(int port, Map<Integer, Integer> suppliers)
-			throws Exception {
+	public OrderManagerHTTPProxy(int orderManagerID, int port,
+			Map<Integer, Integer> suppliers) throws Exception {
 		orderManagerAddress = "http://localhost:" + port;
 
 		// initializeReplicationAwareMappings();
@@ -88,118 +87,63 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		client.setTimeout(ItemSupplierClientConstants.CLIENT_MAX_TIMEOUT_MILLISECS);
 		client.start();
 
-		initializeOrderManagerProxy(suppliers);
+		initializeOrderManagerProxy(orderManagerID, suppliers);
 	}
 
-	private void initializeOrderManagerProxy(Map<Integer, Integer> suppliers) {
+	// TODO use post or get? really just throw error?
+	private void initializeOrderManagerProxy(int orderManagerID,
+			Map<Integer, Integer> suppliers) throws OrderProcessingException {
 		String suppliersXMLString = ItemSupplierUtility
 				.serializeObjectToXMLString(suppliers);
 		Buffer requestContent = new ByteArrayBuffer(suppliersXMLString);
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
 		String urlString = getOrderManagerAddress() + "/"
-				+ ItemSupplierMessageTag.INIT_ORDERMANAGER_PROXY;
+				+ ItemSupplierMessageTag.INIT_ORDERMANAGER_PROXY + "?"
+				+ ItemSupplierClientConstants.INIT_ORDERMANAGER_ID + "="
+				+ ItemSupplierUtility.encodeInteger(orderManagerID);
 		exchange.setURL(urlString);
 		exchange.setRequestContent(requestContent);
 
 		// We do not care about the responds, only if an exception had occurred
-		try {
-			ItemSupplierUtility.sendAndRecv(client, exchange);
-		} catch (OrderProcessingException e) {
-			// TODO what to do?
-			System.out.println("211 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
-		}
+		// try {
+		ItemSupplierUtility.sendAndRecv(client, exchange);
+		// } catch (OrderProcessingException e) {
+		// TODO what to do?
+		// System.out.println("211 -- -- - -- - - -What to do?");
+		// e.printStackTrace();
+		// }
 	}
 
-	// TODO use post or get?
-	private void initializeOrderManager(Map<Integer, ItemSupplier> suppliers) {
+	// TODO use post or get? really just throw error?
+	private void initializeOrderManager(int orderManagerID,
+			Map<Integer, ItemSupplier> suppliers)
+			throws OrderProcessingException {
 		String suppliersXMLString = ItemSupplierUtility
-				.serializeObjectToXMLString(new ArrayList<ItemSupplier>(
-						suppliers.values()));
+				.serializeObjectToXMLString(suppliers);
 		Buffer requestContent = new ByteArrayBuffer(suppliersXMLString);
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
 		String urlString = getOrderManagerAddress() + "/"
-				+ ItemSupplierMessageTag.INIT_ORDERMANAGER;
+				+ ItemSupplierMessageTag.INIT_ORDERMANAGER + "?"
+				+ ItemSupplierClientConstants.INIT_ORDERMANAGER_ID + "="
+				+ ItemSupplierUtility.encodeInteger(orderManagerID);
 		exchange.setURL(urlString);
 		exchange.setRequestContent(requestContent);
 
 		// We do not care about the responds, only if an exception had occurred
-		try {
-			ItemSupplierUtility.sendAndRecv(client, exchange);
-		} catch (OrderProcessingException e) {
-			// TODO what to do?
-			System.out.println("21 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
-		}
+		// try {
+		ItemSupplierUtility.sendAndRecv(client, exchange);
+		// } catch (OrderProcessingException e) {
+		// TODO what to do?
+		// System.out.println("21 -- -- - -- - - -What to do?");
+		// e.printStackTrace();
+		// }
 	}
-
-	// private Map<Integer, ItemSupplier> createSupplierMap(
-	// List<ItemSupplier> suppliers) {
-	// Map<Integer, ItemSupplier> supplierMap = new HashMap<Integer,
-	// ItemSupplier>();
-	// for (ItemSupplier itemSupplier : suppliers) {
-	// supplierMap.put(itemSupplier.getSupplierID(), itemSupplier);
-	// }
-	// return supplierMap;
-	// }
-
-	// private void initializeReplicationAwareMappings() throws IOException {
-	//
-	// Properties props = new Properties();
-	// slaveAddresses = new HashSet<String>();
-	//
-	// props.load(new FileInputStream(filePath));
-	// masterAddress = props.getProperty(BookStoreConstants.KEY_MASTER);
-	// if (!masterAddress.toLowerCase().startsWith("http://")) {
-	// masterAddress = new String("http://" + masterAddress);
-	// }
-	//
-	// String slaveAddresses = props.getProperty(BookStoreConstants.KEY_SLAVE);
-	// for (String slave : slaveAddresses
-	// .split(BookStoreConstants.SPLIT_SLAVE_REGEX)) {
-	// if (!slave.toLowerCase().startsWith("http://")) {
-	// slave = new String("http://" + slave);
-	// }
-	// this.slaveAddresses.add(slave);
-	// }
-	// }
-
-	// public String getReplicaAddress() {
-	// int slaveIndex = new Random(System.currentTimeMillis())
-	// .nextInt(slaveAddresses.size() + 1);
-	// if (slaveIndex == slaveAddresses.size())
-	// return masterAddress;
-	// return slaveAddresses.toArray(new String[0])[slaveIndex];
-	// }
 
 	public String getOrderManagerAddress() {
 		return orderManagerAddress;
 	}
-
-	// @Override
-	// public void buyBooks(Set<BookCopy> isbnSet) throws BookStoreException {
-	//
-	// String listISBNsxmlString = BookStoreUtility
-	// .serializeObjectToXMLString(isbnSet);
-	// Buffer requestContent = new ByteArrayBuffer(listISBNsxmlString);
-	//
-	// BookStoreResult result = null;
-	//
-	// ContentExchange exchange = new ContentExchange();
-	// String urlString = getMasterServerAddress() + "/"
-	// + BookStoreMessageTag.BUYBOOKS;
-	// exchange.setMethod("POST");
-	// exchange.setURL(urlString);
-	// exchange.setRequestContent(requestContent);
-	// result = BookStoreUtility.SendAndRecv(client, exchange);
-	// setSnapshotId(result.getSnapshotId());
-	// }
-
-	//
-
-	//
 
 	public void stop() {
 		try {
@@ -208,72 +152,6 @@ public class OrderManagerHTTPProxy implements OrderManager {
 			e.printStackTrace();
 		}
 	}
-
-	// @SuppressWarnings("unchecked")
-	// public List<Book> getBooks(Set<Integer> isbnSet) {
-	//
-	// String listISBNsxmlString = BookStoreUtility
-	// .serializeObjectToXMLString(isbnSet);
-	// Buffer requestContent = new ByteArrayBuffer(listISBNsxmlString);
-	//
-	// BookStoreResult result = null;
-	// do {
-	// ContentExchange exchange = new ContentExchange();
-	// String urlString = getReplicaAddress() + "/"
-	// + BookStoreMessageTag.GETBOOKS;
-	// exchange.setMethod("POST");
-	// exchange.setURL(urlString);
-	// exchange.setRequestContent(requestContent);
-	// result = BookStoreUtility.SendAndRecv(client, exchange);
-	// } while (result.getSnapshotId() < getSnapshotId());
-	// setSnapshotId(result.getSnapshotId());
-	// return (List<Book>) result.getResultList();
-	// }
-
-	// TODO use post or get?
-	// public void executeStep(OrderStep step) throws OrderProcessingException {
-	// String stepXMLString = ItemSupplierUtility
-	// .serializeObjectToXMLString(step);
-	// Buffer requestContent = new ByteArrayBuffer(stepXMLString);
-	// ContentExchange exchange = new ContentExchange();
-	// exchange.setMethod("POST");
-	// String urlString = getItemSupplierAddress() + "/"
-	// + ItemSupplierMessageTag.EXECUTESTEP;
-	// exchange.setURL(urlString);
-	// exchange.setRequestContent(requestContent);
-	// // We do not care about the responds, only if an exception had occurred
-	// // in which case it would be thrown inside ItemSupplierUtility
-	// ItemSupplierUtility.sendAndRecv(client, exchange);
-	// }
-
-	// TODO use post or get?
-	// @SuppressWarnings("unchecked")
-	// public List<ItemQuantity> getOrdersPerItem(Set<Integer> itemIds)
-	// throws InvalidItemException {
-	// String itemIdsXMLString = ItemSupplierUtility
-	// .serializeObjectToXMLString(itemIds);
-	// Buffer requestContent = new ByteArrayBuffer(itemIdsXMLString);
-	// ContentExchange exchange = new ContentExchange();
-	// exchange.setMethod("POST");
-	// String urlString = getItemSupplierAddress() + "/"
-	// + ItemSupplierMessageTag.GETORDERS;
-	// exchange.setURL(urlString);
-	// exchange.setRequestContent(requestContent);
-	//
-	// ItemSupplierResult result = null;
-	// try {
-	// result = ItemSupplierUtility.sendAndRecv(client, exchange);
-	// } catch (OrderProcessingException e) {
-	// // TODO what to do? Wrap inside InvalidItemException, or change API?
-	// // -> Change API
-	// System.out.println("3 -- -- - -- - - -What to do?");
-	// // e.printStackTrace();
-	// throw new InvalidItemException(
-	// "getOrdersPerItem-Proxy: sendAndRecv threw this error.", e);
-	// }
-	//
-	// return (List<ItemQuantity>) result.getResult();
-	// }
 
 	// TODO use post or get?
 	@Override
@@ -294,26 +172,6 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		}
 	}
 
-	// // TODO use post or get?
-	// public int getSupplierID() {
-	// // return supplierID;
-	// ContentExchange exchange = new ContentExchange();
-	// exchange.setMethod("POST");
-	// String urlString = getItemSupplierAddress() + "/"
-	// + ItemSupplierMessageTag.GETSUPID;
-	// exchange.setURL(urlString);
-	//
-	// ItemSupplierResult result = null;
-	// try {
-	// result = ItemSupplierUtility.sendAndRecv(client, exchange);
-	// } catch (OrderProcessingException e) {
-	// // TODO what to do?
-	// System.out.println("1 -- -- - -- - - -What to do?");
-	// // e.printStackTrace();
-	// }
-	// return (Integer) result.getResult();
-	// }
-
 	// TODO use post or get?
 	@Override
 	public int registerOrderWorkflow(List<OrderStep> steps)
@@ -333,32 +191,6 @@ public class OrderManagerHTTPProxy implements OrderManager {
 
 		return (Integer) result.getResult();
 	}
-
-	// @SuppressWarnings("unchecked")
-	// public List<Book> getEditorPicks(int numBooks) {
-	// ContentExchange exchange = new ContentExchange();
-	// String urlEncodedNumBooks = null;
-	//
-	// try {
-	// urlEncodedNumBooks = URLEncoder.encode(Integer.toString(numBooks),
-	// "UTF-8");
-	// } catch (UnsupportedEncodingException ex) {
-	// throw new BookStoreException("unsupported encoding of numbooks", ex);
-	// }
-	//
-	// BookStoreResult result = null;
-	// do {
-	// String urlString = getReplicaAddress() + "/"
-	// + BookStoreMessageTag.EDITORPICKS + "?"
-	// + BookStoreConstants.BOOK_NUM_PARAM + "="
-	// + urlEncodedNumBooks;
-	// exchange.setURL(urlString);
-	// result = BookStoreUtility.SendAndRecv(client, exchange);
-	// } while (result.getSnapshotId() < getSnapshotId());
-	// setSnapshotId(result.getSnapshotId());
-	//
-	// return (List<Book>) result.getResultList();
-	// }
 
 	// TODO use post or get?
 	@SuppressWarnings("unchecked")

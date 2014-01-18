@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.acertainsupplychain.InvalidWorkflowException;
+import com.acertainsupplychain.ItemQuantity;
 import com.acertainsupplychain.ItemSupplier;
 import com.acertainsupplychain.OrderManager;
 import com.acertainsupplychain.OrderProcessingException;
 import com.acertainsupplychain.OrderStep;
 import com.acertainsupplychain.clients.ItemSupplierHTTPProxy;
+import com.acertainsupplychain.utility.FileLogger;
 
 public class OrderManagerImpl implements OrderManager {
 
@@ -20,16 +22,25 @@ public class OrderManagerImpl implements OrderManager {
 	private int lowestFreeWorkflowID;
 	private final Map<Integer, ItemSupplier> suppliers;
 	private OrderManagerScheduler scheduler;
+	private final FileLogger fileLogger;
+	private final int orderManagerID;
 
-	public OrderManagerImpl(Map<Integer, ItemSupplier> suppliers)
+	public OrderManagerImpl(int orderManagerID,
+			Map<Integer, ItemSupplier> suppliers)
 			throws OrderProcessingException {
 		validateSupplierMap(suppliers);
+		this.orderManagerID = orderManagerID;
 
 		workflows = new HashMap<Integer, List<OrderStep>>();
 		status = new HashMap<Integer, List<StepStatus>>();
 		lowestFreeWorkflowID = 0;
 		this.suppliers = suppliers;
 		scheduler = new OrderManagerScheduler();
+
+		fileLogger = new FileLogger(orderManagerID + "_OrderManager_logfile",
+				"How to read this log file?\n");
+		fileLogger.logToFile("Initialized orderManager with ID ["
+				+ orderManagerID + "]\n", true);
 	}
 
 	private void validateSupplierMap(Map<Integer, ItemSupplier> suppliers)
@@ -85,7 +96,73 @@ public class OrderManagerImpl implements OrderManager {
 
 		scheduler.scheduleJob(this, id);
 
+		logWorkflow(steps);
+
 		return id;
+	}
+
+	private void logWorkflow(List<OrderStep> steps) {
+		String log = "OrderManager with ID [" + orderManagerID
+				+ "] registered workflow: ";
+
+		log = log + createWorkflowString(steps) + "\n";
+
+		fileLogger.logToFile(log, true);
+	}
+
+	private String createWorkflowString(List<OrderStep> steps) {
+		if (steps == null)
+			return "(null)";
+		String string = "[";
+
+		for (OrderStep orderStep : steps) {
+			string = createStepString(orderStep) + ",";
+		}
+
+		if (string.endsWith(",")) {
+			string = string.substring(0, string.length() - 1);
+		}
+
+		string = string + "]";
+		return string;
+	}
+
+	// TODO duplicated in ItemSupplierImpl
+	private String createStepString(OrderStep step) {
+		if (step == null)
+			return "(null)";
+		String string = "[" + step.getSupplierId() + ",";
+
+		for (ItemQuantity itemQuantity : step.getItems()) {
+			if (itemQuantity == null) {
+				string = string + "((null))";
+			} else {
+				string = string + "(" + itemQuantity.getItemId() + ","
+						+ itemQuantity.getQuantity() + "),";
+			}
+		}
+
+		if (string.endsWith(",")) {
+			string = string.substring(0, string.length() - 1);
+		}
+
+		string = string + "]";
+		return string;
+	}
+
+	private void logStatusUpdate(int workflowID, int stepIndex,
+			StepStatus status) {
+		String log = "OrderManager with ID [" + orderManagerID
+				+ "] updated status of workflow step: ";
+
+		if (status == null) {
+			log = log + "[" + workflowID + "," + stepIndex + ",(null)]\n";
+		} else {
+			log = log + "[" + workflowID + "," + stepIndex + "," + status
+					+ "]\n";
+		}
+
+		fileLogger.logToFile(log, true);
 	}
 
 	// TODO untested
@@ -159,6 +236,7 @@ public class OrderManagerImpl implements OrderManager {
 		List<StepStatus> newStatus = this.status.get(workflowID);
 		newStatus.set(stepIndex, status);
 		this.status.put(workflowID, newStatus);
+		logStatusUpdate(workflowID, stepIndex, status);
 	}
 
 	// TODO untested
@@ -167,10 +245,8 @@ public class OrderManagerImpl implements OrderManager {
 		try {
 			scheduler.waitForJobsToFinish();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
 			throw new OrderProcessingException(e);
 		} catch (ExecutionException e) {
-			e.printStackTrace();
 			throw new OrderProcessingException(e);
 		}
 	}

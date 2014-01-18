@@ -21,6 +21,7 @@ public final class ItemSupplierClientConstants {
 	public static final String JOBSETSTATUS_PARAM_WID = "jobSetWorkflowID";
 	public static final String JOBSETSTATUS_PARAM_STEPINDEX = "jobSetStepIndex";
 	public static final String INIT_ITEMSUPPLIER_PARAM = "initSupplierID";
+	public static final String INIT_ORDERMANAGER_ID = "initOrderManagerID";
 
 	public static final int CLIENT_MAX_CONNECTION_ADDRESS = 200;
 	public static final int CLIENT_MAX_THREADSPOOL_THREADS = 250;

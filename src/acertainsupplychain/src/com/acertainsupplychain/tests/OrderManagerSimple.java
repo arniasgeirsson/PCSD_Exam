@@ -43,7 +43,7 @@ public class OrderManagerSimple {
 			suppliers.put(supplierID, supplier);
 			allSuppliers.put(supplierID, supplier);
 		}
-		orderManager = new OrderManagerImpl(suppliers);
+		orderManager = new OrderManagerImpl(0, suppliers);
 	}
 
 	@After
@@ -72,7 +72,7 @@ public class OrderManagerSimple {
 	public final void testOrderManager_NullSupplierMap() {
 		Map<Integer, ItemSupplier> suppliers = null;
 		try {
-			new OrderManagerImpl(suppliers);
+			new OrderManagerImpl(0, suppliers);
 			fail();
 		} catch (OrderProcessingException e) {
 		} catch (Exception e) {
@@ -84,7 +84,7 @@ public class OrderManagerSimple {
 	public final void testOrderManager_EmptySupplierMap() {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
 		try {
-			new OrderManagerImpl(suppliers);
+			new OrderManagerImpl(0, suppliers);
 			fail();
 		} catch (OrderProcessingException e) {
 		} catch (Exception e) {
@@ -97,7 +97,7 @@ public class OrderManagerSimple {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
 		suppliers.put(1, null);
 		try {
-			new OrderManagerImpl(suppliers);
+			new OrderManagerImpl(0, suppliers);
 			fail();
 		} catch (OrderProcessingException e) {
 		} catch (Exception e) {
@@ -110,7 +110,7 @@ public class OrderManagerSimple {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
 		suppliers.put(1, new ItemSupplierImpl(2));
 		try {
-			new OrderManagerImpl(suppliers);
+			new OrderManagerImpl(0, suppliers);
 			fail();
 		} catch (OrderProcessingException e) {
 		} catch (Exception e) {
@@ -636,6 +636,7 @@ public class OrderManagerSimple {
 		try {
 			workflowID = orderManager.registerOrderWorkflow(steps);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 

@@ -62,6 +62,8 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 		ItemSupplierResponse itemSupplierResponse;
 		String workflowIDString;
 		int workflowID;
+		String orderManagerIDString;
+		int orderManagerID;
 
 		// // Need to do request multi-plexing
 		// if (!ItemSupplierUtility.isEmpty(requestURI)
@@ -133,14 +135,21 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 
 			case INIT_ORDERMANAGER:
 				xml = ItemSupplierUtility.extractPOSTDataFromRequest(request);
-				List<ItemSupplier> suppliers = (List<ItemSupplier>) ItemSupplierUtility
+				Map<Integer, ItemSupplier> suppliers = (Map<Integer, ItemSupplier>) ItemSupplierUtility
 						.deserializeXMLStringToObject(xml);
 				itemSupplierResponse = new ItemSupplierResponse();
 
+				orderManagerIDString = URLDecoder
+						.decode(request
+								.getParameter(ItemSupplierClientConstants.INIT_ORDERMANAGER_ID),
+								"UTF-8");
+
+				orderManagerID = Integer.parseInt(orderManagerIDString);
+
 				try {
 					if (orderManager == null) {
-						orderManager = new OrderManagerImpl(
-								createSupplierMap(suppliers));
+						orderManager = new OrderManagerImpl(orderManagerID,
+								suppliers);
 					}
 				} catch (OrderProcessingException e) {
 					itemSupplierResponse.setException(e);
@@ -158,6 +167,13 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 						.deserializeXMLStringToObject(xml);
 				itemSupplierResponse = new ItemSupplierResponse();
 
+				orderManagerIDString = URLDecoder
+						.decode(request
+								.getParameter(ItemSupplierClientConstants.INIT_ORDERMANAGER_ID),
+								"UTF-8");
+
+				orderManagerID = Integer.parseInt(orderManagerIDString);
+
 				Map<Integer, ItemSupplier> supplierProxies = new HashMap<Integer, ItemSupplier>();
 
 				try {
@@ -167,12 +183,12 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 									new ItemSupplierHTTPProxy(itemSupplierID,
 											suppliers2.get(itemSupplierID)));
 						}
-						orderManager = new OrderManagerImpl(supplierProxies);
+						orderManager = new OrderManagerImpl(orderManagerID,
+								supplierProxies);
 					}
 				} catch (OrderProcessingException e) {
 					itemSupplierResponse.setException(e);
 				} catch (Exception e) {
-					e.printStackTrace();
 					itemSupplierResponse
 							.setException(new OrderProcessingException(e));
 				}

@@ -96,6 +96,7 @@ public class TestUtility {
 		return null;
 	}
 
+	// Valid means that it will pass the inspection at the OrderManagerImpl
 	public static OrderStep createRandomValidOrderStep(Integer[] supplierIDs) {
 		int maxItems = 10;
 		int minItemID = -10;
@@ -103,7 +104,7 @@ public class TestUtility {
 		int minItemQuantity = -50;
 		int maxItemQuantity = 100;
 
-		int numberOfItems = TestUtility.nextInt(1, maxItems + 1);
+		int numberOfItems = TestUtility.nextInt(0, maxItems);
 
 		List<ItemQuantity> items = new ArrayList<ItemQuantity>();
 		for (int i = 0; i < numberOfItems; i++) {
@@ -118,7 +119,8 @@ public class TestUtility {
 
 	// Defined as coded in ItemSupplierImpl
 	public static boolean isStepValid(OrderStep step) {
-		if (step == null || step.getItems() == null)
+		if (step == null || step.getItems() == null
+				|| step.getItems().isEmpty())
 			return false;
 		for (ItemQuantity item : step.getItems()) {
 			if (item == null || item.getQuantity() < 1)
@@ -131,7 +133,7 @@ public class TestUtility {
 	public static int nextInt(int n, int m) {
 		if (n >= m)
 			return n;
-		return new Random(System.currentTimeMillis()).nextInt(m - n) + n;
+		return new Random().nextInt(m - n) + n;
 	}
 
 	public static List<StepStatus> createStepStatusList(List<OrderStep> steps) {

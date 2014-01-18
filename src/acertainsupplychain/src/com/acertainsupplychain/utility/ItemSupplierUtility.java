@@ -6,6 +6,8 @@ package com.acertainsupplychain.utility;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -234,5 +236,33 @@ public final class ItemSupplierUtility {
 
 	public static void stopProcess(Process process) {
 		process.destroy();
+	}
+
+	public static String encodeInteger(int integer)
+			throws OrderProcessingException {
+		return encode(Integer.toString(integer));
+	}
+
+	public static int decodeInteger(String string)
+			throws OrderProcessingException {
+		return Integer.parseInt(decode(string));
+	}
+
+	public static String encode(String string) throws OrderProcessingException {
+		try {
+			return URLEncoder.encode(string, "UTF-8"); // TODO constant?
+		} catch (UnsupportedEncodingException e) {
+			throw new OrderProcessingException(
+					"Unsupported encoding exception", e);
+		}
+	}
+
+	public static String decode(String string) throws OrderProcessingException {
+		try {
+			return URLDecoder.decode(string, "UTF-8"); // TODO constant?
+		} catch (UnsupportedEncodingException e) {
+			throw new OrderProcessingException(
+					"Unsupported encoding exception", e);
+		}
 	}
 }

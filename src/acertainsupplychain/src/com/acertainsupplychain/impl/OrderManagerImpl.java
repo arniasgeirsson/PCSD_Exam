@@ -138,6 +138,8 @@ public class OrderManagerImpl implements OrderManager {
 	@Override
 	public ItemSupplier jobGetSupplier(int supplierID)
 			throws OrderProcessingException {
+		if (!suppliers.containsKey(supplierID))
+			throw new OrderProcessingException("TODO");
 		return suppliers.get(supplierID);
 	}
 
@@ -145,6 +147,8 @@ public class OrderManagerImpl implements OrderManager {
 	@Override
 	public List<OrderStep> jobGetWorkFlow(int workflowID)
 			throws OrderProcessingException {
+		if (!workflows.containsKey(workflowID))
+			throw new OrderProcessingException("TODO");
 		return workflows.get(workflowID);
 	}
 

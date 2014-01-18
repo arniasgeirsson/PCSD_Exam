@@ -115,4 +115,26 @@ public class ItemSupplierImpl implements ItemSupplier {
 		return supplierID;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (obj == this)
+			return true;
+		if (!(obj instanceof ItemSupplierImpl))
+			return false;
+
+		ItemSupplierImpl item = (ItemSupplierImpl) obj;
+		return supplierID == item.supplierID
+				&& allHandledOrders.equals(item.allHandledOrders)
+				&& summedOrders.equals(item.summedOrders);
+	}
+
+	// TODO
+	// http://stackoverflow.com/questions/27581/overriding-equals-and-hashcode-in-java
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
 }

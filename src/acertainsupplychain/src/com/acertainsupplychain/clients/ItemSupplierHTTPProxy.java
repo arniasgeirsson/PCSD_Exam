@@ -34,31 +34,16 @@ import com.acertainsupplychain.utility.ItemSupplierUtility;
  */
 public class ItemSupplierHTTPProxy implements ItemSupplier {
 	private final HttpClient client;
-	// private Set<String> slaveAddresses;
 	private final String itemSupplierAddress;
 
 	// private final String filePath = "C:/proxy.properties";
-
-	// private volatile long snapshotId = 0;
-
-	// public long getSnapshotId() {
-	// return snapshotId;
-	// }
-	//
-	// public void setSnapshotId(long snapShotId) {
-	// snapshotId = snapShotId;
-	// }
-
-	private final int supplierID;
 
 	/**
 	 * Initialize the client object
 	 */
 	public ItemSupplierHTTPProxy(int supplierID, int port) throws Exception {
-		this.supplierID = supplierID;
 		itemSupplierAddress = "http://localhost:" + port;
 
-		// initializeReplicationAwareMappings();
 		client = new HttpClient();
 		client.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
 		// max concurrent connections to every address
@@ -107,86 +92,9 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		}
 	}
 
-	// private void initializeReplicationAwareMappings() throws IOException {
-	//
-	// Properties props = new Properties();
-	// slaveAddresses = new HashSet<String>();
-	//
-	// props.load(new FileInputStream(filePath));
-	// masterAddress = props.getProperty(BookStoreConstants.KEY_MASTER);
-	// if (!masterAddress.toLowerCase().startsWith("http://")) {
-	// masterAddress = new String("http://" + masterAddress);
-	// }
-	//
-	// String slaveAddresses = props.getProperty(BookStoreConstants.KEY_SLAVE);
-	// for (String slave : slaveAddresses
-	// .split(BookStoreConstants.SPLIT_SLAVE_REGEX)) {
-	// if (!slave.toLowerCase().startsWith("http://")) {
-	// slave = new String("http://" + slave);
-	// }
-	// this.slaveAddresses.add(slave);
-	// }
-	// }
-
-	// public String getReplicaAddress() {
-	// int slaveIndex = new Random(System.currentTimeMillis())
-	// .nextInt(slaveAddresses.size() + 1);
-	// if (slaveIndex == slaveAddresses.size())
-	// return masterAddress;
-	// return slaveAddresses.toArray(new String[0])[slaveIndex];
-	// }
-
 	public String getItemSupplierAddress() {
 		return itemSupplierAddress;
 	}
-
-	// @Override
-	// public void buyBooks(Set<BookCopy> isbnSet) throws BookStoreException {
-	//
-	// String listISBNsxmlString = BookStoreUtility
-	// .serializeObjectToXMLString(isbnSet);
-	// Buffer requestContent = new ByteArrayBuffer(listISBNsxmlString);
-	//
-	// BookStoreResult result = null;
-	//
-	// ContentExchange exchange = new ContentExchange();
-	// String urlString = getMasterServerAddress() + "/"
-	// + BookStoreMessageTag.BUYBOOKS;
-	// exchange.setMethod("POST");
-	// exchange.setURL(urlString);
-	// exchange.setRequestContent(requestContent);
-	// result = BookStoreUtility.SendAndRecv(client, exchange);
-	// setSnapshotId(result.getSnapshotId());
-	// }
-
-	//
-
-	//
-	// @SuppressWarnings("unchecked")
-	// public List<Book> getEditorPicks(int numBooks) {
-	// ContentExchange exchange = new ContentExchange();
-	// String urlEncodedNumBooks = null;
-	//
-	// try {
-	// urlEncodedNumBooks = URLEncoder.encode(Integer.toString(numBooks),
-	// "UTF-8");
-	// } catch (UnsupportedEncodingException ex) {
-	// throw new BookStoreException("unsupported encoding of numbooks", ex);
-	// }
-	//
-	// BookStoreResult result = null;
-	// do {
-	// String urlString = getReplicaAddress() + "/"
-	// + BookStoreMessageTag.EDITORPICKS + "?"
-	// + BookStoreConstants.BOOK_NUM_PARAM + "="
-	// + urlEncodedNumBooks;
-	// exchange.setURL(urlString);
-	// result = BookStoreUtility.SendAndRecv(client, exchange);
-	// } while (result.getSnapshotId() < getSnapshotId());
-	// setSnapshotId(result.getSnapshotId());
-	//
-	// return (List<Book>) result.getResultList();
-	// }
 
 	public void stop() {
 		try {
@@ -196,27 +104,6 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 			e.printStackTrace();
 		}
 	}
-
-	// @SuppressWarnings("unchecked")
-	// public List<Book> getBooks(Set<Integer> isbnSet) {
-	//
-	// String listISBNsxmlString = BookStoreUtility
-	// .serializeObjectToXMLString(isbnSet);
-	// Buffer requestContent = new ByteArrayBuffer(listISBNsxmlString);
-	//
-	// BookStoreResult result = null;
-	// do {
-	// ContentExchange exchange = new ContentExchange();
-	// String urlString = getReplicaAddress() + "/"
-	// + BookStoreMessageTag.GETBOOKS;
-	// exchange.setMethod("POST");
-	// exchange.setURL(urlString);
-	// exchange.setRequestContent(requestContent);
-	// result = BookStoreUtility.SendAndRecv(client, exchange);
-	// } while (result.getSnapshotId() < getSnapshotId());
-	// setSnapshotId(result.getSnapshotId());
-	// return (List<Book>) result.getResultList();
-	// }
 
 	// TODO use post or get?
 	@Override
@@ -303,6 +190,27 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 			// e.printStackTrace();
 		}
 		return (Integer) result.getResult();
+	}
+
+	// TODO seems kinda stupid..
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (obj == this)
+			return true;
+		if (!(obj instanceof ItemSupplierHTTPProxy))
+			return false;
+
+		ItemSupplierHTTPProxy item = (ItemSupplierHTTPProxy) obj;
+		return itemSupplierAddress == item.itemSupplierAddress;
+	}
+
+	// TODO
+	// http://stackoverflow.com/questions/27581/overriding-equals-and-hashcode-in-java
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 }

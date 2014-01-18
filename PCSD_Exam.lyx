@@ -197,13 +197,74 @@ Question 1 (LG1, LG2, LG3, LG5): Describe your overall implementation of
  Explain.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+What is it they really want to know?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 (1) How did you make workflow processing asynchronous at the OrderManager?
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+- Explain  short the idea/concept
+\end_layout
+
+\begin_layout Plain Layout
+- Show figure and talk about the concrete design
+\end_layout
+
+\begin_layout Plain Layout
++ How exactly does this design make the OrderManager workflow processing
+ asynchronous?
+\end_layout
+
+\begin_layout Plain Layout
++ Make a note on the assumptions on why a thread only works on one workflow
+ and no other touches this.
+\end_layout
+
+\begin_layout Plain Layout
+- Make a note on the possible performance concern in this design
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
 (1) How did you handle failures of individual components? In particular,
  how do you handle failure propagation?
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+WORK (add failure handling and propagation)
+\end_layout
+
+\begin_layout Plain Layout
+- I don't at the moment..
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph
@@ -234,10 +295,41 @@ NOTE: The method you design for atomicity does not need to be complex, as
  your method at a high level.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+WORK (add locking/or what ever in the item Supplier AND the OrderManager
+ (even though the question only asks to ItemSupplier))
+\end_layout
+
+\begin_layout Plain Layout
+- I don't at the moment..
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 (1) Argue for the correctness of your method; to do so, show how your method
  is logically equivalent to a trivial solution based on a single global
  lock or to a well-known locking protocol (e.g., a variant of two-phase locking).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+See note above
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -245,6 +337,19 @@ NOTE: The method you design for atomicity does not need to be complex, as
  about the workload the service is exposed to and why you believe other
  alternatives you considered (e.g.., locking, optimistic approach, or simple
  queueing of operations) would be better or worse than your choice.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+See note above
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -265,8 +370,94 @@ For each of the two scenarios, explain any necessary interaction with other
 (1) an OrderManager
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+- How would I do it?
+\end_layout
+
+\begin_layout Plain Layout
++ What state must be restored? Assuming an OrderManager failed and is now
+ trying to recover?
+\end_layout
+
+\begin_layout Plain Layout
++ What (minimum amount of) information is needed to recover?
+\end_layout
+
+\begin_layout Plain Layout
++ Make note on the look of the log file -> I have more info than needed
+ (reason-> to make it more readable and debug-able)
+\end_layout
+
+\begin_layout Plain Layout
+++ Show how should it look like in a deployed version
+\end_layout
+
+\begin_layout Plain Layout
++ How would I use the log to recover? How technically would I do it?
+\end_layout
+
+\begin_layout Plain Layout
+++ Show some pseudocode?
+\end_layout
+
+\begin_layout Plain Layout
++++ Implement it?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 (1) an ItemSupplier
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+- How would I do it?
+\end_layout
+
+\begin_layout Plain Layout
++ What state must be restored? Assuming an ItemSupplier failed and is now
+ trying to recover?
+\end_layout
+
+\begin_layout Plain Layout
++ What (minimum amount of) information is needed to recover?
+\end_layout
+
+\begin_layout Plain Layout
++ Make note on the look of the log file -> I have more info than needed
+ (reason-> to make it more readable and debug-able)
+\end_layout
+
+\begin_layout Plain Layout
+++ Show how should it look like in a deployed version
+\end_layout
+
+\begin_layout Plain Layout
++ How would I use the log to recover? How technically would I do it?
+\end_layout
+
+\begin_layout Plain Layout
+++ Show some pseudocode?
+\end_layout
+
+\begin_layout Plain Layout
++++ Implement it?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph
@@ -284,12 +475,69 @@ tion.
  asynchronicity of execution.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+- Explain how I decided to test my OrderManager implementation
+\end_layout
+
+\begin_layout Plain Layout
++ How I assert the state, and when I do that, and why (why do I wait)
+\end_layout
+
+\begin_layout Plain Layout
+- Explain the 'valid' tests
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 (1) How you tested that operations were indeed atomic at the ItemSupplier.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+WORK? -> I guess, I need some tests that tries to show that my locking protocols
+ work
+\end_layout
+
+\begin_layout Plain Layout
+- How have I done that?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 (1) How you tested error conditions and failures of the multiple components.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+- Describe how I have done that? What is my overall strategy and 'fremgang'
+ when testing this (<- exception testing)
+\end_layout
+
+\begin_layout Plain Layout
+- Describe how my failure tests works and my strategy (<- failure testing)
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph

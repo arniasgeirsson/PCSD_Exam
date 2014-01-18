@@ -8,11 +8,8 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -27,6 +24,7 @@ import com.acertainsupplychain.OrderProcessingException;
 import com.acertainsupplychain.OrderStep;
 import com.acertainsupplychain.impl.ItemSupplierImpl;
 import com.acertainsupplychain.impl.OrderManagerImpl;
+import com.acertainsupplychain.utility.TestUtility;
 
 public class OrderManagerSimple {
 
@@ -61,102 +59,13 @@ public class OrderManagerSimple {
 		}
 	}
 
-	private int registerOrderWorkflow(List<OrderStep> steps) {
+	private void tearDownWrapper() {
 		try {
-			return orderManager.registerOrderWorkflow(steps);
+			tearDown();
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
-		return 0;
-	}
-
-	private List<StepStatus> getOrderWorkflowStatus(int orderWorkflowId) {
-		try {
-			return orderManager.getOrderWorkflowStatus(orderWorkflowId);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-		return null;
-	}
-
-	private OrderStep createRandomValidOrderStep(Integer[] supplierIDs) {
-		int maxItems = 10;
-		int maxItemID = 20;
-		int maxItemQuantity = 100;
-
-		Random randGen = new Random(System.currentTimeMillis());
-
-		int numberOfItems = randGen.nextInt(maxItems) + 1;
-
-		List<ItemQuantity> items = new ArrayList<ItemQuantity>();
-		for (int i = 0; i < numberOfItems; i++) {
-			items.add(new ItemQuantity(randGen.nextInt(maxItemID), randGen
-					.nextInt(maxItemQuantity) + 1));
-		}
-
-		return new OrderStep(supplierIDs[randGen.nextInt(supplierIDs.length)],
-				items);
-	}
-
-	// Defined as coded in ItemSupplierImpl
-	private boolean isStepValid(OrderStep step) {
-		if (step == null || step.getItems() == null)
-			return false;
-		for (ItemQuantity item : step.getItems()) {
-			if (item == null || item.getQuantity() < 1)
-				return false;
-		}
-		return true;
-	}
-
-	// A random int between n and m, including n excluding m where m > n
-	private int nextInt(int n, int m) {
-		if (n >= m)
-			return n;
-		return new Random(System.currentTimeMillis()).nextInt(m - n) + n;
-	}
-
-	// private List<StepStatus> createStepStatusList(OrderStep step) {
-	// return createStepStatusList(new ArrayList<OrderStep>(
-	// Arrays.asList(step)));
-	// }
-
-	private List<StepStatus> createStepStatusList(List<OrderStep> steps) {
-		List<StepStatus> stepStatus = new ArrayList<StepStatus>();
-		for (OrderStep step : steps) {
-			if (isStepValid(step)) {
-				stepStatus.add(StepStatus.SUCCESSFUL);
-			} else {
-				stepStatus.add(StepStatus.FAILED);
-			}
-		}
-
-		return stepStatus;
-	}
-
-	private Map<Integer, List<StepStatus>> setUpPreExceptionOrderManagerState() {
-		List<OrderStep> workflow1 = new ArrayList<OrderStep>();
-		workflow1.add(createRandomValidOrderStep(supplierIDs));
-		workflow1.add(createRandomValidOrderStep(supplierIDs));
-		workflow1.add(createRandomValidOrderStep(supplierIDs));
-
-		List<OrderStep> workflow2 = new ArrayList<OrderStep>();
-		workflow2.add(createRandomValidOrderStep(supplierIDs));
-		workflow2.add(createRandomValidOrderStep(supplierIDs));
-		workflow2.add(createRandomValidOrderStep(supplierIDs));
-
-		Map<Integer, List<StepStatus>> expectedState = new HashMap<Integer, List<StepStatus>>();
-
-		int workflowID1 = registerOrderWorkflow(workflow1);
-		int workflowID2 = registerOrderWorkflow(workflow2);
-		expectedState.put(workflowID1, createStepStatusList(workflow1));
-		expectedState.put(workflowID2, createStepStatusList(workflow2));
-
-		waitForJobsToFinish(orderManager);
-
-		return expectedState;
 	}
 
 	@Test
@@ -213,10 +122,12 @@ public class OrderManagerSimple {
 	public final void testRegisterOrderWorkflow_NullList() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
-		Map<Integer, List<StepStatus>> expectedState = setUpPreExceptionOrderManagerState();
+		Map<Integer, List<StepStatus>> expectedState = TestUtility
+				.setUpPreExceptionOrderManagerState(orderManager, supplierIDs);
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 
 		List<OrderStep> steps = null;
@@ -233,7 +144,8 @@ public class OrderManagerSimple {
 		// the exception occurred
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 	}
 
@@ -241,10 +153,12 @@ public class OrderManagerSimple {
 	public final void testRegisterOrderWorkflow_EmptyList() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
-		Map<Integer, List<StepStatus>> expectedState = setUpPreExceptionOrderManagerState();
+		Map<Integer, List<StepStatus>> expectedState = TestUtility
+				.setUpPreExceptionOrderManagerState(orderManager, supplierIDs);
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 
 		List<OrderStep> steps = new ArrayList<OrderStep>();
@@ -261,7 +175,8 @@ public class OrderManagerSimple {
 		// the exception occurred
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 	}
 
@@ -269,17 +184,19 @@ public class OrderManagerSimple {
 	public final void testRegisterOrderWorkflow_NullStep() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
-		Map<Integer, List<StepStatus>> expectedState = setUpPreExceptionOrderManagerState();
+		Map<Integer, List<StepStatus>> expectedState = TestUtility
+				.setUpPreExceptionOrderManagerState(orderManager, supplierIDs);
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 
 		List<OrderStep> steps = new ArrayList<OrderStep>();
-		steps.add(createRandomValidOrderStep(supplierIDs));
-		steps.add(createRandomValidOrderStep(supplierIDs));
+		steps.add(TestUtility.createRandomValidOrderStep(supplierIDs));
+		steps.add(TestUtility.createRandomValidOrderStep(supplierIDs));
 		steps.add(null);
-		steps.add(createRandomValidOrderStep(supplierIDs));
+		steps.add(TestUtility.createRandomValidOrderStep(supplierIDs));
 		try {
 			orderManager.registerOrderWorkflow(steps);
 			fail();
@@ -292,7 +209,8 @@ public class OrderManagerSimple {
 		// the exception occurred
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 	}
 
@@ -300,10 +218,12 @@ public class OrderManagerSimple {
 	public final void testRegisterOrderWorkflow_NullItem() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
-		Map<Integer, List<StepStatus>> expectedState = setUpPreExceptionOrderManagerState();
+		Map<Integer, List<StepStatus>> expectedState = TestUtility
+				.setUpPreExceptionOrderManagerState(orderManager, supplierIDs);
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 
 		List<ItemQuantity> items = new ArrayList<ItemQuantity>();
@@ -326,7 +246,8 @@ public class OrderManagerSimple {
 		// the exception occurred
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 	}
 
@@ -334,10 +255,12 @@ public class OrderManagerSimple {
 	public final void testRegisterOrderWorkflow_NonPositiveQuantity() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
-		Map<Integer, List<StepStatus>> expectedState = setUpPreExceptionOrderManagerState();
+		Map<Integer, List<StepStatus>> expectedState = TestUtility
+				.setUpPreExceptionOrderManagerState(orderManager, supplierIDs);
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 
 		List<ItemQuantity> items = new ArrayList<ItemQuantity>();
@@ -359,7 +282,8 @@ public class OrderManagerSimple {
 		// the exception occurred
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 	}
 
@@ -367,10 +291,12 @@ public class OrderManagerSimple {
 	public final void testRegisterOrderWorkflow_NonExistingSupplier() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
-		Map<Integer, List<StepStatus>> expectedState = setUpPreExceptionOrderManagerState();
+		Map<Integer, List<StepStatus>> expectedState = TestUtility
+				.setUpPreExceptionOrderManagerState(orderManager, supplierIDs);
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 
 		Integer wrongSupplierID = 10;
@@ -395,38 +321,9 @@ public class OrderManagerSimple {
 		// the exception occurred
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
-	}
-
-	private void tearDownWrapper() {
-		try {
-			tearDown();
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	private Set<Integer> extractItemIds(List<ItemQuantity> list) {
-		Set<Integer> itemIds = new HashSet<Integer>();
-
-		for (ItemQuantity item : list) {
-			itemIds.add(item.getItemId());
-		}
-
-		return itemIds;
-	}
-
-	private List<ItemQuantity> getOrdersPerItem(ItemSupplier supplier,
-			Set<Integer> itemIds) {
-		try {
-			return supplier.getOrdersPerItem(itemIds);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-		return null;
 	}
 
 	// TODO split?
@@ -474,26 +371,26 @@ public class OrderManagerSimple {
 			fail();
 		}
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 		expectedOMState.put(workflowID, stepStatus);
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
 		// Check the orderManager
 		for (Integer workflowIDTemp : expectedOMState.keySet()) {
 			assertEquals(expectedOMState.get(workflowIDTemp),
-					getOrderWorkflowStatus(workflowIDTemp));
+					TestUtility.getOrderWorkflowStatus(orderManager,
+							workflowIDTemp));
 		}
 
 		// Check the suppliers
 		for (Integer supplierID : expectedSUPState.keySet()) {
 			List<ItemQuantity> expectedList = expectedSUPState.get(supplierID);
-			assertEquals(
-					expectedList,
-					getOrdersPerItem(allSuppliers.get(supplierID),
-							extractItemIds(expectedList)));
+			assertEquals(expectedList, TestUtility.getOrdersPerItem(
+					allSuppliers.get(supplierID),
+					TestUtility.extractItemIds(expectedList)));
 		}
 
 		// 2. Add several valid steps to same supplier (that should cause no
@@ -553,26 +450,26 @@ public class OrderManagerSimple {
 			fail();
 		}
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 		expectedOMState.put(workflowID, stepStatus);
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
 		// Check the orderManager
 		for (Integer workflowIDTemp : expectedOMState.keySet()) {
 			assertEquals(expectedOMState.get(workflowIDTemp),
-					getOrderWorkflowStatus(workflowIDTemp));
+					TestUtility.getOrderWorkflowStatus(orderManager,
+							workflowIDTemp));
 		}
 
 		// Check the suppliers
 		for (Integer supplierID : expectedSUPState.keySet()) {
 			List<ItemQuantity> expectedList = expectedSUPState.get(supplierID);
-			assertEquals(
-					expectedList,
-					getOrdersPerItem(allSuppliers.get(supplierID),
-							extractItemIds(expectedList)));
+			assertEquals(expectedList, TestUtility.getOrdersPerItem(
+					allSuppliers.get(supplierID),
+					TestUtility.extractItemIds(expectedList)));
 		}
 
 		// 3. Add several valid steps to different suppliers (that should cause
@@ -634,26 +531,26 @@ public class OrderManagerSimple {
 			fail();
 		}
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 		expectedOMState.put(workflowID, stepStatus);
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
 		// Check the orderManager
 		for (Integer workflowIDTemp : expectedOMState.keySet()) {
 			assertEquals(expectedOMState.get(workflowIDTemp),
-					getOrderWorkflowStatus(workflowIDTemp));
+					TestUtility.getOrderWorkflowStatus(orderManager,
+							workflowIDTemp));
 		}
 
 		// Check the suppliers
 		for (Integer supplierID : expectedSUPState.keySet()) {
 			List<ItemQuantity> expectedList = expectedSUPState.get(supplierID);
-			assertEquals(
-					expectedList,
-					getOrdersPerItem(allSuppliers.get(supplierID),
-							extractItemIds(expectedList)));
+			assertEquals(expectedList, TestUtility.getOrdersPerItem(
+					allSuppliers.get(supplierID),
+					TestUtility.extractItemIds(expectedList)));
 		}
 
 		// 4. Add a single invalid step (that should cause a fail)
@@ -679,26 +576,26 @@ public class OrderManagerSimple {
 			fail();
 		}
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 		expectedOMState.put(workflowID, stepStatus);
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
 		// Check the orderManager
 		for (Integer workflowIDTemp : expectedOMState.keySet()) {
 			assertEquals(expectedOMState.get(workflowIDTemp),
-					getOrderWorkflowStatus(workflowIDTemp));
+					TestUtility.getOrderWorkflowStatus(orderManager,
+							workflowIDTemp));
 		}
 
 		// Check the suppliers are still in the same state as before this tests
 		for (Integer supplierID : expectedSUPState.keySet()) {
 			List<ItemQuantity> expectedList = expectedSUPState.get(supplierID);
-			assertEquals(
-					expectedList,
-					getOrdersPerItem(allSuppliers.get(supplierID),
-							extractItemIds(expectedList)));
+			assertEquals(expectedList, TestUtility.getOrdersPerItem(
+					allSuppliers.get(supplierID),
+					TestUtility.extractItemIds(expectedList)));
 		}
 
 		// 5. Add several invalid steps to same supplier (that should cause a
@@ -742,26 +639,26 @@ public class OrderManagerSimple {
 			fail();
 		}
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 		expectedOMState.put(workflowID, stepStatus);
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
 		// Check the orderManager
 		for (Integer workflowIDTemp : expectedOMState.keySet()) {
 			assertEquals(expectedOMState.get(workflowIDTemp),
-					getOrderWorkflowStatus(workflowIDTemp));
+					TestUtility.getOrderWorkflowStatus(orderManager,
+							workflowIDTemp));
 		}
 
 		// Check the suppliers are still in the same state as before this tests
 		for (Integer supplierID : expectedSUPState.keySet()) {
 			List<ItemQuantity> expectedList = expectedSUPState.get(supplierID);
-			assertEquals(
-					expectedList,
-					getOrdersPerItem(allSuppliers.get(supplierID),
-							extractItemIds(expectedList)));
+			assertEquals(expectedList, TestUtility.getOrdersPerItem(
+					allSuppliers.get(supplierID),
+					TestUtility.extractItemIds(expectedList)));
 		}
 
 		// 6. Add several invalid steps to different suppliers (that should
@@ -806,26 +703,26 @@ public class OrderManagerSimple {
 			fail();
 		}
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 		expectedOMState.put(workflowID, stepStatus);
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
 		// Check the orderManager
 		for (Integer workflowIDTemp : expectedOMState.keySet()) {
 			assertEquals(expectedOMState.get(workflowIDTemp),
-					getOrderWorkflowStatus(workflowIDTemp));
+					TestUtility.getOrderWorkflowStatus(orderManager,
+							workflowIDTemp));
 		}
 
 		// Check the suppliers are still in the same state as before this tests
 		for (Integer supplierID : expectedSUPState.keySet()) {
 			List<ItemQuantity> expectedList = expectedSUPState.get(supplierID);
-			assertEquals(
-					expectedList,
-					getOrdersPerItem(allSuppliers.get(supplierID),
-							extractItemIds(expectedList)));
+			assertEquals(expectedList, TestUtility.getOrdersPerItem(
+					allSuppliers.get(supplierID),
+					TestUtility.extractItemIds(expectedList)));
 		}
 
 		// 7. Add a mix of valid and invalid steps to different suppliers
@@ -874,26 +771,26 @@ public class OrderManagerSimple {
 			fail();
 		}
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 		expectedOMState.put(workflowID, stepStatus);
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
 		// Check the orderManager
 		for (Integer workflowIDTemp : expectedOMState.keySet()) {
 			assertEquals(expectedOMState.get(workflowIDTemp),
-					getOrderWorkflowStatus(workflowIDTemp));
+					TestUtility.getOrderWorkflowStatus(orderManager,
+							workflowIDTemp));
 		}
 
 		// Check the suppliers
 		for (Integer supplierID : expectedSUPState.keySet()) {
 			List<ItemQuantity> expectedList = expectedSUPState.get(supplierID);
-			assertEquals(
-					expectedList,
-					getOrdersPerItem(allSuppliers.get(supplierID),
-							extractItemIds(expectedList)));
+			assertEquals(expectedList, TestUtility.getOrdersPerItem(
+					allSuppliers.get(supplierID),
+					TestUtility.extractItemIds(expectedList)));
 		}
 	}
 
@@ -901,10 +798,12 @@ public class OrderManagerSimple {
 	public final void testGetOrderWorkflowStatus_NonExistingID() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
-		Map<Integer, List<StepStatus>> expectedState = setUpPreExceptionOrderManagerState();
+		Map<Integer, List<StepStatus>> expectedState = TestUtility
+				.setUpPreExceptionOrderManagerState(orderManager, supplierIDs);
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 
 		Integer wrongSupplierID = 10;
@@ -922,7 +821,8 @@ public class OrderManagerSimple {
 		// the exception occurred
 		for (Integer workflowID : expectedState.keySet()) {
 			assertEquals(expectedState.get(workflowID),
-					getOrderWorkflowStatus(workflowID));
+					TestUtility
+							.getOrderWorkflowStatus(orderManager, workflowID));
 		}
 	}
 
@@ -951,7 +851,7 @@ public class OrderManagerSimple {
 		step = new OrderStep(supplierIDs[0], items);
 
 		steps.add(step);
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 
 		try {
 			workflowID = orderManager.registerOrderWorkflow(steps);
@@ -961,9 +861,10 @@ public class OrderManagerSimple {
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
-		assertTrue(compareOrder(stepStatus, getOrderWorkflowStatus(workflowID)));
+		assertTrue(TestUtility.compareOrder(stepStatus,
+				TestUtility.getOrderWorkflowStatus(orderManager, workflowID)));
 		// assertEquals(stepStatus, getOrderWorkflowStatus(workflowID));
 
 		// 2. Register multiple valid steps and make sure they are in the
@@ -990,7 +891,7 @@ public class OrderManagerSimple {
 		step = new OrderStep(supplierIDs[0], items);
 		steps.add(step);
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 
 		try {
 			workflowID = orderManager.registerOrderWorkflow(steps);
@@ -1000,9 +901,10 @@ public class OrderManagerSimple {
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
-		assertTrue(compareOrder(stepStatus, getOrderWorkflowStatus(workflowID)));
+		assertTrue(TestUtility.compareOrder(stepStatus,
+				TestUtility.getOrderWorkflowStatus(orderManager, workflowID)));
 		// assertEquals(stepStatus, getOrderWorkflowStatus(workflowID));
 
 		// 3. Register a mismatch of valid and invalid steps and make sure they
@@ -1029,7 +931,7 @@ public class OrderManagerSimple {
 		step = new OrderStep(supplierIDs[0], items);
 		steps.add(step);
 
-		stepStatus = createStepStatusList(steps);
+		stepStatus = TestUtility.createStepStatusList(steps);
 
 		try {
 			workflowID = orderManager.registerOrderWorkflow(steps);
@@ -1039,29 +941,102 @@ public class OrderManagerSimple {
 
 		// Make sure that the orderManager and the affected suppliers are in the
 		// correct state
-		waitForJobsToFinish(orderManager);
+		TestUtility.waitForJobsToFinish(orderManager);
 
-		assertTrue(compareOrder(stepStatus, getOrderWorkflowStatus(workflowID)));
+		assertTrue(TestUtility.compareOrder(stepStatus,
+				TestUtility.getOrderWorkflowStatus(orderManager, workflowID)));
 		// assertEquals(stepStatus, getOrderWorkflowStatus(workflowID));
 	}
 
-	private <E> boolean compareOrder(List<E> list1, List<E> list2) {
-		int size = list1.size();
-		if (size != list2.size())
-			return false;
-		for (int i = 0; i < size; i++) {
-			if (!list1.get(i).equals(list2.get(i)))
-				return false;
+	@Test
+	public final void testJobGetSupplier() {
+		// 1. Test that all the suppliers created in BeforeClass are the same as
+		// the ones given when asked
+		for (Integer supplierID : allSuppliers.keySet()) {
+			try {
+				assertEquals(allSuppliers.get(supplierID),
+						orderManager.jobGetSupplier(supplierID));
+			} catch (Exception e) {
+				fail();
+			}
 		}
-		return true;
-	}
 
-	private void waitForJobsToFinish(OrderManager orderManager) {
+		// 2. Test that with a unknown supplier id the proper exception is
+		// thrown
+
+		int wrongSupplierID = 6;
+		assertFalse(allSuppliers.keySet().contains(wrongSupplierID));
+
 		try {
-			orderManager.waitForJobsToFinish();
+			assertEquals(allSuppliers.get(wrongSupplierID),
+					orderManager.jobGetSupplier(wrongSupplierID));
+			fail();
+		} catch (OrderProcessingException e) {
 		} catch (Exception e) {
-			e.printStackTrace();
 			fail();
 		}
 	}
+
+	@Test
+	public final void testJobGetWorkflow() {
+
+		// 1. Test that a returned workflow returns the workflow given
+		List<OrderStep> workflowLocal = new ArrayList<OrderStep>();
+		workflowLocal.add(TestUtility.createRandomValidOrderStep(supplierIDs));
+		workflowLocal.add(TestUtility.createRandomValidOrderStep(supplierIDs));
+		workflowLocal.add(TestUtility.createRandomValidOrderStep(supplierIDs));
+
+		Integer workflowID = null;
+		List<OrderStep> workflow = null;
+
+		workflowID = TestUtility.registerOrderWorkflow(orderManager,
+				workflowLocal);
+
+		try {
+			workflow = orderManager.jobGetWorkFlow(workflowID);
+		} catch (Exception e) {
+			fail();
+		}
+
+		assertEquals(workflowLocal, workflow);
+
+		// 2. Test that a workflow that has not been returned throws proper
+		// exception
+		try {
+			orderManager.jobGetWorkFlow(workflowID + 1);
+			fail();
+		} catch (OrderProcessingException e) {
+		} catch (Exception e) {
+			fail();
+		}
+		// 3. Test that the workflow from test 1. still works
+		// TODO must also make sure that the state of the orderManager is the
+		// correct one
+		try {
+			workflow = orderManager.jobGetWorkFlow(workflowID);
+		} catch (Exception e) {
+			fail();
+		}
+
+		assertEquals(workflowLocal, workflow);
+	}
+
+	@Test
+	public final void testJobSetStatus() {
+		// TODO this cannot be done, but assumed to work, as the other tests
+		// does not fail
+	}
+
+	@Test
+	public final void testWaitForJobsToFinish() {
+		// TODO this cannot be done, but assumed to work, as the other tests
+		// does not fail
+	}
+
+	@Test
+	public final void testStopItemSupplierProxies() {
+		// TODO this cannot be done, but assumed to work, as the other tests
+		// does not fail
+	}
+
 }

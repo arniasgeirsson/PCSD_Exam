@@ -16,7 +16,6 @@ import com.acertainsupplychain.utility.FileLogger;
 public class ItemSupplierImpl implements ItemSupplier {
 
 	private final int supplierID;
-	private final List<OrderStep> allHandledOrders; // A log file
 	private final Map<Integer, Integer> summedOrders;
 	private final FileLogger fileLogger;
 
@@ -24,7 +23,6 @@ public class ItemSupplierImpl implements ItemSupplier {
 
 	public ItemSupplierImpl(int supplierID) {
 		this.supplierID = supplierID;
-		allHandledOrders = new ArrayList<OrderStep>();
 		summedOrders = new HashMap<Integer, Integer>();
 		logID = 0;
 
@@ -71,50 +69,13 @@ public class ItemSupplierImpl implements ItemSupplier {
 
 		// TODO can item ids be negative? Yes
 
-		// TODO should an empty list be allowed? No
-
 		// TODO must copy the step before adding it to the database.
+		// -> nah, I just assume no one alters the object while I use it to
+		// update the state
 
 		// Execute the step
-		// TODO allHandledOrders is not needed anymore? as now I properly log..
-		if (!allHandledOrders.add(step))
-			throw new OrderProcessingException("Supplier with id ["
-					+ supplierID + "]: Something unexpected happened when "
-					+ "trying to add step to log file.");
 		addStepToSummedOrders(step);
 	}
-
-	// private void logStep(OrderStep step) {
-	// String log = "Supplier with ID [" + supplierID + "] executed "
-	// + "OrderStep: ";
-	//
-	// log = log + createStepString(step) + "\n";
-	//
-	// fileLogger.logToFile(log, true);
-	// }
-
-	// TODO duplicated in OrderManagerImpl
-	// private String createStepString(OrderStep step) {
-	// if (step == null)
-	// return "(null)";
-	// String string = "[" + step.getSupplierId() + ",";
-	//
-	// for (ItemQuantity itemQuantity : step.getItems()) {
-	// if (itemQuantity == null) {
-	// string = string + "((null))";
-	// } else {
-	// string = string + "(" + itemQuantity.getItemId() + ","
-	// + itemQuantity.getQuantity() + "),";
-	// }
-	// }
-	//
-	// if (string.endsWith(",")) {
-	// string = string.substring(0, string.length() - 1);
-	// }
-	//
-	// string = string + "]";
-	// return string;
-	// }
 
 	// This function assumes that the step is valid
 	private void addStepToSummedOrders(OrderStep step) {
@@ -160,7 +121,6 @@ public class ItemSupplierImpl implements ItemSupplier {
 
 	@Override
 	public void clear() {
-		allHandledOrders.clear();
 		summedOrders.clear();
 		fileLogger.logToFile("CLEARDONE\n", true);
 	}
@@ -181,7 +141,6 @@ public class ItemSupplierImpl implements ItemSupplier {
 
 		ItemSupplierImpl item = (ItemSupplierImpl) obj;
 		return supplierID == item.supplierID
-				&& allHandledOrders.equals(item.allHandledOrders)
 				&& summedOrders.equals(item.summedOrders);
 	}
 

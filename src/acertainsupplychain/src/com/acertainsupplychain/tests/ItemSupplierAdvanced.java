@@ -37,7 +37,7 @@ public class ItemSupplierAdvanced {
 	public static void setUpBeforeClass() throws Exception {
 		int port = 8010;
 		itemSupplierProcess = ItemSupplierUtility.startProcess(
-				ItemSupplierHTTPServer.class, Integer.toString(port));
+				ItemSupplierHTTPServer.class, true, Integer.toString(port));
 		supplier = new ItemSupplierHTTPProxy(0, port);
 	}
 

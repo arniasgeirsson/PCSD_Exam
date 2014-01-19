@@ -52,7 +52,8 @@ public class OrderManagerAdvanced {
 		for (Integer supplierID : supplierIDs) {
 			// Start a new itemSupplier server
 			Process itemSupplierProcess = ItemSupplierUtility.startProcess(
-					ItemSupplierHTTPServer.class, Integer.toString(++port));
+					ItemSupplierHTTPServer.class, true,
+					Integer.toString(++port));
 			itemSupplierProcesses.add(itemSupplierProcess);
 
 			// Create new ItemSupplier proxy
@@ -63,7 +64,7 @@ public class OrderManagerAdvanced {
 
 		// Start new OrderManger server
 		orderManagerProcess = ItemSupplierUtility.startProcess(
-				OrderManagerHTTPServer.class, Integer.toString(++port));
+				OrderManagerHTTPServer.class, true, Integer.toString(++port));
 		orderManager = new OrderManagerHTTPProxy(0, port, suppliers);
 	}
 
@@ -71,7 +72,9 @@ public class OrderManagerAdvanced {
 	public static void testDownAfterClass() throws Exception {
 		// Stop all the itemSupplier jetty clients
 		for (ItemSupplier itemSupplier : allSuppliers.values()) {
-			((ItemSupplierHTTPProxy) itemSupplier).stop();
+			if (itemSupplier instanceof ItemSupplierHTTPProxy) {
+				((ItemSupplierHTTPProxy) itemSupplier).stop();
+			}
 		}
 		// Stop all the itemSupplier servers
 		for (Process process : itemSupplierProcesses) {
@@ -80,7 +83,9 @@ public class OrderManagerAdvanced {
 
 		orderManager.stopItemSupplierProxies();
 		// Stop the OrderManager client
-		((OrderManagerHTTPProxy) orderManager).stop();
+		if (orderManager instanceof OrderManagerHTTPProxy) {
+			((OrderManagerHTTPProxy) orderManager).stop();
+		}
 		// Stop the OrderManager server
 		ItemSupplierUtility.stopProcess(orderManagerProcess);
 	}
@@ -107,7 +112,6 @@ public class OrderManagerAdvanced {
 		}
 	}
 
-	// TODO, do they make sense in advanced test? -> yes, refactor
 	@Test
 	public final void testOrderManager_NullSupplierMap() {
 		Map<Integer, ItemSupplier> suppliers = null;
@@ -115,7 +119,8 @@ public class OrderManagerAdvanced {
 
 		try {
 			process = ItemSupplierUtility.startProcess(
-					OrderManagerHTTPServer.class, Integer.toString(++port));
+					OrderManagerHTTPServer.class, true,
+					Integer.toString(++port));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -136,7 +141,6 @@ public class OrderManagerAdvanced {
 		assertTrue(successFullTest);
 	}
 
-	// TODO, do they make sense in advanced test? -> yes, refactor
 	@Test
 	public final void testOrderManager_EmptySupplierMap() {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
@@ -144,7 +148,8 @@ public class OrderManagerAdvanced {
 
 		try {
 			process = ItemSupplierUtility.startProcess(
-					OrderManagerHTTPServer.class, Integer.toString(++port));
+					OrderManagerHTTPServer.class, true,
+					Integer.toString(++port));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -165,7 +170,6 @@ public class OrderManagerAdvanced {
 		assertTrue(successFullTest);
 	}
 
-	// TODO, do they make sense in advanced test? -> yes, refactor
 	@Test
 	public final void testOrderManager_NullSupplier() {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
@@ -174,7 +178,8 @@ public class OrderManagerAdvanced {
 
 		try {
 			process = ItemSupplierUtility.startProcess(
-					OrderManagerHTTPServer.class, Integer.toString(++port));
+					OrderManagerHTTPServer.class, true,
+					Integer.toString(++port));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -195,7 +200,6 @@ public class OrderManagerAdvanced {
 		assertTrue(successFullTest);
 	}
 
-	// TODO, do they make sense in advanced test? -> yes, refactor
 	@Test
 	public final void testOrderManager_IDmismatch() {
 		Map<Integer, ItemSupplier> suppliers = new HashMap<Integer, ItemSupplier>();
@@ -204,7 +208,8 @@ public class OrderManagerAdvanced {
 
 		try {
 			process = ItemSupplierUtility.startProcess(
-					OrderManagerHTTPServer.class, Integer.toString(++port));
+					OrderManagerHTTPServer.class, true,
+					Integer.toString(++port));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();

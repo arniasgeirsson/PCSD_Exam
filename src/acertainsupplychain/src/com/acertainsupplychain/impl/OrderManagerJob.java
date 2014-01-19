@@ -3,6 +3,7 @@ package com.acertainsupplychain.impl;
 import java.util.List;
 
 import com.acertainsupplychain.ItemSupplier;
+import com.acertainsupplychain.NetworkException;
 import com.acertainsupplychain.OrderManager;
 import com.acertainsupplychain.OrderManager.StepStatus;
 import com.acertainsupplychain.OrderProcessingException;
@@ -44,6 +45,9 @@ public class OrderManagerJob implements Runnable {
 			try {
 				// - wait for responds
 				supplier.executeStep(orderStep);
+			} catch (NetworkException e) {
+				// We assume that the component failed (ie is 'dead' somehow)
+				status = StepStatus.FAILED;
 			} catch (OrderProcessingException e) {
 				status = StepStatus.FAILED;
 			}

@@ -73,7 +73,6 @@ public class OrderManagerHTTPProxy implements OrderManager {
 			Map<Integer, Integer> suppliers) throws Exception {
 		orderManagerAddress = "http://localhost:" + port;
 
-		// initializeReplicationAwareMappings();
 		client = new HttpClient();
 		client.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
 		// max concurrent connections to every address

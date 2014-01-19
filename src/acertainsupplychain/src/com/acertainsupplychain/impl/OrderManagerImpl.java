@@ -31,7 +31,10 @@ public class OrderManagerImpl implements OrderManager {
 		validateSupplierMap(suppliers);
 		this.orderManagerID = orderManagerID;
 
+		// TODO do I really need this? -> means I must pass the workflow along
+		// -> I need it, to enable flexibility in the design.
 		workflows = new HashMap<Integer, List<OrderStep>>();
+
 		status = new HashMap<Integer, List<StepStatus>>();
 		lowestFreeWorkflowID = 0;
 		this.suppliers = suppliers;
@@ -39,8 +42,7 @@ public class OrderManagerImpl implements OrderManager {
 
 		fileLogger = new FileLogger(orderManagerID + "_OrderManager_logfile",
 				"How to read this log file?\n");
-		fileLogger.logToFile("Initialized orderManager with ID ["
-				+ orderManagerID + "]\n", true);
+		fileLogger.logToFile("INITOM " + orderManagerID + "\n", true);
 	}
 
 	private void validateSupplierMap(Map<Integer, ItemSupplier> suppliers)
@@ -94,16 +96,15 @@ public class OrderManagerImpl implements OrderManager {
 		workflows.put(id, steps);
 		status.put(id, initializeStatusList(steps.size()));
 
-		scheduler.scheduleJob(this, id);
+		logWorkflow(id, steps);
 
-		logWorkflow(steps);
+		scheduler.scheduleJob(this, id);
 
 		return id;
 	}
 
-	private void logWorkflow(List<OrderStep> steps) {
-		String log = "OrderManager with ID [" + orderManagerID
-				+ "] registered workflow: ";
+	private void logWorkflow(int workflowID, List<OrderStep> steps) {
+		String log = "REGISTER " + workflowID + " ";
 
 		log = log + createWorkflowString(steps) + "\n";
 
@@ -113,17 +114,16 @@ public class OrderManagerImpl implements OrderManager {
 	private String createWorkflowString(List<OrderStep> steps) {
 		if (steps == null)
 			return "(null)";
-		String string = "[";
+		String string = "";
 
 		for (OrderStep orderStep : steps) {
-			string = createStepString(orderStep) + ",";
+			string = string + createStepString(orderStep) + " ";
 		}
 
 		if (string.endsWith(",")) {
 			string = string.substring(0, string.length() - 1);
 		}
 
-		string = string + "]";
 		return string;
 	}
 
@@ -135,7 +135,7 @@ public class OrderManagerImpl implements OrderManager {
 
 		for (ItemQuantity itemQuantity : step.getItems()) {
 			if (itemQuantity == null) {
-				string = string + "((null))";
+				string = string + "(null)";
 			} else {
 				string = string + "(" + itemQuantity.getItemId() + ","
 						+ itemQuantity.getQuantity() + "),";
@@ -152,14 +152,12 @@ public class OrderManagerImpl implements OrderManager {
 
 	private void logStatusUpdate(int workflowID, int stepIndex,
 			StepStatus status) {
-		String log = "OrderManager with ID [" + orderManagerID
-				+ "] updated status of workflow step: ";
+		String log = "UPDATE ";
 
 		if (status == null) {
-			log = log + "[" + workflowID + "," + stepIndex + ",(null)]\n";
+			log = log + workflowID + " " + stepIndex + " (null)\n";
 		} else {
-			log = log + "[" + workflowID + "," + stepIndex + "," + status
-					+ "]\n";
+			log = log + workflowID + " " + stepIndex + " " + status + "\n";
 		}
 
 		fileLogger.logToFile(log, true);
@@ -209,6 +207,7 @@ public class OrderManagerImpl implements OrderManager {
 		// Must stop any working thread
 		scheduler.shutDown();
 		scheduler = new OrderManagerScheduler();
+		fileLogger.logToFile("CLEARDONE\n", true);
 	}
 
 	// TODO untested
@@ -233,6 +232,8 @@ public class OrderManagerImpl implements OrderManager {
 	@Override
 	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)
 			throws OrderProcessingException {
+		System.out.println("jobsetstatus: " + workflowID + " " + stepIndex
+				+ " " + status);
 		List<StepStatus> newStatus = this.status.get(workflowID);
 		newStatus.set(stepIndex, status);
 		this.status.put(workflowID, newStatus);

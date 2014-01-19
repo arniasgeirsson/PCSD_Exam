@@ -79,6 +79,10 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 
 				} catch (OrderProcessingException e) {
 					itemSupplierResponse.setException(e);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -96,6 +100,10 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 					supplier.executeStep(step);
 				} catch (OrderProcessingException ex) {
 					itemSupplierResponse.setException(ex);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -114,6 +122,10 @@ public class ItemSupplierHTTPMessageHandler extends AbstractHandler {
 							supplier.getOrdersPerItem(itemIds)));
 				} catch (OrderProcessingException ex) {
 					itemSupplierResponse.setException(ex);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);

@@ -85,8 +85,12 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 				try {
 					itemSupplierResponse.setResult(new ItemSupplierResult(
 							orderManager.registerOrderWorkflow(steps)));
-				} catch (OrderProcessingException ex) {
-					itemSupplierResponse.setException(ex);
+				} catch (OrderProcessingException e) {
+					itemSupplierResponse.setException(e);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -102,8 +106,12 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 
 					itemSupplierResponse.setResult(new ItemSupplierResult(
 							orderManager.getOrderWorkflowStatus(workflowID)));
-				} catch (OrderProcessingException ex) {
-					itemSupplierResponse.setException(ex);
+				} catch (OrderProcessingException e) {
+					itemSupplierResponse.setException(e);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -132,6 +140,10 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					}
 				} catch (OrderProcessingException e) {
 					itemSupplierResponse.setException(e);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -139,14 +151,17 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 				break;
 
 			case INIT_ORDERMANAGER_PROXY:
-				xml = ItemSupplierUtility.extractPOSTDataFromRequest(request);
-				suppliersPortMap = (Map<Integer, Integer>) ItemSupplierUtility
-						.deserializeXMLStringToObject(xml);
+				System.out.println("HEYEYE");
 				itemSupplierResponse = new ItemSupplierResponse();
 
 				supplierProxies = new HashMap<Integer, ItemSupplier>();
 
 				try {
+					xml = ItemSupplierUtility
+							.extractPOSTDataFromRequest(request);
+					suppliersPortMap = (Map<Integer, Integer>) ItemSupplierUtility
+							.deserializeXMLStringToObject(xml);
+
 					orderManagerID = ItemSupplierUtility
 							.decodeInteger(request
 									.getParameter(ItemSupplierClientConstants.INIT_ORDERMANAGER_ID));
@@ -161,11 +176,15 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 						orderManager = new OrderManagerImpl(orderManagerID,
 								supplierProxies);
 					}
+					System.out.println("done!");
 				} catch (OrderProcessingException e) {
+					e.printStackTrace();
 					itemSupplierResponse.setException(e);
 				} catch (Exception e) {
+					e.printStackTrace();
 					itemSupplierResponse
-							.setException(new OrderProcessingException(e));
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -182,6 +201,10 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 							orderManager.jobGetSupplier(supplierID)));
 				} catch (OrderProcessingException ex) {
 					itemSupplierResponse.setException(ex);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -197,6 +220,10 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 							orderManager.jobGetWorkflow(workflowID)));
 				} catch (OrderProcessingException ex) {
 					itemSupplierResponse.setException(ex);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -220,6 +247,10 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					orderManager.jobSetStatus(workflowID, stepIndex, status);
 				} catch (OrderProcessingException ex) {
 					itemSupplierResponse.setException(ex);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);
@@ -233,6 +264,10 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 					orderManager.waitForJobsToFinish();
 				} catch (OrderProcessingException e) {
 					itemSupplierResponse.setException(e);
+				} catch (Exception e) {
+					itemSupplierResponse
+							.setException(new OrderProcessingException(
+									"Caught unexpected exception", e));
 				}
 
 				writeResponse(response, itemSupplierResponse);

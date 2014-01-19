@@ -20,15 +20,17 @@ public class ItemSupplierImpl implements ItemSupplier {
 	private final Map<Integer, Integer> summedOrders;
 	private final FileLogger fileLogger;
 
+	private int logID;
+
 	public ItemSupplierImpl(int supplierID) {
 		this.supplierID = supplierID;
 		allHandledOrders = new ArrayList<OrderStep>();
 		summedOrders = new HashMap<Integer, Integer>();
+		logID = 0;
 
 		fileLogger = new FileLogger(this.supplierID + "_Supplier_logfile",
 				"How to read this log file?\n");
-		fileLogger.logToFile("Initialized supplier with ID [" + this.supplierID
-				+ "]\n", true);
+		fileLogger.logToFile("INITSUP " + this.supplierID + "\n", true);
 	}
 
 	@Override
@@ -74,56 +76,62 @@ public class ItemSupplierImpl implements ItemSupplier {
 		// TODO must copy the step before adding it to the database.
 
 		// Execute the step
+		// TODO allHandledOrders is not needed anymore? as now I properly log..
 		if (!allHandledOrders.add(step))
 			throw new OrderProcessingException("Supplier with id ["
 					+ supplierID + "]: Something unexpected happened when "
 					+ "trying to add step to log file.");
 		addStepToSummedOrders(step);
-
-		logStep(step);
 	}
 
-	private void logStep(OrderStep step) {
-		String log = "Supplier with ID [" + supplierID + "] executed "
-				+ "OrderStep: ";
-
-		log = log + createStepString(step) + "\n";
-
-		fileLogger.logToFile(log, true);
-	}
+	// private void logStep(OrderStep step) {
+	// String log = "Supplier with ID [" + supplierID + "] executed "
+	// + "OrderStep: ";
+	//
+	// log = log + createStepString(step) + "\n";
+	//
+	// fileLogger.logToFile(log, true);
+	// }
 
 	// TODO duplicated in OrderManagerImpl
-	private String createStepString(OrderStep step) {
-		if (step == null)
-			return "(null)";
-		String string = "[" + step.getSupplierId() + ",";
-
-		for (ItemQuantity itemQuantity : step.getItems()) {
-			if (itemQuantity == null) {
-				string = string + "((null))";
-			} else {
-				string = string + "(" + itemQuantity.getItemId() + ","
-						+ itemQuantity.getQuantity() + "),";
-			}
-		}
-
-		if (string.endsWith(",")) {
-			string = string.substring(0, string.length() - 1);
-		}
-
-		string = string + "]";
-		return string;
-	}
+	// private String createStepString(OrderStep step) {
+	// if (step == null)
+	// return "(null)";
+	// String string = "[" + step.getSupplierId() + ",";
+	//
+	// for (ItemQuantity itemQuantity : step.getItems()) {
+	// if (itemQuantity == null) {
+	// string = string + "((null))";
+	// } else {
+	// string = string + "(" + itemQuantity.getItemId() + ","
+	// + itemQuantity.getQuantity() + "),";
+	// }
+	// }
+	//
+	// if (string.endsWith(",")) {
+	// string = string.substring(0, string.length() - 1);
+	// }
+	//
+	// string = string + "]";
+	// return string;
+	// }
 
 	// This function assumes that the step is valid
 	private void addStepToSummedOrders(OrderStep step) {
+		// TODO lock the ID
+		int mylogID = logID++;
+		// TODO unlock the ID
+		fileLogger.logToFile("EXEC-START " + mylogID + "\n", true);
 		for (ItemQuantity item : step.getItems()) {
 			int summed = item.getQuantity();
 			if (summedOrders.containsKey(item.getItemId())) {
 				summed += summedOrders.get(item.getItemId());
 			}
 			summedOrders.put(item.getItemId(), summed);
+			fileLogger.logToFile("WRT " + mylogID + " " + item.getItemId()
+					+ " " + item.getQuantity() + "\n", true);
 		}
+		fileLogger.logToFile("EXEC-DONE " + mylogID + "\n", true);
 	}
 
 	@Override
@@ -154,6 +162,7 @@ public class ItemSupplierImpl implements ItemSupplier {
 	public void clear() {
 		allHandledOrders.clear();
 		summedOrders.clear();
+		fileLogger.logToFile("CLEARDONE\n", true);
 	}
 
 	@Override

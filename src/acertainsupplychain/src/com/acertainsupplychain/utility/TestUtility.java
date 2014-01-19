@@ -3,6 +3,7 @@ package com.acertainsupplychain.utility;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -96,8 +97,16 @@ public class TestUtility {
 		return null;
 	}
 
-	// Valid means that it will pass the inspection at the OrderManagerImpl
+	public static OrderStep createRandomValidOrderStep(Set<Integer> supplierIDs) {
+		return createRandomValidOrderStep(new ArrayList<Integer>(supplierIDs));
+	}
+
 	public static OrderStep createRandomValidOrderStep(Integer[] supplierIDs) {
+		return createRandomValidOrderStep(Arrays.asList(supplierIDs));
+	}
+
+	// Valid means that it will pass the inspection at the OrderManagerImpl
+	public static OrderStep createRandomValidOrderStep(List<Integer> supplierIDs) {
 		int maxItems = 10;
 		int minItemID = -10;
 		int maxItemID = 20;
@@ -113,8 +122,8 @@ public class TestUtility {
 					minItemQuantity, maxItemQuantity)));
 		}
 
-		return new OrderStep(supplierIDs[TestUtility.nextInt(0,
-				supplierIDs.length)], items);
+		return new OrderStep(supplierIDs.get(TestUtility.nextInt(0,
+				supplierIDs.size())), items);
 	}
 
 	// Defined as coded in ItemSupplierImpl

@@ -3,7 +3,10 @@
  */
 package com.acertainsupplychain.utility;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -31,57 +34,6 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
  * 
  */
 public final class ItemSupplierUtility {
-
-	/**
-	 * Checks if a string is empty or null
-	 * 
-	 * @param str
-	 * @return
-	 */
-	// public static boolean isEmpty(String str) {
-	// return ((str == null) || str.isEmpty());
-	// }
-
-	/**
-	 * Converts a string to a float if possible else it returns the signal value
-	 * for failure passed as parameter
-	 * 
-	 * @param str
-	 * @param failureSignal
-	 * @return
-	 */
-	// public static float convertStringToFloat(String str, float failureSignal)
-	// {
-	// float returnValue = failureSignal;
-	// try {
-	// returnValue = Float.parseFloat(str);
-	//
-	// } catch (NumberFormatException ex) {
-	// ;
-	// } catch (NullPointerException ex) {
-	// ;
-	// }
-	// return returnValue;
-	// }
-
-	/**
-	 * Converts a string to a int if possible else it returns the signal value
-	 * for failure passed as parameter
-	 * 
-	 * @param str
-	 * @param failureSignal
-	 * @return
-	 */
-	// public static int convertStringToInt(String str) throws
-	// BookStoreException {
-	// int returnValue = 0;
-	// try {
-	// returnValue = Integer.parseInt(str);
-	// } catch (Exception ex) {
-	// throw new BookStoreException(ex);
-	// }
-	// return returnValue;
-	// }
 
 	/**
 	 * TODO Convert a request URI to the message tags supported in
@@ -147,6 +99,8 @@ public final class ItemSupplierUtility {
 			throw new NetworkException(
 					ItemSupplierClientConstants.strERR_CLIENT_REQUEST_SENDING,
 					ex);
+		} catch (Exception e) {
+			throw new NetworkException("Caught unexpected exception", e);
 		}
 
 		try {
@@ -156,6 +110,8 @@ public final class ItemSupplierUtility {
 			throw new NetworkException(
 					ItemSupplierClientConstants.strERR_CLIENT_REQUEST_SENDING,
 					ex);
+		} catch (Exception e) {
+			throw new NetworkException("Caught unexpected exception", e);
 		}
 
 		if (exchangeState == HttpExchange.STATUS_COMPLETED) {
@@ -173,6 +129,8 @@ public final class ItemSupplierUtility {
 				throw new NetworkException(
 						ItemSupplierClientConstants.strERR_CLIENT_RESPONSE_DECODING,
 						ex);
+			} catch (Exception e) {
+				throw new NetworkException("Caught unexpected exception", e);
 			}
 		} else if (exchangeState == HttpExchange.STATUS_EXCEPTED)
 			throw new NetworkException(
@@ -208,8 +166,7 @@ public final class ItemSupplierUtility {
 
 	// http://stackoverflow.com/questions/3263130/processbuilder-start-another-process-jvm-howto
 	public static Process startProcess(Class<? extends Object> clazz,
-			String... mainArgs) throws Exception {
-		System.out.println(clazz.getCanonicalName());
+			boolean redirectStreams, String... mainArgs) throws Exception {
 		String separator = System.getProperty("file.separator");
 		String classpath = System.getProperty("java.class.path");
 		String path = System.getProperty("java.home") + separator + "bin"
@@ -224,9 +181,19 @@ public final class ItemSupplierUtility {
 		}
 
 		ProcessBuilder processBuilder = new ProcessBuilder(commandList);
-		processBuilder.redirectErrorStream(false);
-
 		Process process = processBuilder.start();
+
+		if (redirectStreams) {
+			StreamGobbler errorGobbler = new StreamGobbler(
+					process.getErrorStream(), "ERROR");
+
+			StreamGobbler outputGobbler = new StreamGobbler(
+					process.getInputStream(), "OUTPUT");
+
+			errorGobbler.start();
+			outputGobbler.start();
+		}
+
 		// Wait a second to make sure that the process is more likely to be
 		// ready
 		Thread.yield();
@@ -240,12 +207,20 @@ public final class ItemSupplierUtility {
 
 	public static String encodeInteger(int integer)
 			throws OrderProcessingException {
-		return encode(Integer.toString(integer));
+		try {
+			return encode(Integer.toString(integer));
+		} catch (Exception e) {
+			throw new OrderProcessingException(e);
+		}
 	}
 
 	public static int decodeInteger(String string)
 			throws OrderProcessingException {
-		return Integer.parseInt(decode(string));
+		try {
+			return Integer.parseInt(decode(string));
+		} catch (Exception e) {
+			throw new OrderProcessingException(e);
+		}
 	}
 
 	public static String encode(String string) throws OrderProcessingException {
@@ -263,6 +238,31 @@ public final class ItemSupplierUtility {
 		} catch (UnsupportedEncodingException e) {
 			throw new OrderProcessingException(
 					"Unsupported encoding exception", e);
+		}
+	}
+
+	// http://stackoverflow.com/questions/14165517/processbuilder-forwarding-stdout-and-stderr-of-started-processes-without-blocki
+	private static class StreamGobbler extends Thread {
+		InputStream is;
+		String type;
+
+		private StreamGobbler(InputStream is, String type) {
+			this.is = is;
+			this.type = type;
+		}
+
+		@Override
+		public void run() {
+			try {
+				InputStreamReader isr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(isr);
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					System.out.println(type + "> " + line);
+				}
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
 		}
 	}
 }

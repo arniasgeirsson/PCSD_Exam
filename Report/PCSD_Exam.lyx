@@ -1,0 +1,1252 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement H
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+PCSD
+\begin_inset Newline newline
+\end_inset
+
+Final Exam
+\end_layout
+
+\begin_layout Author
+Arni Asgeirsson - lwf986
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+- Introduction to this report
+\end_layout
+
+\begin_layout Standard
+- Introduction to the given assignment
+\end_layout
+
+\begin_layout Standard
+- Overview of the hand-in.
+\end_layout
+
+\begin_layout Standard
+- Overview of the appendix
+\end_layout
+
+\begin_layout Standard
+- How is the general structure of this report? (does it make sense in this
+ one?)
+\end_layout
+
+\begin_layout Section
+Exercises
+\end_layout
+
+\begin_layout Subsection
+Question 1: Proximity
+\end_layout
+
+\begin_layout Subsection
+Question 2: Parallelism
+\end_layout
+
+\begin_layout Section
+Programming Task
+\end_layout
+
+\begin_layout Paragraph
+Development Environment
+\end_layout
+
+\begin_layout Standard
+I use JDK 6
+\end_layout
+
+\begin_layout Standard
+Developed in Eclipse version Kepler ?
+\end_layout
+
+\begin_layout Standard
+JUnit version for my tests?
+\end_layout
+
+\begin_layout Standard
+I use Jetty version 9.1.1v20140108
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Download link http://download.eclipse.org/jetty/stable-9/dist/
+\end_layout
+
+\end_inset
+
+ -> No, I use the ones from assignment 4 (same as all assignments)
+\end_layout
+
+\begin_layout Standard
+Use xsteam 1.4.5, same as assignments (actually 1.4.6 atm)
+\end_layout
+
+\begin_layout Paragraph
+Additions to the provided API (what and why)
+\end_layout
+
+\begin_layout Paragraph
+Additions to the handed out code (what and why)
+\end_layout
+
+\begin_layout Paragraph
+Where and how does logging happen?
+\end_layout
+
+\begin_layout Paragraph
+Where and how does performance logging happen?
+\end_layout
+
+\begin_layout Paragraph
+Assumptions taken
+\end_layout
+
+\begin_layout Standard
+- What step-status describes for instance
+\end_layout
+
+\begin_layout Paragraph
+High-Level Design Decisions and Modularity
+\end_layout
+
+\begin_layout Standard
+First, you will document the main organization of modules and data in your
+ system.
+\end_layout
+
+\begin_layout Subsection
+Question 1 (LG1, LG2, LG3, LG5): Describe your overall implementation of
+ the OrderManager and ItemSupplier, including the following aspects in your
+ answer:
+\end_layout
+
+\begin_layout Subsubsection
+(1) Considering your use of logging, what RPC semantics are effectively
+ implemented between clients and OrderManager or ItemSupplier? What RPC
+ semantics are effectively implemented between OrderManager and ItemSupplier?
+ Explain.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+What is it they really want to know?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+(1) How did you make workflow processing asynchronous at the OrderManager?
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+- Explain short the idea/concept
+\end_layout
+
+\begin_layout Plain Layout
+- Show figure and talk about the concrete design
+\end_layout
+
+\begin_layout Plain Layout
++ How exactly does this design make the OrderManager workflow processing
+ asynchronous?
+\end_layout
+
+\begin_layout Plain Layout
++ Make a note on the assumptions on why a thread only works on one workflow
+ and no other touches this.
+\end_layout
+
+\begin_layout Plain Layout
+- Make a note on the possible performance concern in this design
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+- Explain short the idea/concept
+\end_layout
+
+\begin_layout Standard
+My overall idea to make the workflow processing asynchronous at the OrderManager
+ is to have a thread pool which the OrderManager schedules a workflow processing
+ to, after it has durably stored the workflow to some datastructure/database
+ and log.
+ The scheduler then makes sure to create a new thread and workflow processes
+ asynchronous so the OrderManager can return to taking registrations.
+ 
+\end_layout
+
+\begin_layout Paragraph
+- Show figure and talk about the concrete design
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:OrderManagerAsyncDiagram"
+
+\end_inset
+
+ shows in details my design of the OrderManager.
+ The figure is a diagram showing how a request from a Global Client gets
+ propagated through an OrderManager and properly processed.
+ What is worth mentioning is that the asynchronously link happens when the
+ OrderManagerImpl object schedules a new workflow process and the scheduler
+ submits a new job to its work pool.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+<- Do I need to say more, than that?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+#From here...
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The database in the diagram is implemented as the two Map datastructures
+ inside OrderManagerImpl.
+ One contains all the registered workflows and the other all the current
+ status on each step in each workflow.
+ In my implementation the Map containing the workflows could easily be avoided
+ my simply passing along the workflow to be processed to the spawned thread,
+ instead of the workflow ID, but when making the design I decided to think
+ of the system as it would be implemented in a more real-world situation.
+ Although to try and limit the overhead a little bit, the OrderManagerJob
+ thread fetches the whole workflow the first time, and not only a single
+ step at the time.
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is worth noting that this design has focus on making the OrderManager
+ asynchronously with an easy implementation and understanding and not so
+ much on performance as currently in my implementation an OrderManagerJob
+ thread only handles a single workflow and a workflow is only handled by
+ a single OrderManagerJob thread which is a very bad design in some situations.
+ Such a situation could be if a single very big workflow was registered,
+ but every step of the workflow was intended to a different ItemSupplier,
+ then a lot of waiting time could be saved by scheduling several more threads
+ and allow them to all work on the same workflow.
+ As it seemed like that performance of the OrderManager was not of great
+ focus in this assignment I decided not to dwell much in finding the ultimate
+ solution, but instead make note on some of the other options and state
+ that my solution is not optimal in many cases and this area has a great
+ opportunity for optimization.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Needs to be spell corrected.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Other options could be to spawn a new thread to each step, but might create
+ an overhead of having so many threads, yet another option could be to have
+ as many threads a live as their are steps intended for different suppliers,
+ and then let each thread process each a supplier, this would be a more
+ preferred solution and very doable in my overall design, although I decided
+ not to do this in my implementation due to the reasons stated above.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+#..
+ to here, has actual nothing to do the supposed question? Move it down somewhere
+ else?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hspace{}
+\length -2cm
+\end_inset
+
+
+\begin_inset Graphics
+	filename Figures/OrderManagerAsyncWorkflow_box.png
+	lyxscale 30
+	scale 20
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Diagram showing my design of my implementation of the OrderManager.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:OrderManagerAsyncDiagram"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
++ How exactly does this design make the OrderManager workflow processing
+ asynchronous?
+\end_layout
+
+\begin_layout Standard
+This design allows the working OrderManagerJob threads to work in the background
+ while the OrderManagerImpl can keep on register workflows, without spending
+ time processing the workflows.
+\end_layout
+
+\begin_layout Paragraph
++ Make a note on the assumptions on why a thread only works on one workflow
+ and no other touches this.
+\end_layout
+
+\begin_layout Standard
+-> already done in the above
+\end_layout
+
+\begin_layout Paragraph
+- Make a note on the possible performance concern in this design
+\end_layout
+
+\begin_layout Standard
+-> already done in the above
+\end_layout
+
+\begin_layout Subsubsection
+(1) How did you handle failures of individual components? In particular,
+ how do you handle failure propagation?
+\end_layout
+
+\begin_layout Standard
+I have subclassed OrderProcessingException and created a class called NetworkExc
+eption which is thrown if an network exception occurs.
+ The exception class is used to tell if a component fails as we assume that
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+bla bla
+\end_layout
+
+\end_inset
+
+ , and therefore can assume that if receive a NetworkException then the
+ component is deemed failed.
+ If the OrderManagerJob thread catches such an exception then, as opposed
+ to the statement in the assignment text 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+quote?
+\end_layout
+
+\end_inset
+
+, then the thread does not retry to talk to the ItemSupplier, but gives
+ up the first time, this decision is taken to simplify implementation and
+ testing.
+ The thread then marks the step as FAILED and continues its work.
+\end_layout
+
+\begin_layout Standard
+If an OrderManager fails when waiting for response from an ItemSupplier
+ then 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Yeah, what then happens? does the message handler fail when trying to reply
+ to a dead server?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+When an OrderManager fails then used proxy will be unable to connect to
+ the server and be rendered useless, but no one else will be effected.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+WORK (add failure handling and propagation)
+\end_layout
+
+\begin_layout Plain Layout
+- I don't at the moment..
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Atomicity and Fault-Tolerance
+\end_layout
+
+\begin_layout Standard
+Now, you will argue for your implementation and testing choices regarding
+ atomicity and fault-tolerance.
+\end_layout
+
+\begin_layout Subsection
+Question 2 (LG3, LG4, LG5): An ItemSupplier executes operations originated
+ at multiple instances of OrderManager as well as local clients.
+ Describe how you ensured atomicity of these operations.
+ In particular, mention the following aspects in your answer:
+\end_layout
+
+\begin_layout Standard
+NOTE: The method you design for atomicity does not need to be complex, as
+ long as you argue convincingly for its correctness, its trade-off in complexity
+ of implementation and performance, and how it fits in the system as a whole.
+\end_layout
+
+\begin_layout Subsubsection
+(1) Which method did you use for ensuring serializability at each item supplier
+ (e.g., locking, optimistic approach, or simple queueing of operations)? Describe
+ your method at a high level.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+WORK (add locking/or what ever in the item Supplier AND the OrderManager
+ (even though the question only asks to ItemSupplier))
+\end_layout
+
+\begin_layout Plain Layout
+- I don't at the moment..
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+(1) Argue for the correctness of your method; to do so, show how your method
+ is logically equivalent to a trivial solution based on a single global
+ lock or to a well-known locking protocol (e.g., a variant of two-phase locking).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+See note above
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+(2) Argue for the performance of your method; to do so, explain your assumptions
+ about the workload the service is exposed to and why you believe other
+ alternatives you considered (e.g.., locking, optimistic approach, or simple
+ queueing of operations) would be better or worse than your choice.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+See note above
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Question 3 (LG4, LG5): In your implementation, you were not required to
+ implement a procedure for log-based recovery of individual components.
+ Explain how you would recover from a failure of:
+\end_layout
+
+\begin_layout Standard
+For each of the two scenarios, explain any necessary interaction with other
+ components to achieve recovery by replaying the log.
+ Also explain how you would use the log during recovery, i.e., how is the
+ information in the log used to rebuild data structures in main memory,
+ and why is it sufficient.
+\end_layout
+
+\begin_layout Subsubsection
+(1) an OrderManager
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+- How would I do it?
+\end_layout
+
+\begin_layout Plain Layout
++ What state must be restored? Assuming an OrderManager failed and is now
+ trying to recover?
+\end_layout
+
+\begin_layout Plain Layout
++ What (minimum amount of) information is needed to recover?
+\end_layout
+
+\begin_layout Plain Layout
++ Make note on the look of the log file -> I have more info than needed
+ (reason-> to make it more readable and debug-able)
+\end_layout
+
+\begin_layout Plain Layout
+++ Show how should it look like in a deployed version
+\end_layout
+
+\begin_layout Plain Layout
++ How would I use the log to recover? How technically would I do it?
+\end_layout
+
+\begin_layout Plain Layout
+++ Show some pseudocode?
+\end_layout
+
+\begin_layout Plain Layout
++++ Implement it?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+- How would I do it?
+\end_layout
+
+\begin_layout Paragraph
++ What state must be restored? Assuming an OrderManager failed and is now
+ trying to recover?
+\end_layout
+
+\begin_layout Standard
+After a failure in an OrderManager then the state that must be recovered
+ is the registered workflows and all the updated step statuses.
+\end_layout
+
+\begin_layout Paragraph
++ What (minimum amount of) information is needed to recover?
+\end_layout
+
+\begin_layout Standard
+To recover to this state we must therefore be able to read all the workflows
+ that has been registered and the updates to step statuses.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+<- Seems very very redundant.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
++ Make note on the look of the log file -> I have more info than needed
+ (reason-> to make it more readable and debug-able)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Not valid anymore
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+++ Show how should it look like in a deployed version
+\end_layout
+
+\begin_layout Standard
+I have tried to design my log file to allow for easy recovery and not human-read
+ability, except that a time-stamp is included which could be avoided in
+ a real-world deployment.
+\end_layout
+
+\begin_layout Standard
+The snippet shown below is an example of an OrderManager log file.
+\end_layout
+
+\begin_layout LyX-Code
+...
+\end_layout
+
+\begin_layout LyX-Code
+3 INITOM 1                                      // INITOM orderManagerID
+\end_layout
+
+\begin_layout LyX-Code
+4 REGISTER 0 [2,(1,12),(4,33)]                  // REGISTER new_workflowID
+ [supplierID,(itemID,itemQuantity),..] ..
+\end_layout
+
+\begin_layout LyX-Code
+5 UPDATE 0 0 SUCCESSFUL                         // UPDATE workflowID stepIndex
+ new_status
+\end_layout
+
+\begin_layout LyX-Code
+6 REGISTER 1 [2,(2,10)] [6,(1,1),(10,12),(2,3)]
+\end_layout
+
+\begin_layout LyX-Code
+7 UPDATE 1 1 FAILED
+\end_layout
+
+\begin_layout LyX-Code
+8 UPDATE 1 0 SUCCESSFUL
+\end_layout
+
+\begin_layout LyX-Code
+9 CRASH
+\end_layout
+
+\begin_layout LyX-Code
+...
+\end_layout
+
+\begin_layout Standard
+Here we can see that the OrderManager starts by logging an initialization
+ line with its ID then if an workflow is to be registered then it is logged
+ to the file along with its assigned workflow ID and needed information
+ to recreate the workflow.
+\end_layout
+
+\begin_layout Paragraph
++ How would I use the log to recover? How technically would I do it?
+\end_layout
+
+\begin_layout Standard
+NOTE: I am pretending that the implemented clear() function is non-existent
+ and therefore should not be considered, as I only added this function to
+ ease testing of the component it self.
+\end_layout
+
+\begin_layout Standard
+As I assume that someone will be monitoring the OrderManager instance, this
+ someone will also be able to tell the rebooting OrderManager that it must
+ now recover after reboot.
+ For instance calling another constructor which will start recovering.
+\end_layout
+
+\begin_layout Standard
+When recovering an OrderManager must look through the log file from the
+ highest log line, ie.
+ most recent log line, to the oldest line and find the first occurrence
+ of an initialization line and read the OrderManager ID from there, then
+ from that log line down to the most recent log line, the OrderManager must
+ redo everything.
+ Luckily there is nothing that needs to be undone when recovering an OrderManage
+r and therefore when everything has been redone, then the OrderManager is
+ back in business.
+\end_layout
+
+\begin_layout Paragraph
+++ Show some pseudocode?
+\end_layout
+
+\begin_layout Paragraph
++++ Implement it?
+\end_layout
+
+\begin_layout Subsubsection
+(1) an ItemSupplier
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+- How would I do it?
+\end_layout
+
+\begin_layout Plain Layout
++ What state must be restored? Assuming an ItemSupplier failed and is now
+ trying to recover?
+\end_layout
+
+\begin_layout Plain Layout
++ What (minimum amount of) information is needed to recover?
+\end_layout
+
+\begin_layout Plain Layout
++ Make note on the look of the log file -> I have more info than needed
+ (reason-> to make it more readable and debug-able)
+\end_layout
+
+\begin_layout Plain Layout
+++ Show how should it look like in a deployed version
+\end_layout
+
+\begin_layout Plain Layout
++ How would I use the log to recover? How technically would I do it?
+\end_layout
+
+\begin_layout Plain Layout
+++ Show some pseudocode?
+\end_layout
+
+\begin_layout Plain Layout
++++ Implement it?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+- How would I do it?
+\end_layout
+
+\begin_layout Paragraph
++ What state must be restored? Assuming an ItemSupplier failed and is now
+ trying to recover?
+\end_layout
+
+\begin_layout Standard
+First order of business is to assume
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+is 'define' a better wording?
+\end_layout
+
+\end_inset
+
+ what state of the ItemSupplier must be recovered; which is the supplier
+ ID and the summed orders of the orders that has been fully successfully
+ executed within the ItemSupplier, where I assume that if an order is fully
+ executed then it has also been written to log.
+\end_layout
+
+\begin_layout Paragraph
++ What (minimum amount of) information is needed to recover?
+\end_layout
+
+\begin_layout Standard
+To be able to recover to the assumed state when we need to log the provided
+ supplier ID and each successfully executed order step.
+ I therefore see no reason to log any failed steps, ie.
+ incoming steps that are not valid, or any calls to getOrdersPerItem/1 as
+ these do not alter any assumed state in the ItemSupplier.
+ I am not saying that these situations are not interesting in many other
+ cases, they are just not needed for recovery.
+\end_layout
+
+\begin_layout Paragraph
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+This is now not correct any more ->
+\end_layout
+
+\begin_layout Paragraph
++ Make note on the look of the log file -> I have more info than needed
+ (reason-> to make it more readable and debug-able)
+\end_layout
+
+\begin_layout Plain Layout
+I have made the log file more human-readable than needed for easier debugging
+ and reading.
+\end_layout
+
+\begin_layout LyX-Code
+[2014-01-19 15:31:46.895] Supplier with ID [0] executed OrderStep: [0,(0,10),(1,1
+1),(2,12)]
+\end_layout
+
+\begin_layout Plain Layout
+The above shows a possible log line in a ItemSupplier log file.
+ In a real world application the human-readable words could be skipped and
+ the timestamp likewise, so the file is easier to parse.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+++ Show how should it look like in a deployed version
+\end_layout
+
+\begin_layout Standard
+I have tried to design my log file to allow for easy recovery and not human-read
+ability, except that a time-stamp is included which could be avoided in
+ a real-world deployment.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+<- copy-pasted from above
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+...
+\end_layout
+
+\begin_layout LyX-Code
+14 INITSUP 3    // INIT supplierID
+\end_layout
+
+\begin_layout LyX-Code
+15 EXEC-START 0 // EXEC-START logID
+\end_layout
+
+\begin_layout LyX-Code
+16 WRT 0 0 10   // WRT logID itemID itemQuantity
+\end_layout
+
+\begin_layout LyX-Code
+17 EXEC-START 1
+\end_layout
+
+\begin_layout LyX-Code
+18 WRT 0 1 11
+\end_layout
+
+\begin_layout LyX-Code
+19 WRT 1 2 2
+\end_layout
+
+\begin_layout LyX-Code
+20 EXEC-DONE 0  // EXEC-DONT logID
+\end_layout
+
+\begin_layout LyX-Code
+21 WRT 1 4 1
+\end_layout
+
+\begin_layout LyX-Code
+22 CRASH
+\end_layout
+
+\begin_layout LyX-Code
+...
+\end_layout
+
+\begin_layout Standard
+The snippet above shows a subset of an ItemSupplier log file, where as I
+ have manually added the 
+\begin_inset Quotes eld
+\end_inset
+
+21 CRASH
+\begin_inset Quotes erd
+\end_inset
+
+ line and some comments to try and describe the form.
+ The first shown line is logged when a ItemSupplier is initialized the first
+ time and is given a supplier ID and is not trying to recover from a failure.
+ When a valid OrderStep is to be executed, then it is assigned a log ID
+ which is used to determine which OrderStep a write belongs to and be able
+ to log that an OrderStep has been fully successfully executed.
+\end_layout
+
+\begin_layout Paragraph
++ How would I use the log to recover? How technically would I do it?
+\end_layout
+
+\begin_layout Standard
+NOTE: I am pretending that the implemented clear() function is non-existent
+ and therefore should not be considered, as I only added this function to
+ ease testing of the component it self.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+<- copy-pasted from above
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As I assume that someone will be monitoring the ItemSupplier, this someone
+ will also be able to tell the failed ItemSupplier that it must now recover
+ after reboot.
+ For instance calling another constructor which will start recovering
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Also assumed above in OrderManager
+\end_layout
+
+\end_inset
+
+.
+ In such case the ItemSupplier would start reading the log from bottom up
+ (ie.
+ start by the highest log line and then read towards the smallest) until
+ it hits an initialization line which contains the supplier ID and the marks
+ the beginning of the lifetime of the ItemSupplier, from it would be able
+ to move downwards again and redos every WRT line from the INIT line and
+ downwards, and in the mean time as it goes down the list, the ItemSupplier
+ keeps track of all the OrderSteps that has been started but was never able
+ to finish before a failure, those 
+\begin_inset Quotes eld
+\end_inset
+
+EXEC-START logID
+\begin_inset Quotes erd
+\end_inset
+
+ that does not have an accompany 
+\begin_inset Quotes eld
+\end_inset
+
+EXEC-DONE logID
+\begin_inset Quotes erd
+\end_inset
+
+ line.
+ When the bottom has been reached and all steps have been redone, then all
+ the unfinished OrderSteps must be undone before the ItemSupplier has regained
+ its assumed state.
+\end_layout
+
+\begin_layout Standard
+In the recovery phase nothing is needed to be added to the log file as the
+ datastructure is kept in main-memory and therefore upon a failure, everything
+ is lost, and the whole procedure must be redone from scratch, and any pass
+ recovery attempts are ignorable.
+\end_layout
+
+\begin_layout Paragraph
+++ Show some pseudocode?
+\end_layout
+
+\begin_layout Paragraph
++++ Implement it?
+\end_layout
+
+\begin_layout Paragraph
+Testing
+\end_layout
+
+\begin_layout Subsection
+Question 4 (LG4, LG5): Describe your high-level strategy to test your implementa
+tion.
+ In particular, mention the following aspects in your answer:
+\end_layout
+
+\begin_layout Subsubsection
+(1) How you tested execution of workflows by the OrderManager, considering
+ asynchronicity of execution.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+- Explain how I decided to test my OrderManager implementation
+\end_layout
+
+\begin_layout Plain Layout
++ How I assert the state, and when I do that, and why (why do I wait)
+\end_layout
+
+\begin_layout Plain Layout
+- Explain the 'valid' tests
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+(1) How you tested that operations were indeed atomic at the ItemSupplier.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+WORK? -> I guess, I need some tests that tries to show that my locking protocols
+ work
+\end_layout
+
+\begin_layout Plain Layout
+- How have I done that?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+(1) How you tested error conditions and failures of the multiple components.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+- Describe how I have done that? What is my overall strategy and 'fremgang'
+ when testing this (<- exception testing)
+\end_layout
+
+\begin_layout Plain Layout
+- Describe how my failure tests works and my strategy (<- failure testing)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Experiments
+\end_layout
+
+\begin_layout Standard
+Finally, you will evaluate the scalability of one component of your system
+ experimentally.
+\end_layout
+
+\begin_layout Subsection
+Question 5 (LG6): Design, describe the setup for, and execute an experiment
+ that shows how well your implementation of a single ItemSupplier behaves
+ as concurrency is increased.
+ You will need to argue for a basic workload mix involving calls from order
+ managers as well as local clients.
+ Given a mix, you should report how the throughtput of the service scales
+ as more local clients / order managers are added.
+ Remember to thoroughly document your setup.
+ In particular, mention the following aspects in your answer:
+\end_layout
+
+\begin_layout Subsubsection
+(2) Setup: Document the hardware, data size and distribution, and workload
+ characteristics you have used to make your measurements.
+ In addition, describe your measurement procedure, e.g., procedure to generate
+ workload calls, use of timers, and numbers of repetitions, along with short
+ arguments for your decisions.
+ Also make sure to document your hardware configuration and how you expect
+ this configuration to affect the scalability results you obtain.
+\end_layout
+
+\begin_layout Subsubsection
+(1, + Figure) Results: According to your setup, show a graph with your throughpu
+t measurements for a single ItemSupplier on the y-axis and the number of
+ local clients / order managers on the x-axis, maintaining the workload
+ mix you argued for in your setup.
+ How does the observed throughput scale with the number of local clients
+ / order managers? Describe the trends observed and any other effects.
+ Explain why you observe these trends and how much that matches your expectation
+s.
+\end_layout
+
+\end_body
+\end_document

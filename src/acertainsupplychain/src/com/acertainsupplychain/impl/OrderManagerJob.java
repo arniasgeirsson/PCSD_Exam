@@ -41,16 +41,7 @@ public class OrderManagerJob implements Runnable {
 				e.printStackTrace();
 				return;
 			}
-			StepStatus status = StepStatus.SUCCESSFUL;
-			try {
-				// - wait for responds
-				supplier.executeStep(orderStep);
-			} catch (NetworkException e) {
-				// We assume that the component failed (ie is 'dead' somehow)
-				status = StepStatus.FAILED;
-			} catch (OrderProcessingException e) {
-				status = StepStatus.FAILED;
-			}
+			StepStatus status = executeStep(supplier, orderStep);
 
 			// - update status in db
 			try {
@@ -60,5 +51,25 @@ public class OrderManagerJob implements Runnable {
 				return;
 			}
 		}
+	}
+
+	private StepStatus executeStep(ItemSupplier supplier, OrderStep step) {
+		StepStatus status = StepStatus.SUCCESSFUL;
+		try {
+			// - wait for responds
+			supplier.executeStep(step);
+		} catch (NetworkException e) {
+			// We assume that the component failed (ie is 'dead' somehow)
+			// This is where we would retry the step to adhere to the
+			// exactly-once semantics, but this is avoided to ease testing
+			// status = executeStep(supplier, step);
+			status = StepStatus.FAILED;
+		} catch (OrderProcessingException e) {
+			status = StepStatus.FAILED;
+		} catch (Exception e) {
+			// An unexpected exception occurred, mark status as FAILED
+			status = StepStatus.FAILED;
+		}
+		return status;
 	}
 }

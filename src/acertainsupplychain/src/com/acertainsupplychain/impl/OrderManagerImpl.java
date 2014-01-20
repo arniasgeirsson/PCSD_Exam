@@ -1,10 +1,12 @@
 package com.acertainsupplychain.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.acertainsupplychain.InvalidWorkflowException;
 import com.acertainsupplychain.ItemQuantity;
@@ -14,6 +16,7 @@ import com.acertainsupplychain.OrderProcessingException;
 import com.acertainsupplychain.OrderStep;
 import com.acertainsupplychain.clients.ItemSupplierHTTPProxy;
 import com.acertainsupplychain.utility.FileLogger;
+import com.acertainsupplychain.utility.LockMapManager;
 
 public class OrderManagerImpl implements OrderManager {
 
@@ -25,6 +28,9 @@ public class OrderManagerImpl implements OrderManager {
 	private final FileLogger fileLogger;
 	private final int orderManagerID;
 
+	private final ReadWriteLock workflowIDLock;
+	private final LockMapManager<Integer> lockManager;
+
 	public OrderManagerImpl(int orderManagerID,
 			Map<Integer, ItemSupplier> suppliers)
 			throws OrderProcessingException {
@@ -32,16 +38,19 @@ public class OrderManagerImpl implements OrderManager {
 		this.orderManagerID = orderManagerID;
 
 		// TODO do I really need this? -> means I must pass the workflow along
-		// -> I need it, to enable flexibility in the design.
-		workflows = new HashMap<Integer, List<OrderStep>>();
+		// -> I need it, to enable flexibility in the design. hm really?
+		workflows = new ConcurrentHashMap<Integer, List<OrderStep>>();
 
-		status = new HashMap<Integer, List<StepStatus>>();
+		status = new ConcurrentHashMap<Integer, List<StepStatus>>();
 		lowestFreeWorkflowID = 0;
 		this.suppliers = suppliers;
 		scheduler = new OrderManagerScheduler();
 
-		fileLogger = new FileLogger(orderManagerID + "_OrderManager_logfile",
-				"How to read this log file?\n");
+		workflowIDLock = new ReentrantReadWriteLock();
+		lockManager = new LockMapManager<Integer>();
+
+		fileLogger = new FileLogger(this.orderManagerID
+				+ "_OrderManager_logfile", "How to read this log file?\n");
 		fileLogger.logToFile("INITOM " + orderManagerID + "\n", true);
 	}
 
@@ -93,11 +102,15 @@ public class OrderManagerImpl implements OrderManager {
 		if (status.containsKey(id))
 			throw new OrderProcessingException("Should not be possible");
 
+		// As the workflowIDLock makes sure that only no two (or more) threads
+		// can get the same workflowID then it does not matter if the next five
+		// lines are interleaved, as it will not conflict with any entry in the
+		// maps.
+
+		lockManager.addToLockMap(id);
 		workflows.put(id, steps);
 		status.put(id, initializeStatusList(steps.size()));
-
 		logWorkflow(id, steps);
-
 		scheduler.scheduleJob(this, id);
 
 		return id;
@@ -127,7 +140,6 @@ public class OrderManagerImpl implements OrderManager {
 		return string;
 	}
 
-	// TODO duplicated in ItemSupplierImpl
 	private String createStepString(OrderStep step) {
 		if (step == null)
 			return "(null)";
@@ -179,7 +191,11 @@ public class OrderManagerImpl implements OrderManager {
 
 	// TODO untested
 	private int getNextWorkflowID() {
-		return lowestFreeWorkflowID++;
+		workflowIDLock.writeLock().lock();
+		int nextID = lowestFreeWorkflowID;
+		lowestFreeWorkflowID++;
+		workflowIDLock.writeLock().unlock();
+		return nextID;
 	}
 
 	@Override
@@ -196,7 +212,11 @@ public class OrderManagerImpl implements OrderManager {
 							+ " the database of statusses [" + orderWorkflowId
 							+ "] This is not supposed to happend.");
 
-		return status.get(orderWorkflowId);
+		lockManager.acquireReadLock(orderWorkflowId);
+		List<StepStatus> statuses = status.get(orderWorkflowId);
+		lockManager.releaseReadLock(orderWorkflowId);
+
+		return statuses;
 	}
 
 	// TODO untested
@@ -232,11 +252,11 @@ public class OrderManagerImpl implements OrderManager {
 	@Override
 	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)
 			throws OrderProcessingException {
-		System.out.println("jobsetstatus: " + workflowID + " " + stepIndex
-				+ " " + status);
+		lockManager.acquireWriteLock(workflowID);
 		List<StepStatus> newStatus = this.status.get(workflowID);
 		newStatus.set(stepIndex, status);
 		this.status.put(workflowID, newStatus);
+		lockManager.releaseWriteLock(workflowID);
 		logStatusUpdate(workflowID, stepIndex, status);
 	}
 

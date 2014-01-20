@@ -202,6 +202,7 @@ public class ItemSupplierSimple {
 			fail();
 		} catch (InvalidItemException e) {
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 

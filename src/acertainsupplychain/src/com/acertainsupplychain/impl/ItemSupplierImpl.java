@@ -1,10 +1,14 @@
 package com.acertainsupplychain.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.acertainsupplychain.InvalidItemException;
 import com.acertainsupplychain.ItemQuantity;
@@ -12,19 +16,24 @@ import com.acertainsupplychain.ItemSupplier;
 import com.acertainsupplychain.OrderProcessingException;
 import com.acertainsupplychain.OrderStep;
 import com.acertainsupplychain.utility.FileLogger;
+import com.acertainsupplychain.utility.LockMapManager;
 
 public class ItemSupplierImpl implements ItemSupplier {
 
 	private final int supplierID;
 	private final Map<Integer, Integer> summedOrders;
 	private final FileLogger fileLogger;
-
 	private int logID;
+	private final ReadWriteLock logIDLock;
+
+	private final LockMapManager<Integer> lockManager;
 
 	public ItemSupplierImpl(int supplierID) {
 		this.supplierID = supplierID;
-		summedOrders = new HashMap<Integer, Integer>();
+		summedOrders = new ConcurrentHashMap<Integer, Integer>();
 		logID = 0;
+		lockManager = new LockMapManager<Integer>();
+		logIDLock = new ReentrantReadWriteLock();
 
 		fileLogger = new FileLogger(this.supplierID + "_Supplier_logfile",
 				"How to read this log file?\n");
@@ -67,32 +76,76 @@ public class ItemSupplierImpl implements ItemSupplier {
 						+ "amount of some item");
 		}
 
-		// TODO can item ids be negative? Yes
-
 		// TODO must copy the step before adding it to the database.
 		// -> nah, I just assume no one alters the object while I use it to
 		// update the state
+
+		// Update the lockMap before executing the step to ensure that the
+		// needed locks exist
+		lockManager.addToLockMap(extractSortedItemIDs(step));
 
 		// Execute the step
 		addStepToSummedOrders(step);
 	}
 
+	private int getNextLogID() {
+		int nextID;
+		logIDLock.writeLock().lock();
+		nextID = logID;
+		logID++;
+		logIDLock.writeLock().unlock();
+		return nextID;
+	}
+
+	private List<Integer> extractSortedItemIDs(OrderStep step) {
+		List<Integer> itemIDs = new ArrayList<Integer>();
+
+		for (ItemQuantity item : step.getItems()) {
+			itemIDs.add(item.getItemId());
+		}
+
+		Collections.sort(itemIDs);
+		return itemIDs;
+	}
+
 	// This function assumes that the step is valid
 	private void addStepToSummedOrders(OrderStep step) {
-		// TODO lock the ID
-		int mylogID = logID++;
-		// TODO unlock the ID
+		int mylogID = getNextLogID();
+
 		fileLogger.logToFile("EXEC-START " + mylogID + "\n", true);
+
+		// To make sure that this function is atomic, we must 'prepare' how the
+		// map is going to be after this execution
+		Map<Integer, Integer> preparedMap = new HashMap<Integer, Integer>();
+		List<Integer> itemIDs = extractSortedItemIDs(step);
+		lockManager.acquireWriteLocks(itemIDs);
+		// String logString = "";
+
 		for (ItemQuantity item : step.getItems()) {
 			int summed = item.getQuantity();
-			if (summedOrders.containsKey(item.getItemId())) {
+
+			if (preparedMap.containsKey(item.getItemId())) {
+				summed += preparedMap.get(item.getItemId());
+			} else if (summedOrders.containsKey(item.getItemId())) {
 				summed += summedOrders.get(item.getItemId());
 			}
-			summedOrders.put(item.getItemId(), summed);
+			preparedMap.put(item.getItemId(), summed);
+			// logString = logString + "WRT " + mylogID + " " + item.getItemId()
+			// + " " + item.getQuantity() + "\n";
+
+		}
+
+		// Do the atomic write
+		summedOrders.putAll(preparedMap);
+
+		for (ItemQuantity item : step.getItems()) {
 			fileLogger.logToFile("WRT " + mylogID + " " + item.getItemId()
 					+ " " + item.getQuantity() + "\n", true);
 		}
+
+		// fileLogger.logToFile(logString, true);
 		fileLogger.logToFile("EXEC-DONE " + mylogID + "\n", true);
+		lockManager.releaseWriteLocks(itemIDs);
 	}
 
 	@Override
@@ -101,21 +154,26 @@ public class ItemSupplierImpl implements ItemSupplier {
 		if (itemIds == null)
 			throw new InvalidItemException("Supplier with id [" + supplierID
 					+ "]: The given Integer set cannot be NULL.");
-
-		List<ItemQuantity> allItems = new ArrayList<ItemQuantity>();
-
 		for (Integer id : itemIds) {
 			if (id == null)
 				throw new InvalidItemException("Supplier with id ["
 						+ supplierID + "]: The given Integer set cannot"
 						+ "contain a NULL Integer.");
-			if (summedOrders.containsKey(id)) {
-				allItems.add(new ItemQuantity(id, summedOrders.get(id)));
-			} else
+			if (!summedOrders.containsKey(id))
 				throw new InvalidItemException("Supplier with id ["
 						+ supplierID + "]: Supplier have no records of "
 						+ "any orders on item with id [" + id + "]");
 		}
+
+		List<ItemQuantity> allItems = new ArrayList<ItemQuantity>();
+
+		List<Integer> itemIdList = new ArrayList<Integer>(itemIds);
+		lockManager.acquireReadLocks(itemIdList);
+
+		for (Integer id : itemIds) {
+			allItems.add(new ItemQuantity(id, summedOrders.get(id)));
+		}
+		lockManager.releaseReadLocks(itemIdList);
 		return allItems;
 	}
 

@@ -151,7 +151,6 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 				break;
 
 			case INIT_ORDERMANAGER_PROXY:
-				System.out.println("HEYEYE");
 				itemSupplierResponse = new ItemSupplierResponse();
 
 				supplierProxies = new HashMap<Integer, ItemSupplier>();
@@ -176,7 +175,6 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 						orderManager = new OrderManagerImpl(orderManagerID,
 								supplierProxies);
 					}
-					System.out.println("done!");
 				} catch (OrderProcessingException e) {
 					e.printStackTrace();
 					itemSupplierResponse.setException(e);

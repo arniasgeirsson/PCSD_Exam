@@ -103,7 +103,8 @@ public class FileLogger {
 		return new Timestamp(date.getTime()).toString();
 	}
 
-	public void logToFile(String log) {
+	// TODO why is it synchronized?
+	synchronized public void logToFile(String log) {
 		String content = log;
 
 		File file = new File(fullPath);

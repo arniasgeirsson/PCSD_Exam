@@ -197,7 +197,7 @@ public final class ItemSupplierUtility {
 		// Wait a second to make sure that the process is more likely to be
 		// ready
 		Thread.yield();
-		Thread.sleep(1000);
+		Thread.sleep(1500);
 		return process;
 	}
 

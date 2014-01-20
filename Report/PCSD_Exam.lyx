@@ -217,17 +217,104 @@ Question 1 (LG1, LG2, LG3, LG5): Describe your overall implementation of
  Explain.
 \end_layout
 
+\begin_layout Paragraph
+Logging
+\end_layout
+
 \begin_layout Standard
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-What is it they really want to know?
+My use of logging?
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Paragraph
+RPC semantics
+\end_layout
+
+\begin_layout Paragraph
+- Which ones are there?
+\end_layout
+
+\begin_layout Paragraph
+* (Global) Clients to OrderManager
+\end_layout
+
+\begin_layout Paragraph
++ registerOrderWorkflow
+\end_layout
+
+\begin_layout Standard
+When a client is trying to register an order workflow with an OrderManager
+ through RPC then the semantics used is at-most-once, as the message is
+ only send once and if the communication failed then it is not retried automatic
+ally.
+ The reason for the chosen semantics is that it is okay if the workflow
+ does not get registered opposed to exactly-once semantics, but it is not
+ okay that the workflow gets registered twice, which could be a situation
+ with at-least-once semantics.
+\end_layout
+
+\begin_layout Paragraph
++ getOrderWorkflowStatus 
+\end_layout
+
+\begin_layout Standard
+The same goes for when a client is trying to get an order workflow status,
+ then the RPC also has the semantics of at-most-once since the call is not
+ automatically retried.
+\end_layout
+
+\begin_layout Paragraph
+* (Local) Clients to ItemSupplier
+\end_layout
+
+\begin_layout Paragraph
++ executeStep
+\end_layout
+
+\begin_layout Standard
+When a client is trying to execute a step in a ItemSupplier over RPC the
+ semantics used is once again at-most-once, the same reasoning as when a
+ client tries to register an order workflow at an OrderManager also goes
+ here.
+\end_layout
+
+\begin_layout Paragraph
++ getOrdersPerItem
+\end_layout
+
+\begin_layout Standard
+The RPC semantics used when a client tries to get the list of orders per
+ item in an ItemSupplier is also effectively implemented as at-most-once
+ as the RPC call is not retried by force.
+\end_layout
+
+\begin_layout Paragraph
+* OrderManager to ItemSupplier
+\end_layout
+
+\begin_layout Paragraph
++ executeStep
+\end_layout
+
+\begin_layout Standard
+As the assignment text specifies the RPC semantics for executeStep when
+ it is an OrderManger that tries to execute a step at an ItemSupplier should
+ be exactly-once as the OrderManager should keep trying until it gets a
+ response from the ItemSupplier, but does not spam the message until it
+ gets a response.
+ Although I have decided that in my implementation I use the at-most-once
+ semantics as this allows me to make testing of failures more simple and
+ easier.
+ I have made a comment in the code (OrderManagerJob.java) where one can flip
+ the semantics to be exactly-once instead of at-most-once.
 \end_layout
 
 \begin_layout Subsubsection
@@ -570,6 +657,18 @@ Question 2 (LG3, LG4, LG5): An ItemSupplier executes operations originated
 NOTE: The method you design for atomicity does not need to be complex, as
  long as you argue convincingly for its correctness, its trade-off in complexity
  of implementation and performance, and how it fits in the system as a whole.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Hm, they just mentioned they want to know about atomicity, but they only
+ asks for locks?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -579,21 +678,20 @@ NOTE: The method you design for atomicity does not need to be complex, as
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-WORK (add locking/or what ever in the item Supplier AND the OrderManager
- (even though the question only asks to ItemSupplier))
-\end_layout
-
-\begin_layout Plain Layout
-- I don't at the moment..
-\end_layout
-
-\end_inset
-
-
+I decided to use readwrite locks to ensure serializability at each item
+ supplier.
+ Each item supplier keeps a map of readwrite locks where one lock maps to
+ one specific item ID.
+ When an OrderStep is to be executed the item supplier creates the missing
+ locks if the OrderStep carries item ID's which the item supplier has not
+ seen yet.
+ Then when actually executing (summing) the order then the item supplier
+ locks all write locks associated with the item ID's in the given step in
+ an ascending order, and once the step has been executed then the locks
+ are released in the reverse order they where taken.
+ Then when getOrdersPerItem/1 is called then the same procedure is performed
+ except now the item supplier locks and unlocks read locks instead of write
+ locks.
 \end_layout
 
 \begin_layout Subsubsection
@@ -603,16 +701,55 @@ WORK (add locking/or what ever in the item Supplier AND the OrderManager
 \end_layout
 
 \begin_layout Standard
+I decided to try and make my design similar to strict two-phase locking
+ (2PL) and will therefore argue for the correctness of my method by comparing
+ it to that specific variant of 2PL.
+ I assume that the reader is familiar with 2PL and its variants and will
+ therefore not dwell in its definition.
+ My method conforms to strict 2PL since I take exclusive locks on objects
+ that are modified and get shared locks on objects that are only read.
+ Furthermore I only take a lock if a need it, and I wait as long as possible
+ before acquiring the lock and when releasing the locks I make sure to release
+ them all at once, i.e.
+ I do not acquire any locks after I have released one lock.
+\end_layout
+
+\begin_layout Standard
+Although note that when executing a step I actually conform to the conservative
+ strict 2PL protocol as I acquire all the locks before executing anything,
+ aside from only take the lock right before I need to use it.
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-See note above
+Due to time constraints, deadline approaching..
 \end_layout
 
 \end_inset
 
 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+This is still subject to change.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since strict 2PL allows for deadlocks I decided to only acquire locks in
+ an ascending order and only release locks in a descending order, to make
+ sure that deadlocks cannot happen.
+\end_layout
+
+\begin_layout Standard
+The same method is used both in ItemSupplierImpl and OrderManagerImpl even
+ though the OrderManagerImpl is much simpler than ItemSupplierImpl and only
+ one lock is taken at the time.
 \end_layout
 
 \begin_layout Subsubsection
@@ -620,6 +757,23 @@ See note above
  about the workload the service is exposed to and why you believe other
  alternatives you considered (e.g.., locking, optimistic approach, or simple
  queueing of operations) would be better or worse than your choice.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Somewhat incomplete, must rethink my locking strategy first...
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Early in my development phase I decided to use locks and try and implement
+ something that was logically equal to strict 2PL as this protocol allows
+ almost full parallelism of the locks and is a rather simply and straightforward
+ approach.
 \end_layout
 
 \begin_layout Standard
@@ -627,12 +781,61 @@ See note above
 status open
 
 \begin_layout Plain Layout
-See note above
+this line and the one above, seems rather unconnected
 \end_layout
 
 \end_inset
 
+When designing and developing my method my focus has been on parallelism
+ of the ItemSupplier and how to utilities the ItemSupplier the most in a
+ concurrent way.
+ Of course I could have achieved a lot more parallelism by not using 
+\emph on
+strict
+\emph default
+ 2PL but simple 2PL although this made it harder for me to assure that the
+ executeStep/1 function in the ItemSupplierImpl class is be atomic.
+\end_layout
 
+\begin_layout Standard
+I assume that the most workload will occur in executeStep/1 method ...
+ And that each supplier will be more or less specialized in a small set
+ of items or a specific type of items, which would imply that they would
+ have a small set of high end items that are ordered a lot and then a larger
+ subset of items that are not as frequently ordered.
+\end_layout
+
+\begin_layout Standard
+One performance issue that might arise when an ItemSupplier is heavily used
+ is that acquiring and releasing locks are CPU expensive operations and
+ performing many much operations might cause an overhead that is not worth
+ it in the long run
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+also called lock thrashing?
+\end_layout
+
+\end_inset
+
+.
+ Where as an optimistic approach or a queuing method would avoid a big part
+ of this overhead.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Then how would those methods be worse than my method?
+\end_layout
+
+\end_inset
+
+ Although the optimistic approach might cause a greater overhead if a lot
+ of threads are ordering the same high-end item, since a lot of abort control
+ and fixing would be needed, but would be a great approach if the workload
+ of the ItemSupplier was more spread out and the ItemSupplier was not as
+ frequently used.
 \end_layout
 
 \begin_layout Subsection
@@ -1143,7 +1346,7 @@ tion.
 
 \begin_layout Standard
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 - Explain how I decided to test my OrderManager implementation
@@ -1162,26 +1365,77 @@ status open
 
 \end_layout
 
+\begin_layout Standard
+As the OrderManager uses asynchronic execution of registered steps then
+ I had to define somehow to assert that the OrderManager and underlying
+ ItemSuppliers are in the expected states at the expected times and situations.
+ By the nature of asynchronicity this is hard to do.
+ I therefore decided that I would only assert the state of a OrderManager
+ or an underlying ItemSupplier either before a workflow is registered or
+ after a registered workflow have finished execution of all its steps.
+ As the RPC semantics when executing a step between an OrderManager and
+ an ItemSupplier is at-most-once
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+insert cross-reference?
+\end_layout
+
+\end_inset
+
+, this is possible.
+\end_layout
+
+\begin_layout Standard
+With this setup at hand I can now easily test the OrderManager and the underlyin
+g ItemSuppliers by register a set of workflows and then assert the expected
+ states both before and after registration.
+\end_layout
+
+\begin_layout Standard
+To perform the waiting I have added the waitForJobsToFinish/0 method to
+ the OrderManager.java interface which waits for any ongoing execution threads
+ to finish before returning.
+ By then I can be sure that it is not 'random' which state the OrderManager
+ or ItemSupplier's will be in.
+\end_layout
+
 \begin_layout Subsubsection
 (1) How you tested that operations were indeed atomic at the ItemSupplier.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-WORK? -> I guess, I need some tests that tries to show that my locking protocols
- work
+To test that the executeStep/1 in the ItemSupplierImpl.java class is indeed
+ atomic I decided to make what I call a 'stress' test.
+ I try and put pressure on the property to see if I can break it.
+ My setup is as follows; I create a single ItemSupplierImpl instance and
+ then a number of Runner threads whom have one job and that is to execute
+ steps to the item supplier instance.
+ Before starting the Runner threads I create a Checker thread which repeatedly
+ calls getOrdersPerItem/1 and asserts the return value with an expected
+ value, and if the return value is something unexpected at any point then
+ the test fails.
+ All of which happens within the same JVM/process.
+ The Runners and the Checker is then started, and I wait until they are
+ all done and see if the Checker at one point deemed the test to be a fail.
+ If the test succeeded I try again with a greater number of threads and
+ iterations, until it fails or I decide that I don't want to wait an hour
+ anymore before the test finishes.
 \end_layout
 
-\begin_layout Plain Layout
-- How have I done that?
+\begin_layout Standard
+The downside of this test is that it does not guarantee that my implementation
+ of executeStep in ItemSupplierImpl is indeed atomic, but it does greatly
+ hint that my implementation might be correct.
 \end_layout
 
-\end_inset
-
-
+\begin_layout Standard
+Furthermore as I try to always develop with the test-driven development
+ mindset I created this test before ensuring/implementing atomicity in the
+ executeStep/1 function, and the function failed horribly every time, after
+ implementing my method of atomicity the test has yet to fail, still after
+ countless of test runs.
 \end_layout
 
 \begin_layout Subsubsection
@@ -1204,6 +1458,50 @@ status open
 \end_inset
 
 
+\end_layout
+
+\begin_layout Paragraph
+Testing error conditions
+\end_layout
+
+\begin_layout Standard
+My general strategy when testing that the proper exceptions are thrown is
+ that I give the components that are under testing some initial state and
+ assert that they are in this initial state, then a assert that the error
+ occurs as expected and finally I assert that the components are still in
+ the same state, or what ever is the expected state after the tested error
+ condition.
+\end_layout
+
+\begin_layout Paragraph
+Testing failure
+\end_layout
+
+\begin_layout Standard
+When designing my failure handling test I had to decide on when to manually
+ fail a component and still be able to assert some expected state.
+\end_layout
+
+\begin_layout Standard
+I decided to use the strategy of placing the components in some initial
+ state then manually fail one component type followed by making sure that
+ the still functional components are still working as expected, then I manually
+ fail one component of the other type and once again make sure that the
+ rest of the components are still working.
+\end_layout
+
+\begin_layout Standard
+This strategy allows me to make assumptions on the state of the individual
+ components both before and after a component fails.
+ Furthermore this strategy is easy to control and removes an amount of 'randomne
+ss' from the tests.
+\end_layout
+
+\begin_layout Standard
+What this strategy is not capable of handling is when a component fails
+ while being mists in communication with another component.
+ Although in this case I argue with my use of the NetworkException takes
+ care of this.
 \end_layout
 
 \begin_layout Paragraph
@@ -1246,6 +1544,34 @@ t measurements for a single ItemSupplier on the y-axis and the number of
  / order managers? Describe the trends observed and any other effects.
  Explain why you observe these trends and how much that matches your expectation
 s.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix A
+\end_layout
+
+\begin_layout Subsection
+Test overview
+\end_layout
+
+\begin_layout Standard
+- What test are there, what do they test for, how good are they, and what
+ can I assume based on these tests?
+\end_layout
+
+\begin_layout Subsection
+Project overview
+\end_layout
+
+\begin_layout Standard
+- How is my project structured and give a short description of each class.
 \end_layout
 
 \end_body

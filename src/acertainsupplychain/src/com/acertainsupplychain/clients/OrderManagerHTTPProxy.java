@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.acertainsupplychain.clients;
 
 import java.util.List;
@@ -10,8 +7,6 @@ import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
-//import org.eclipse.jetty.io.ByteArrayBuffer;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import com.acertainsupplychain.InvalidWorkflowException;
 import com.acertainsupplychain.ItemSupplier;
@@ -22,80 +17,72 @@ import com.acertainsupplychain.utility.ItemSupplierMessageTag;
 import com.acertainsupplychain.utility.ItemSupplierResult;
 import com.acertainsupplychain.utility.ItemSupplierUtility;
 
-//TODO Inspired by the weekly assignments
+//import org.eclipse.jetty.io.ByteArrayBuffer;
 
 /**
- * TODO ReplicationAwareBookStoreHTTPProxy implements the client level
- * synchronous CertainBookStore API declared in the BookStore class. It keeps
- * retrying the API until a consistent reply is returned from the replicas
+ * This class works as a proxy to an actual OrderManager server. This class uses
+ * a Jetty HttpClient to synchronously communicate with the underlying
+ * OrderManager server.
  * 
  */
 public class OrderManagerHTTPProxy implements OrderManager {
 	private final HttpClient client;
-	// private Set<String> slaveAddresses;
 	private final String orderManagerAddress;
 
-	// private final String filePath = "C:/proxy.properties";
-
-	// private volatile long snapshotId = 0;
-
-	// public long getSnapshotId() {
-	// return snapshotId;
-	// }
-	//
-	// public void setSnapshotId(long snapShotId) {
-	// snapshotId = snapShotId;
-	// }
-
 	/**
-	 * Initialize the client object
+	 * Initialize the OrderManager proxy object with a given list of
+	 * ItemSupplier objects, mapped to their suppler IDs.
 	 */
 	public OrderManagerHTTPProxy(int orderManagerID,
 			Map<Integer, ItemSupplier> suppliers, int port) throws Exception {
+
 		orderManagerAddress = "http://localhost:" + port;
-
-		// initializeReplicationAwareMappings();
-		client = new HttpClient();
-		client.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
-		// max concurrent connections to every address
-		client.setMaxConnectionsPerAddress(ItemSupplierClientConstants.CLIENT_MAX_CONNECTION_ADDRESS);
-		// max threads
-		client.setThreadPool(new QueuedThreadPool(
-				ItemSupplierClientConstants.CLIENT_MAX_THREADSPOOL_THREADS));
-		// seconds timeout if server reply, the request expires
-		client.setTimeout(ItemSupplierClientConstants.CLIENT_MAX_TIMEOUT_MILLISECS);
+		client = ItemSupplierUtility.setupNewHttpClient();
 		client.start();
-
 		initializeOrderManager(orderManagerID, suppliers);
 	}
 
+	/**
+	 * Initialize the OrderManager proxy object with a given list of server
+	 * ports mapped to the ID of their respected ItemSupplier.
+	 * 
+	 * The main reason for this function and the associated
+	 * initializeOrderManagerProxy function is that XStream had trouble
+	 * serializing and de-serializing the proxy objects.
+	 * 
+	 * @param orderManagerID
+	 * @param port
+	 * @param suppliers
+	 * @throws Exception
+	 */
 	public OrderManagerHTTPProxy(int orderManagerID, int port,
 			Map<Integer, Integer> suppliers) throws Exception {
+
 		orderManagerAddress = "http://localhost:" + port;
-
-		client = new HttpClient();
-		client.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
-		// max concurrent connections to every address
-		client.setMaxConnectionsPerAddress(ItemSupplierClientConstants.CLIENT_MAX_CONNECTION_ADDRESS);
-		// max threads
-		client.setThreadPool(new QueuedThreadPool(
-				ItemSupplierClientConstants.CLIENT_MAX_THREADSPOOL_THREADS));
-		// seconds timeout if server reply, the request expires
-		client.setTimeout(ItemSupplierClientConstants.CLIENT_MAX_TIMEOUT_MILLISECS);
+		client = ItemSupplierUtility.setupNewHttpClient();
 		client.start();
-
 		initializeOrderManagerProxy(orderManagerID, suppliers);
 	}
 
-	// TODO use post or get? really just throw error?
+	/**
+	 * Sends a HTTP request to the underlying OrderManager server to initialize
+	 * the OrderManager with a set of ItemSupplier ports and let the
+	 * OrderManager it self create the needed ItemSupplier proxies.
+	 * 
+	 * @param orderManagerID
+	 * @param suppliers
+	 * @throws OrderProcessingException
+	 */
 	private void initializeOrderManagerProxy(int orderManagerID,
 			Map<Integer, Integer> suppliers) throws OrderProcessingException {
+
 		String suppliersXMLString = ItemSupplierUtility
 				.serializeObjectToXMLString(suppliers);
 		Buffer requestContent = new ByteArrayBuffer(suppliersXMLString);
+
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
-		String urlString = getOrderManagerAddress() + "/"
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.INIT_ORDERMANAGER_PROXY + "?"
 				+ ItemSupplierClientConstants.INIT_ORDERMANAGER_ID + "="
 				+ ItemSupplierUtility.encodeInteger(orderManagerID);
@@ -103,25 +90,28 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		exchange.setRequestContent(requestContent);
 
 		// We do not care about the responds, only if an exception had occurred
-		// try {
 		ItemSupplierUtility.sendAndRecv(client, exchange);
-		// } catch (OrderProcessingException e) {
-		// TODO what to do?
-		// System.out.println("211 -- -- - -- - - -What to do?");
-		// e.printStackTrace();
-		// }
 	}
 
-	// TODO use post or get? really just throw error?
+	/**
+	 * Initialize the underlying OrderManager with a HTTP request including the
+	 * ItemSupplier objects the OrderManager should have access to.
+	 * 
+	 * @param orderManagerID
+	 * @param suppliers
+	 * @throws OrderProcessingException
+	 */
 	private void initializeOrderManager(int orderManagerID,
 			Map<Integer, ItemSupplier> suppliers)
 			throws OrderProcessingException {
+
 		String suppliersXMLString = ItemSupplierUtility
 				.serializeObjectToXMLString(suppliers);
 		Buffer requestContent = new ByteArrayBuffer(suppliersXMLString);
+
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
-		String urlString = getOrderManagerAddress() + "/"
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.INIT_ORDERMANAGER + "?"
 				+ ItemSupplierClientConstants.INIT_ORDERMANAGER_ID + "="
 				+ ItemSupplierUtility.encodeInteger(orderManagerID);
@@ -129,19 +119,12 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		exchange.setRequestContent(requestContent);
 
 		// We do not care about the responds, only if an exception had occurred
-		// try {
 		ItemSupplierUtility.sendAndRecv(client, exchange);
-		// } catch (OrderProcessingException e) {
-		// TODO what to do?
-		// System.out.println("21 -- -- - -- - - -What to do?");
-		// e.printStackTrace();
-		// }
 	}
 
-	public String getOrderManagerAddress() {
-		return orderManagerAddress;
-	}
-
+	/**
+	 * Stop the HttpClient object.
+	 */
 	public void stop() {
 		try {
 			client.stop();
@@ -150,12 +133,11 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		}
 	}
 
-	// TODO use post or get?
 	@Override
 	public void clear() {
 		ContentExchange exchange = new ContentExchange();
-		exchange.setMethod("POST");
-		String urlString = getOrderManagerAddress() + "/"
+		exchange.setMethod("GET");
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.CLEAR;
 		exchange.setURL(urlString);
 
@@ -163,39 +145,36 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		try {
 			ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do?
-			System.out.println("2 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
-	// TODO use post or get?
 	@Override
 	public int registerOrderWorkflow(List<OrderStep> steps)
 			throws OrderProcessingException {
+
 		String stepsXMLString = ItemSupplierUtility
 				.serializeObjectToXMLString(steps);
 		Buffer requestContent = new ByteArrayBuffer(stepsXMLString);
+
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
-		String urlString = getOrderManagerAddress() + "/"
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.REGISTERWORKFLOW;
 		exchange.setURL(urlString);
 		exchange.setRequestContent(requestContent);
 
-		ItemSupplierResult result = null;
-		result = ItemSupplierUtility.sendAndRecv(client, exchange);
-
-		return (Integer) result.getResult();
+		return (Integer) ItemSupplierUtility.sendAndRecv(client, exchange)
+				.getResult();
 	}
 
-	// TODO use post or get?
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<StepStatus> getOrderWorkflowStatus(int orderWorkflowId)
 			throws InvalidWorkflowException {
+
 		ContentExchange exchange = new ContentExchange();
-		exchange.setMethod("GET"); // TODO correct?
+		exchange.setMethod("GET");
 
 		String urlEncodedOrderWorkflowID = null;
 
@@ -207,7 +186,7 @@ public class OrderManagerHTTPProxy implements OrderManager {
 					"Unsupported encoding exception", e);
 		}
 
-		String urlString = getOrderManagerAddress() + "/"
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.GETWORKFLOWSTATUS + "?"
 				+ ItemSupplierClientConstants.GETWORKFLOWSTATUS_PARAM + "="
 				+ urlEncodedOrderWorkflowID;
@@ -217,27 +196,23 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		try {
 			result = ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do? Wrap inside InvalidItemException, or change API?
-			// -> Change API
-			System.out.println("31 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
-			throw new InvalidWorkflowException("", e);
+			throw new InvalidWorkflowException(e);
 		}
 
 		return (List<StepStatus>) result.getResult();
 	}
 
-	// TODO use post or get?
 	@Override
 	public ItemSupplier jobGetSupplier(int supplierID)
 			throws OrderProcessingException {
+
 		ContentExchange exchange = new ContentExchange();
-		exchange.setMethod("GET"); // TODO correct?
+		exchange.setMethod("GET");
 
 		String urlEncodedSupplierID = ItemSupplierUtility
 				.encodeInteger(supplierID);
 
-		String urlString = getOrderManagerAddress() + "/"
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.JOBGETSUPID + "?"
 				+ ItemSupplierClientConstants.JOBGETSUPPLIER_PARAM + "="
 				+ urlEncodedSupplierID;
@@ -247,28 +222,24 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		try {
 			result = ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do? Wrap inside InvalidItemException, or change API?
-			// -> Change API
-			System.out.println("32 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
-			throw new InvalidWorkflowException("", e);
+			throw new InvalidWorkflowException(e);
 		}
 
 		return (ItemSupplier) result.getResult();
 	}
 
-	// TODO use post or get?
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<OrderStep> jobGetWorkflow(int workflowID)
 			throws OrderProcessingException {
+
 		ContentExchange exchange = new ContentExchange();
-		exchange.setMethod("GET"); // TODO correct?
+		exchange.setMethod("GET");
 
 		String urlEncodedWorkflowID = ItemSupplierUtility
 				.encodeInteger(workflowID);
 
-		String urlString = getOrderManagerAddress() + "/"
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.JOBGETWORKFLOW + "?"
 				+ ItemSupplierClientConstants.JOBGETWORKFLOW_PARAM + "="
 				+ urlEncodedWorkflowID;
@@ -278,77 +249,62 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		try {
 			result = ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do? Wrap inside InvalidItemException, or change API?
-			// -> Change API
-			System.out.println("32 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
-			throw new InvalidWorkflowException("", e);
+			throw new InvalidWorkflowException(e);
 		}
 
 		return (List<OrderStep>) result.getResult();
 	}
 
-	// TODO use post or get?
 	@Override
 	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)
 			throws OrderProcessingException {
+
+		String stepStatusXMLString = ItemSupplierUtility
+				.serializeObjectToXMLString(status);
+		Buffer requestContent = new ByteArrayBuffer(stepStatusXMLString);
+
 		ContentExchange exchange = new ContentExchange();
-		exchange.setMethod("GET"); // TODO correct?
+		exchange.setMethod("GET");
 
 		String urlEncodedWorkflowID = ItemSupplierUtility
 				.encodeInteger(workflowID);
 		String urlEncodedStepIndex = ItemSupplierUtility
 				.encodeInteger(stepIndex);
 
-		String urlString = getOrderManagerAddress() + "/"
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.JOBSETSTATUS + "?"
 				+ ItemSupplierClientConstants.JOBSETSTATUS_PARAM_WID + "="
 				+ urlEncodedWorkflowID + "?"
 				+ ItemSupplierClientConstants.JOBSETSTATUS_PARAM_STEPINDEX
 				+ "=" + urlEncodedStepIndex;
-
 		exchange.setURL(urlString);
 
-		String stepStatusXMLString = ItemSupplierUtility
-				.serializeObjectToXMLString(status);
-		Buffer requestContent = new ByteArrayBuffer(stepStatusXMLString);
 		exchange.setRequestContent(requestContent);
 
 		try {
 			ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do? Wrap inside InvalidItemException, or change API?
-			// -> Change API
-			System.out.println("33 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
-			throw new InvalidWorkflowException("", e);
+			throw new InvalidWorkflowException(e);
 		}
 	}
 
-	// TODO use post or get?
 	@Override
 	public void waitForJobsToFinish() throws OrderProcessingException {
 		ContentExchange exchange = new ContentExchange();
-		exchange.setMethod("POST");
-		String urlString = getOrderManagerAddress() + "/"
+		exchange.setMethod("GET");
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.WAITFORJOBS;
 		exchange.setURL(urlString);
 
 		// We do not care about the responds, only if an exception had occurred
-		try {
-			ItemSupplierUtility.sendAndRecv(client, exchange);
-		} catch (OrderProcessingException e) {
-			// TODO what to do?
-			System.out.println("2 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
-		}
+		ItemSupplierUtility.sendAndRecv(client, exchange);
 	}
 
 	@Override
 	public void stopItemSupplierProxies() {
 		ContentExchange exchange = new ContentExchange();
-		exchange.setMethod("POST");
-		String urlString = getOrderManagerAddress() + "/"
+		exchange.setMethod("GET");
+		String urlString = orderManagerAddress + "/"
 				+ ItemSupplierMessageTag.ORDERMANAGER_STOP;
 		exchange.setURL(urlString);
 
@@ -356,9 +312,7 @@ public class OrderManagerHTTPProxy implements OrderManager {
 		try {
 			ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do?
-			System.out.println("2 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 

@@ -47,34 +47,60 @@ public interface OrderManager {
 	public List<StepStatus> getOrderWorkflowStatus(int orderWorkflowId)
 			throws InvalidWorkflowException;
 
-	// This function is added for the sake of testing.
-	// It puts the ItemSupplier in a same state as if it was reallocated.
+	/**
+	 * This function is added for the sake of testing. It puts the ItemSupplier
+	 * in a same state as if it was reallocated.
+	 */
 	public void clear();
 
-	// This function is added so the thread processing the workflow can
-	// fetch the ItemSupplier associated to that ID.
-	// The function returns the ItemSupplier with the given ID.
+	/**
+	 * This function is added so the thread processing the workflow can fetch
+	 * the ItemSupplier associated to that ID. The function returns the
+	 * ItemSupplier with the given ID.
+	 * 
+	 * @param supplierID
+	 * @return
+	 * @throws OrderProcessingException
+	 */
 	public ItemSupplier jobGetSupplier(int supplierID)
 			throws OrderProcessingException;
 
-	// This function is added so the thread processing the workflow can
-	// fetch the workflow associated with that ID.
-	// The function returns the workflow with the given ID.
+	/**
+	 * This function is added so the thread processing the workflow can fetch
+	 * the workflow associated with that ID. The function returns the workflow
+	 * with the given ID.
+	 * 
+	 * @param workflowID
+	 * @return
+	 * @throws OrderProcessingException
+	 */
 	public List<OrderStep> jobGetWorkflow(int workflowID)
 			throws OrderProcessingException;
 
-	// This function is used by the workflow processing threads to update the
-	// status of a processed step.
-	// The function marks a specific step to be in the given StepStatus.
+	/**
+	 * This function is used by the workflow processing threads to update the
+	 * status of a processed step. The function marks a specific step to be in
+	 * the given StepStatus.
+	 * 
+	 * @param workflowID
+	 * @param stepIndex
+	 * @param status
+	 * @throws OrderProcessingException
+	 */
 	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)
 			throws OrderProcessingException;
 
-	// This function is added for the sake of testing.
-	// This function blocks the OrderManager until every workflow as been
-	// properly processed.
+	/**
+	 * This function is added for the sake of testing. This function blocks the
+	 * OrderManager until every workflow as been properly processed.
+	 * 
+	 * @throws OrderProcessingException
+	 */
 	public void waitForJobsToFinish() throws OrderProcessingException;
 
-	// This functions stops any ItemSupplier proxies this OrderManager might
-	// control.
+	/**
+	 * This functions stops any ItemSupplier proxies this OrderManager might
+	 * control.
+	 */
 	public void stopItemSupplierProxies();
 }

@@ -36,12 +36,18 @@ public interface ItemSupplier {
 	public List<ItemQuantity> getOrdersPerItem(Set<Integer> itemIds)
 			throws InvalidItemException;
 
-	// This function is added for the sake of testing.
-	// It puts the ItemSupplier in a same state as if it was reallocated.
+	/**
+	 * This function is added for the sake of testing. It puts the ItemSupplier
+	 * in a same state as if it was reallocated.
+	 */
 	public void clear();
 
-	// This function is added for the sake of testing.
-	// It simply returns the ID of the quired supplier.
+	/**
+	 * This function is added for the sake of testing. It simply returns the ID
+	 * of the quired supplier.
+	 * 
+	 * @return the item supplier ID if the supplier.
+	 */
 	public int getSupplierID();
 
 }

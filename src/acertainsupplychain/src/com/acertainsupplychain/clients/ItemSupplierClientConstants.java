@@ -1,15 +1,9 @@
-/**
- * 
- */
 package com.acertainsupplychain.clients;
 
-// TODO Inspired by the weekly assignments
-
 /**
- * TODO BookStoreClientConstants stores the constants used by the
- * CertainBookStore proxy and client classes
  * 
- * @author bonii
+ * Constant values used through the acertainsupplychain project. Partially
+ * greatly inspired by some of the course assignments.
  * 
  */
 public final class ItemSupplierClientConstants {

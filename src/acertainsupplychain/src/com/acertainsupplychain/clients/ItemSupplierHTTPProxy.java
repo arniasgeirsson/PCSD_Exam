@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.acertainsupplychain.clients;
 
 import java.util.List;
@@ -10,8 +7,6 @@ import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
-//import org.eclipse.jetty.io.ByteArrayBuffer;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import com.acertainsupplychain.InvalidItemException;
 import com.acertainsupplychain.ItemQuantity;
@@ -22,44 +17,36 @@ import com.acertainsupplychain.utility.ItemSupplierMessageTag;
 import com.acertainsupplychain.utility.ItemSupplierResult;
 import com.acertainsupplychain.utility.ItemSupplierUtility;
 
-//TODO Inspired by the weekly assignments
-
 /**
- * TODO ReplicationAwareBookStoreHTTPProxy implements the client level
- * synchronous CertainBookStore API declared in the BookStore class. It keeps
- * retrying the API until a consistent reply is returned from the replicas
+ * This class works as a proxy to an actual ItemSupplier server. This class uses
+ * a Jetty HttpClient to synchronously communicate with the underlying
+ * ItemSupplier server.
  * 
  */
 public class ItemSupplierHTTPProxy implements ItemSupplier {
 	private final HttpClient client;
 	private final String itemSupplierAddress;
 
-	// private final String filePath = "C:/proxy.properties";
-
 	/**
-	 * Initialize the client object
+	 * Initialize the ItemSupplier proxy.
 	 */
 	public ItemSupplierHTTPProxy(int supplierID, int port) throws Exception {
 		itemSupplierAddress = "http://localhost:" + port;
-
-		client = new HttpClient();
-		client.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
-		// max concurrent connections to every address
-		client.setMaxConnectionsPerAddress(ItemSupplierClientConstants.CLIENT_MAX_CONNECTION_ADDRESS);
-		// max threads
-		client.setThreadPool(new QueuedThreadPool(
-				ItemSupplierClientConstants.CLIENT_MAX_THREADSPOOL_THREADS));
-		// seconds timeout if server reply, the request expires
-		client.setTimeout(ItemSupplierClientConstants.CLIENT_MAX_TIMEOUT_MILLISECS);
+		client = ItemSupplierUtility.setupNewHttpClient();
 		client.start();
-
 		initializeItemSupplier(supplierID);
 	}
 
-	// TODO use post or get?
+	/**
+	 * Sends a HTTP request to initialize an ItemSupplier with the given
+	 * supplier ID on the server side.
+	 * 
+	 * @param supplierID
+	 *            , the provided supplier ID that the itemsupplier must have
+	 */
 	private void initializeItemSupplier(int supplierID) {
 		ContentExchange exchange = new ContentExchange();
-		exchange.setMethod("GET"); // TODO correct?
+		exchange.setMethod("GET");
 
 		String urlEncodedsupplierID = null;
 
@@ -68,10 +55,10 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 					.encodeInteger(supplierID);
 		} catch (OrderProcessingException e) {
 			e.printStackTrace();
-			// TODO have to handle the error somehow?
+			return;
 		}
 
-		String urlString = getItemSupplierAddress() + "/"
+		String urlString = itemSupplierAddress + "/"
 				+ ItemSupplierMessageTag.INIT_ITEMSUPPLIER + "?"
 				+ ItemSupplierClientConstants.INIT_ITEMSUPPLIER_PARAM + "="
 				+ urlEncodedsupplierID;
@@ -80,18 +67,13 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		try {
 			ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do? Wrap inside InvalidItemException, or change API?
-			// -> Change API
-			System.out.println("381 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
-			// throw new InvalidWorkflowException("", e);
+			e.printStackTrace();
 		}
 	}
 
-	public String getItemSupplierAddress() {
-		return itemSupplierAddress;
-	}
-
+	/**
+	 * Stops the HttpClient within this proxy.
+	 */
 	public void stop() {
 		try {
 			client.stop();
@@ -100,15 +82,15 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		}
 	}
 
-	// TODO use post or get?
 	@Override
 	public void executeStep(OrderStep step) throws OrderProcessingException {
 		String stepXMLString = ItemSupplierUtility
 				.serializeObjectToXMLString(step);
 		Buffer requestContent = new ByteArrayBuffer(stepXMLString);
+
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
-		String urlString = getItemSupplierAddress() + "/"
+		String urlString = itemSupplierAddress + "/"
 				+ ItemSupplierMessageTag.EXECUTESTEP;
 		exchange.setURL(urlString);
 		exchange.setRequestContent(requestContent);
@@ -117,7 +99,6 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		ItemSupplierUtility.sendAndRecv(client, exchange);
 	}
 
-	// TODO use post or get?
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<ItemQuantity> getOrdersPerItem(Set<Integer> itemIds)
@@ -125,9 +106,10 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		String itemIdsXMLString = ItemSupplierUtility
 				.serializeObjectToXMLString(itemIds);
 		Buffer requestContent = new ByteArrayBuffer(itemIdsXMLString);
+
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
-		String urlString = getItemSupplierAddress() + "/"
+		String urlString = itemSupplierAddress + "/"
 				+ ItemSupplierMessageTag.GETORDERS;
 		exchange.setURL(urlString);
 		exchange.setRequestContent(requestContent);
@@ -136,10 +118,6 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		try {
 			result = ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do? Wrap inside InvalidItemException, or change API?
-			// -> Change API
-			System.out.println("3 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
 			throw new InvalidItemException(
 					"getOrdersPerItem-Proxy: sendAndRecv threw this error.", e);
 		}
@@ -147,12 +125,11 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		return (List<ItemQuantity>) result.getResult();
 	}
 
-	// TODO use post or get?
 	@Override
 	public void clear() {
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
-		String urlString = getItemSupplierAddress() + "/"
+		String urlString = itemSupplierAddress + "/"
 				+ ItemSupplierMessageTag.CLEAR;
 		exchange.setURL(urlString);
 
@@ -160,19 +137,18 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		try {
 			ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do?
-			System.out.println("2 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
-	// TODO use post or get?
+	// This function could have been optimized if the ItemSupplier ID were
+	// stored in the proxy class, but I decided not to do that to allow the
+	// flexibility of an ItemSupplier proxy could switch ItemSupplier address.
 	@Override
 	public int getSupplierID() {
-		// return supplierID;
 		ContentExchange exchange = new ContentExchange();
 		exchange.setMethod("POST");
-		String urlString = getItemSupplierAddress() + "/"
+		String urlString = itemSupplierAddress + "/"
 				+ ItemSupplierMessageTag.GETSUPID;
 		exchange.setURL(urlString);
 
@@ -180,32 +156,22 @@ public class ItemSupplierHTTPProxy implements ItemSupplier {
 		try {
 			result = ItemSupplierUtility.sendAndRecv(client, exchange);
 		} catch (OrderProcessingException e) {
-			// TODO what to do?
-			System.out.println("1 -- -- - -- - - -What to do?");
-			// e.printStackTrace();
+			e.printStackTrace();
 		}
 		return (Integer) result.getResult();
 	}
 
-	// TODO seems kinda stupid..
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (obj == this)
-			return true;
-		if (!(obj instanceof ItemSupplierHTTPProxy))
-			return false;
-
-		ItemSupplierHTTPProxy item = (ItemSupplierHTTPProxy) obj;
-		return itemSupplierAddress == item.itemSupplierAddress;
-	}
-
-	// TODO
-	// http://stackoverflow.com/questions/27581/overriding-equals-and-hashcode-in-java
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+	// @Override
+	// public boolean equals(Object obj) {
+	// if (obj == null)
+	// return false;
+	// if (obj == this)
+	// return true;
+	// if (!(obj instanceof ItemSupplierHTTPProxy))
+	// return false;
+	//
+	// ItemSupplierHTTPProxy item = (ItemSupplierHTTPProxy) obj;
+	// return itemSupplierAddress == item.itemSupplierAddress;
+	// }
 
 }

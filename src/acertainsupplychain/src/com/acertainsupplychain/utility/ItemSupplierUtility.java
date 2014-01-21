@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpExchange;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import com.acertainsupplychain.NetworkException;
 import com.acertainsupplychain.OrderProcessingException;
@@ -34,6 +35,19 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
  * 
  */
 public final class ItemSupplierUtility {
+
+	public static HttpClient setupNewHttpClient() {
+		HttpClient client = new HttpClient();
+		client.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+		// max concurrent connections to every address
+		client.setMaxConnectionsPerAddress(ItemSupplierClientConstants.CLIENT_MAX_CONNECTION_ADDRESS);
+		// max threads
+		client.setThreadPool(new QueuedThreadPool(
+				ItemSupplierClientConstants.CLIENT_MAX_THREADSPOOL_THREADS));
+		// seconds timeout if server reply, the request expires
+		client.setTimeout(ItemSupplierClientConstants.CLIENT_MAX_TIMEOUT_MILLISECS);
+		return client;
+	}
 
 	/**
 	 * TODO Convert a request URI to the message tags supported in

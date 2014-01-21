@@ -38,6 +38,11 @@ public final class ItemQuantity {
 	}
 
 	@Override
+	public String toString() {
+		return "ItemQuantity: [" + itemId + "," + quantity + "]";
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null)
 			return false;
@@ -47,19 +52,7 @@ public final class ItemQuantity {
 			return false;
 
 		ItemQuantity item = (ItemQuantity) obj;
-		return itemId == item.getItemId() && quantity == item.getQuantity();
-	}
-
-	// TODO
-	// http://stackoverflow.com/questions/27581/overriding-equals-and-hashcode-in-java
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return "ItemQuantity: [" + itemId + "," + quantity + "]";
+		return itemId == item.itemId && quantity == item.quantity;
 	}
 
 }

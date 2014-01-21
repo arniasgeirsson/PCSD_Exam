@@ -36,10 +36,12 @@ public interface ItemSupplier {
 	public List<ItemQuantity> getOrdersPerItem(Set<Integer> itemIds)
 			throws InvalidItemException;
 
-	// TODO added this function for the sake of testing
+	// This function is added for the sake of testing.
+	// It puts the ItemSupplier in a same state as if it was reallocated.
 	public void clear();
 
-	// TODO added this function for the sake of testing
+	// This function is added for the sake of testing.
+	// It simply returns the ID of the quired supplier.
 	public int getSupplierID();
 
 }

@@ -59,10 +59,4 @@ public final class OrderStep {
 		return supplierId == item.supplierId && items.equals(item.items);
 	}
 
-	// TODO
-	// http://stackoverflow.com/questions/27581/overriding-equals-and-hashcode-in-java
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
 }

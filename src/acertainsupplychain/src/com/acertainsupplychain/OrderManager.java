@@ -47,22 +47,34 @@ public interface OrderManager {
 	public List<StepStatus> getOrderWorkflowStatus(int orderWorkflowId)
 			throws InvalidWorkflowException;
 
-	// TODO for the sake of testing
+	// This function is added for the sake of testing.
+	// It puts the ItemSupplier in a same state as if it was reallocated.
 	public void clear();
 
-	// TODO, can be passed along to lessen the interaction with the orderManager
+	// This function is added so the thread processing the workflow can
+	// fetch the ItemSupplier associated to that ID.
+	// The function returns the ItemSupplier with the given ID.
 	public ItemSupplier jobGetSupplier(int supplierID)
 			throws OrderProcessingException;
 
+	// This function is added so the thread processing the workflow can
+	// fetch the workflow associated with that ID.
+	// The function returns the workflow with the given ID.
 	public List<OrderStep> jobGetWorkflow(int workflowID)
 			throws OrderProcessingException;
 
+	// This function is used by the workflow processing threads to update the
+	// status of a processed step.
+	// The function marks a specific step to be in the given StepStatus.
 	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)
 			throws OrderProcessingException;
 
-	// TODO how to test it? Do random tests and never will the state ever be
-	// Registered after this call?
+	// This function is added for the sake of testing.
+	// This function blocks the OrderManager until every workflow as been
+	// properly processed.
 	public void waitForJobsToFinish() throws OrderProcessingException;
 
+	// This functions stops any ItemSupplier proxies this OrderManager might
+	// control.
 	public void stopItemSupplierProxies();
 }

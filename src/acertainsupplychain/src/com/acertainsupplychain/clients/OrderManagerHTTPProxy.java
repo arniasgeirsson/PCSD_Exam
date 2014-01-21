@@ -24,6 +24,8 @@ import com.acertainsupplychain.utility.ItemSupplierUtility;
  * a Jetty HttpClient to synchronously communicate with the underlying
  * OrderManager server.
  * 
+ * @author Arni
+ * 
  */
 public class OrderManagerHTTPProxy implements OrderManager {
 	private final HttpClient client;

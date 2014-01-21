@@ -18,6 +18,12 @@ import com.acertainsupplychain.OrderStep;
 import com.acertainsupplychain.utility.FileLogger;
 import com.acertainsupplychain.utility.LockMapManager;
 
+/**
+ * This class is an implementation of the ItemSupplier interface.
+ * 
+ * @author Arni
+ * 
+ */
 public class ItemSupplierImpl implements ItemSupplier {
 
 	private final int supplierID;
@@ -25,23 +31,51 @@ public class ItemSupplierImpl implements ItemSupplier {
 	private final FileLogger fileLogger;
 	private int logID;
 	private final ReadWriteLock logIDLock;
-
 	private final LockMapManager<Integer> lockManager;
 
+	/**
+	 * Initializes the ItemSupplier with a given supplier ID.
+	 * 
+	 * @param supplierID
+	 */
 	public ItemSupplierImpl(int supplierID) {
 		this.supplierID = supplierID;
-		summedOrders = new ConcurrentHashMap<Integer, Integer>();
 		logID = 0;
+		summedOrders = new ConcurrentHashMap<Integer, Integer>();
 		lockManager = new LockMapManager<Integer>();
 		logIDLock = new ReentrantReadWriteLock();
 
-		fileLogger = new FileLogger(this.supplierID + "_Supplier_logfile",
-				"How to read this log file?\n");
+		fileLogger = new FileLogger(this.supplierID + "_Supplier_logfile", "");
 		fileLogger.logToFile("INITSUP " + this.supplierID + "\n", true);
 	}
 
 	@Override
 	public void executeStep(OrderStep step) throws OrderProcessingException {
+		// Validate the step before processing it.
+		validateStep(step);
+
+		// TODO must copy the step before adding it to the database.
+		// -> nah, I just assume no one alters the object while I use it to
+		// update the state
+
+		// Update the lockMap before executing the step to ensure that the
+		// needed locks exist
+		lockManager.addToLockMap(extractSortedItemIDs(step));
+
+		// Execute the step
+		addStepToSummedOrders(step);
+	}
+
+	/**
+	 * Validates a given OrderStep. If the step is not valid then an
+	 * OrderProcessingException is thrown, otherwise the function simply returns
+	 * with no exception.
+	 * 
+	 * @param step
+	 *            , the OrderStep to be validated.
+	 * @throws OrderProcessingException
+	 */
+	private void validateStep(OrderStep step) throws OrderProcessingException {
 		if (step == null)
 			throw new OrderProcessingException("Supplier with id ["
 					+ supplierID + "]: The given OrderStep cannot be NULL.");
@@ -66,37 +100,35 @@ public class ItemSupplierImpl implements ItemSupplier {
 				throw new OrderProcessingException("Supplier with id ["
 						+ supplierID + "]: No items in the given OrderStep can"
 						+ " be NULL.");
-			// TODO as one can only buy stuff a negative amount should not be
-			// valid
-			// TODO 0 is not okay either, as it does not make sense to buy
-			// nothing
 			if (item.getQuantity() < 1)
 				throw new OrderProcessingException("Supplier with id ["
 						+ supplierID + "]: You cannot order a non-positive "
 						+ "amount of some item");
 		}
-
-		// TODO must copy the step before adding it to the database.
-		// -> nah, I just assume no one alters the object while I use it to
-		// update the state
-
-		// Update the lockMap before executing the step to ensure that the
-		// needed locks exist
-		lockManager.addToLockMap(extractSortedItemIDs(step));
-
-		// Execute the step
-		addStepToSummedOrders(step);
 	}
 
+	/**
+	 * Returns the next log ID and guarantees that no one else can get the same
+	 * ID as you.
+	 * 
+	 * @return a unique log ID.
+	 */
 	private int getNextLogID() {
-		int nextID;
 		logIDLock.writeLock().lock();
-		nextID = logID;
+		int nextID = logID;
 		logID++;
 		logIDLock.writeLock().unlock();
 		return nextID;
 	}
 
+	/**
+	 * Extracts a list of item IDs from a given OrderStep and sorts the list in
+	 * ascending order before returning it.
+	 * 
+	 * @param step
+	 *            , the step to be extracted.
+	 * @return the sorted list of item IDs.
+	 */
 	private List<Integer> extractSortedItemIDs(OrderStep step) {
 		List<Integer> itemIDs = new ArrayList<Integer>();
 
@@ -108,7 +140,13 @@ public class ItemSupplierImpl implements ItemSupplier {
 		return itemIDs;
 	}
 
-	// This function assumes that the step is valid
+	/**
+	 * This function executes the OrderStep by adding it atomically to the map
+	 * of summed orders. This function assumes that the step is valid
+	 * 
+	 * @param step
+	 *            , the OrderStep to be executed.
+	 */
 	private void addStepToSummedOrders(OrderStep step) {
 		int mylogID = getNextLogID();
 
@@ -119,7 +157,6 @@ public class ItemSupplierImpl implements ItemSupplier {
 		Map<Integer, Integer> preparedMap = new HashMap<Integer, Integer>();
 		List<Integer> itemIDs = extractSortedItemIDs(step);
 		lockManager.acquireWriteLocks(itemIDs);
-		// String logString = "";
 
 		for (ItemQuantity item : step.getItems()) {
 			int summed = item.getQuantity();
@@ -130,26 +167,54 @@ public class ItemSupplierImpl implements ItemSupplier {
 				summed += summedOrders.get(item.getItemId());
 			}
 			preparedMap.put(item.getItemId(), summed);
-			// logString = logString + "WRT " + mylogID + " " + item.getItemId()
-			// + " " + item.getQuantity() + "\n";
 
 		}
 
 		// Do the atomic write
 		summedOrders.putAll(preparedMap);
 
+		// The logs in the loop below is supposed be inside the puAll function
+		// and happen right after an element has been written to the
+		// summedOrders map. Although instead of overwritten the putAll method
+		// and forcing myself into a possible daring challenge I will for now
+		// just do the logging afterwards.
 		for (ItemQuantity item : step.getItems()) {
 			fileLogger.logToFile("WRT " + mylogID + " " + item.getItemId()
 					+ " " + item.getQuantity() + "\n", true);
 		}
 
-		// fileLogger.logToFile(logString, true);
 		fileLogger.logToFile("EXEC-DONE " + mylogID + "\n", true);
 		lockManager.releaseWriteLocks(itemIDs);
 	}
 
 	@Override
 	public List<ItemQuantity> getOrdersPerItem(Set<Integer> itemIds)
+			throws InvalidItemException {
+		// Validate the set of item IDs before processing them.
+		validateItemIDs(itemIds);
+
+		List<ItemQuantity> allItems = new ArrayList<ItemQuantity>();
+
+		List<Integer> itemIdList = new ArrayList<Integer>(itemIds);
+		lockManager.acquireReadLocks(itemIdList);
+
+		for (Integer id : itemIds) {
+			allItems.add(new ItemQuantity(id, summedOrders.get(id)));
+		}
+		lockManager.releaseReadLocks(itemIdList);
+		return allItems;
+	}
+
+	/**
+	 * Validates a given set of item IDs. The function throws an
+	 * InvalidItemException if the set is invalid, otherwise just returns
+	 * normally.
+	 * 
+	 * @param itemIds
+	 *            , the set of item IDs to be validated.
+	 * @throws InvalidItemException
+	 */
+	private void validateItemIDs(Set<Integer> itemIds)
 			throws InvalidItemException {
 		if (itemIds == null)
 			throw new InvalidItemException("Supplier with id [" + supplierID
@@ -164,21 +229,11 @@ public class ItemSupplierImpl implements ItemSupplier {
 						+ supplierID + "]: Supplier have no records of "
 						+ "any orders on item with id [" + id + "]");
 		}
-
-		List<ItemQuantity> allItems = new ArrayList<ItemQuantity>();
-
-		List<Integer> itemIdList = new ArrayList<Integer>(itemIds);
-		lockManager.acquireReadLocks(itemIdList);
-
-		for (Integer id : itemIds) {
-			allItems.add(new ItemQuantity(id, summedOrders.get(id)));
-		}
-		lockManager.releaseReadLocks(itemIdList);
-		return allItems;
 	}
 
 	@Override
 	public void clear() {
+		logID = 0;
 		summedOrders.clear();
 		fileLogger.logToFile("CLEARDONE\n", true);
 	}
@@ -200,13 +255,6 @@ public class ItemSupplierImpl implements ItemSupplier {
 		ItemSupplierImpl item = (ItemSupplierImpl) obj;
 		return supplierID == item.supplierID
 				&& summedOrders.equals(item.summedOrders);
-	}
-
-	// TODO
-	// http://stackoverflow.com/questions/27581/overriding-equals-and-hashcode-in-java
-	@Override
-	public int hashCode() {
-		return super.hashCode();
 	}
 
 }

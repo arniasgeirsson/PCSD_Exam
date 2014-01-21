@@ -2,6 +2,9 @@ package com.acertainsupplychain;
 
 /**
  * This exception flags that a network error occurred.
+ * 
+ * @author Arni
+ * 
  */
 @SuppressWarnings("serial")
 public class NetworkException extends OrderProcessingException {

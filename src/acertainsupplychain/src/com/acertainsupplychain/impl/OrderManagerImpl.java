@@ -18,11 +18,17 @@ import com.acertainsupplychain.clients.ItemSupplierHTTPProxy;
 import com.acertainsupplychain.utility.FileLogger;
 import com.acertainsupplychain.utility.LockMapManager;
 
+/**
+ * This is an implementation of the OrderManager interface.
+ * 
+ * @author Arni
+ * 
+ */
 public class OrderManagerImpl implements OrderManager {
 
 	private final Map<Integer, List<OrderStep>> workflows;
 	private final Map<Integer, List<StepStatus>> status;
-	private int lowestFreeWorkflowID;
+	private int nextWorkflowID;
 	private final Map<Integer, ItemSupplier> suppliers;
 	private OrderManagerScheduler scheduler;
 	private final FileLogger fileLogger;
@@ -31,21 +37,26 @@ public class OrderManagerImpl implements OrderManager {
 	private final ReadWriteLock workflowIDLock;
 	private final LockMapManager<Integer> lockManager;
 
+	/**
+	 * Initialize the OrderManager with a given OrderManager ID and map of
+	 * ItemSupplier instances, mapped to their respected ItemSupplier ID.
+	 * 
+	 * @param orderManagerID
+	 * @param suppliers
+	 * @throws OrderProcessingException
+	 */
 	public OrderManagerImpl(int orderManagerID,
 			Map<Integer, ItemSupplier> suppliers)
 			throws OrderProcessingException {
+
+		// Validate the map of suppliers, to ensure that it is okay.
 		validateSupplierMap(suppliers);
 		this.orderManagerID = orderManagerID;
-
-		// TODO do I really need this? -> means I must pass the workflow along
-		// -> I need it, to enable flexibility in the design. hm really?
-		workflows = new ConcurrentHashMap<Integer, List<OrderStep>>();
-
-		status = new ConcurrentHashMap<Integer, List<StepStatus>>();
-		lowestFreeWorkflowID = 0;
 		this.suppliers = suppliers;
+		nextWorkflowID = 0;
+		workflows = new ConcurrentHashMap<Integer, List<OrderStep>>();
+		status = new ConcurrentHashMap<Integer, List<StepStatus>>();
 		scheduler = new OrderManagerScheduler();
-
 		workflowIDLock = new ReentrantReadWriteLock();
 		lockManager = new LockMapManager<Integer>();
 
@@ -54,6 +65,13 @@ public class OrderManagerImpl implements OrderManager {
 		fileLogger.logToFile("INITOM " + orderManagerID + "\n", true);
 	}
 
+	/**
+	 * Validates a map of ItemSuppliers by throwing an OrderProcessingException
+	 * if the map is invalid.
+	 * 
+	 * @param suppliers
+	 * @throws OrderProcessingException
+	 */
 	private void validateSupplierMap(Map<Integer, ItemSupplier> suppliers)
 			throws OrderProcessingException {
 		if (suppliers == null)
@@ -79,33 +97,21 @@ public class OrderManagerImpl implements OrderManager {
 	@Override
 	public int registerOrderWorkflow(List<OrderStep> steps)
 			throws OrderProcessingException {
-		if (steps == null)
-			throw new InvalidWorkflowException("TODO");
-		if (steps.isEmpty())
-			throw new InvalidWorkflowException("TODO");
-		for (OrderStep orderStep : steps) {
-			if (orderStep == null)
-				throw new InvalidWorkflowException("TODO");
-			if (!suppliers.containsKey(orderStep.getSupplierId()))
-				throw new InvalidWorkflowException("TODO");
-			// for (ItemQuantity item : orderStep.getItems()) {
-			// if (item == null)
-			// throw new InvalidWorkflowException("TODO");
-			// if (item.getQuantity() < 1)
-			// throw new InvalidWorkflowException("TODO");
-			// }
-		}
+
+		// Must validate the given steps before processing them.
+		validateWorkflow(steps);
 
 		int id = getNextWorkflowID();
+		// Sanity checks.
 		if (workflows.containsKey(id))
 			throw new OrderProcessingException("Should not be possible");
 		if (status.containsKey(id))
 			throw new OrderProcessingException("Should not be possible");
 
-		// As the workflowIDLock makes sure that only no two (or more) threads
-		// can get the same workflowID then it does not matter if the next five
+		// As the workflowIDLock makes sure that no two (or more) threads
+		// can get the same workflowID, then it does not matter if the next five
 		// lines are interleaved, as it will not conflict with any entry in the
-		// maps.
+		// maps, nor will it break all-or-nothing atomicity.
 
 		lockManager.addToLockMap(id);
 		workflows.put(id, steps);
@@ -116,6 +122,56 @@ public class OrderManagerImpl implements OrderManager {
 		return id;
 	}
 
+	/**
+	 * This function validates a given workflow, i.e. a list of OrderSteps by
+	 * throwing a OrderProcessingException if the list is not valid.
+	 * 
+	 * @param steps
+	 *            , the steps to validate.
+	 * @throws OrderProcessingException
+	 */
+	private void validateWorkflow(List<OrderStep> steps)
+			throws OrderProcessingException {
+		if (steps == null)
+			throw new InvalidWorkflowException(
+					"The given workflow cannot be null.");
+		if (steps.isEmpty())
+			throw new InvalidWorkflowException(
+					"The given workflow is not allowed to be empty.");
+		for (OrderStep orderStep : steps) {
+			if (orderStep == null)
+				throw new InvalidWorkflowException(
+						"The given workflow cannot contain a NULL step.");
+			if (!suppliers.containsKey(orderStep.getSupplierId()))
+				throw new InvalidWorkflowException(
+						"The given workflow cannot a step that is intended for"
+								+ " ItemSupplier whom this OrderManager knows"
+								+ " nothing about.");
+			// Note that the below validations has been commented out to allow
+			// for any other then SUCCESS steps when trying to execute validated
+			// steps with an ItemSupplier.
+			// I also assume that the OrderManager should not have this kind of
+			// full control knowledge, as it simple just forwards and processes
+			// workflows and not determines what an ItemSupplier wants to accept
+			// or not.
+
+			// for (ItemQuantity item : orderStep.getItems()) {
+			// if (item == null)
+			// throw new
+			// InvalidWorkflowException("The given workflow cannot contain a step which has a NULL item.");
+			// if (item.getQuantity() < 1)
+			// throw new
+			// InvalidWorkflowException("The given workflow cannot contain a step which has an item with a non-positive quantity.");
+			// }
+		}
+	}
+
+	/**
+	 * Logs a workflow to the log file.
+	 * 
+	 * @param workflowID
+	 * @param steps
+	 */
 	private void logWorkflow(int workflowID, List<OrderStep> steps) {
 		String log = "REGISTER " + workflowID + " ";
 
@@ -124,6 +180,13 @@ public class OrderManagerImpl implements OrderManager {
 		fileLogger.logToFile(log, true);
 	}
 
+	/**
+	 * This function creates a string representation of a workflow to use when
+	 * logging.
+	 * 
+	 * @param steps
+	 * @return
+	 */
 	private String createWorkflowString(List<OrderStep> steps) {
 		if (steps == null)
 			return "(null)";
@@ -140,6 +203,13 @@ public class OrderManagerImpl implements OrderManager {
 		return string;
 	}
 
+	/**
+	 * This function create a string representation of a single OrderStep. Is
+	 * used during logging.
+	 * 
+	 * @param step
+	 * @return
+	 */
 	private String createStepString(OrderStep step) {
 		if (step == null)
 			return "(null)";
@@ -162,6 +232,13 @@ public class OrderManagerImpl implements OrderManager {
 		return string;
 	}
 
+	/**
+	 * This function logs a status update to the log file.
+	 * 
+	 * @param workflowID
+	 * @param stepIndex
+	 * @param status
+	 */
 	private void logStatusUpdate(int workflowID, int stepIndex,
 			StepStatus status) {
 		String log = "UPDATE ";
@@ -175,11 +252,21 @@ public class OrderManagerImpl implements OrderManager {
 		fileLogger.logToFile(log, true);
 	}
 
-	// TODO untested
+	/**
+	 * This function is a helper function to create a list of stepStatus with
+	 * the status REGISTERED. If the given size is non-positive then an
+	 * OrderProcessingException is thrown.
+	 * 
+	 * @param size
+	 *            , the size of the list
+	 * @return
+	 * @throws OrderProcessingException
+	 */
 	private List<StepStatus> initializeStatusList(int size)
 			throws OrderProcessingException {
 		if (size < 1)
-			throw new OrderProcessingException("Should not happen..");
+			throw new OrderProcessingException(
+					"Cannot create a list with a non-positive size.");
 
 		List<StepStatus> list = new ArrayList<StepStatus>();
 		for (int i = 0; i < size; i++) {
@@ -189,17 +276,42 @@ public class OrderManagerImpl implements OrderManager {
 		return list;
 	}
 
-	// TODO untested
+	/**
+	 * Returns the next workflow ID to be used. Locking is used to ensure that
+	 * function is not interleaved by any other thread.
+	 * 
+	 * @return a unique workflow ID.
+	 */
 	private int getNextWorkflowID() {
 		workflowIDLock.writeLock().lock();
-		int nextID = lowestFreeWorkflowID;
-		lowestFreeWorkflowID++;
+		int nextID = nextWorkflowID;
+		nextWorkflowID++;
 		workflowIDLock.writeLock().unlock();
 		return nextID;
 	}
 
 	@Override
 	public List<StepStatus> getOrderWorkflowStatus(int orderWorkflowId)
+			throws InvalidWorkflowException {
+
+		// Validate the workflow ID before trying to use it.
+		validateOrderWorkflowID(orderWorkflowId);
+		lockManager.acquireReadLock(orderWorkflowId);
+		List<StepStatus> statuses = status.get(orderWorkflowId);
+		lockManager.releaseReadLock(orderWorkflowId);
+
+		return statuses;
+	}
+
+	/**
+	 * This function validates a given workflow ID to ensure that it exist and
+	 * can be used by throwing a InvalidWorkflowException if the ID is invalid.
+	 * 
+	 * @param orderWorkflowId
+	 *            , the ID to validate.
+	 * @throws InvalidWorkflowException
+	 */
+	private void validateOrderWorkflowID(int orderWorkflowId)
 			throws InvalidWorkflowException {
 		if (!workflows.containsKey(orderWorkflowId))
 			throw new InvalidWorkflowException(
@@ -211,17 +323,11 @@ public class OrderManagerImpl implements OrderManager {
 					"OrderManager: The given orderWorkflowId does not exist in"
 							+ " the database of statusses [" + orderWorkflowId
 							+ "] This is not supposed to happend.");
-
-		lockManager.acquireReadLock(orderWorkflowId);
-		List<StepStatus> statuses = status.get(orderWorkflowId);
-		lockManager.releaseReadLock(orderWorkflowId);
-
-		return statuses;
 	}
 
-	// TODO untested
 	@Override
 	public void clear() {
+		nextWorkflowID = 0;
 		workflows.clear();
 		status.clear();
 		// Must stop any working thread
@@ -230,28 +336,29 @@ public class OrderManagerImpl implements OrderManager {
 		fileLogger.logToFile("CLEARDONE\n", true);
 	}
 
-	// TODO untested
 	@Override
 	public ItemSupplier jobGetSupplier(int supplierID)
 			throws OrderProcessingException {
 		if (!suppliers.containsKey(supplierID))
-			throw new OrderProcessingException("TODO");
+			throw new OrderProcessingException(
+					"The provided supplier ID is unknown to this OrderManager ["
+							+ orderManagerID + "]");
 		return suppliers.get(supplierID);
 	}
 
-	// TODO untested
 	@Override
 	public List<OrderStep> jobGetWorkflow(int workflowID)
 			throws OrderProcessingException {
-		if (!workflows.containsKey(workflowID))
-			throw new OrderProcessingException("TODO");
+		validateOrderWorkflowID(workflowID);
 		return workflows.get(workflowID);
 	}
 
-	// TODO untested
+	// This function assumes that the given stepIndex is valid.
 	@Override
 	public void jobSetStatus(int workflowID, int stepIndex, StepStatus status)
 			throws OrderProcessingException {
+		validateOrderWorkflowID(workflowID);
+
 		lockManager.acquireWriteLock(workflowID);
 		List<StepStatus> newStatus = this.status.get(workflowID);
 		newStatus.set(stepIndex, status);
@@ -260,7 +367,6 @@ public class OrderManagerImpl implements OrderManager {
 		logStatusUpdate(workflowID, stepIndex, status);
 	}
 
-	// TODO untested
 	@Override
 	public void waitForJobsToFinish() throws OrderProcessingException {
 		try {

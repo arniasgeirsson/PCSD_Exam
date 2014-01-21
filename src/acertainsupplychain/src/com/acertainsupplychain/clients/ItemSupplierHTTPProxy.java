@@ -22,6 +22,8 @@ import com.acertainsupplychain.utility.ItemSupplierUtility;
  * a Jetty HttpClient to synchronously communicate with the underlying
  * ItemSupplier server.
  * 
+ * @author Arni
+ * 
  */
 public class ItemSupplierHTTPProxy implements ItemSupplier {
 	private final HttpClient client;

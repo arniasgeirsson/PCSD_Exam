@@ -257,7 +257,10 @@ d
 As mentioned I skip the divide-phase of my divide-and-conquer algorithm
  I will try and only focus on the conquer-phase i.e.
  the actual merging.
- Now if we look at the created recursion tree, which can be seen in Figure
+ Now if we look at the created recursion tree, which can be seen in 
+\series bold
+Figure
+\series default
  
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -303,17 +306,22 @@ reference "fig:Recursion-treeQ1a"
 placement H
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Figures/RecursionTree_dark.png
+	lyxscale 18
+	scale 14
 
-\end_layout
+\end_inset
 
-\begin_layout Plain Layout
+
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Recursion treeQ1a
+Recursion tree created when doing the algorithm.
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:Recursion-treeQ1a"
@@ -695,7 +703,7 @@ Assuming that the database has no central disk, and that the disk space
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 

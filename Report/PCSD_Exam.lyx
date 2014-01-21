@@ -591,16 +591,73 @@ a) Give explicitly what are the domains and ranges of the two hash functions.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO
-\end_layout
-
+As the first hash function has 
+\begin_inset Formula $h_{1}$
 \end_inset
 
+ must be able to accept R and S (and anything they contain) the domain of
+ 
+\begin_inset Formula $h_{1}$
+\end_inset
 
+ is 
+\begin_inset Formula $\{R,S\}$
+\end_inset
+
+ and as the output must be one of the 
+\begin_inset Formula $k$
+\end_inset
+
+ bucket indexes then the range of 
+\begin_inset Formula $h_{1}$
+\end_inset
+
+ is 
+\begin_inset Formula $\{1,2,...,k\}$
+\end_inset
+
+ assuming that the buckets are 1-indexed.
+\end_layout
+
+\begin_layout Standard
+For the reason that 
+\begin_inset Formula $h_{2}$
+\end_inset
+
+ must be able to accept any bucket index that 
+\begin_inset Formula $h_{1}$
+\end_inset
+
+ is able to produce then the domain of 
+\begin_inset Formula $h_{2}$
+\end_inset
+
+ must be the range of 
+\begin_inset Formula $h_{1}$
+\end_inset
+
+ or put in another way: 
+\begin_inset Formula $\{1,2,...,k\}$
+\end_inset
+
+.
+ The assignment text specifies that 
+\begin_inset Formula $h_{2}$
+\end_inset
+
+ must redistribute the different buckets on to the 
+\begin_inset Formula $p$
+\end_inset
+
+ different processes that are in the database, therefore the range of 
+\begin_inset Formula $h_{2}$
+\end_inset
+
+ must be 
+\begin_inset Formula $\{1,2,...,p\}$
+\end_inset
+
+ assuming that the processes are 1-indexed.
 \end_layout
 
 \begin_layout Subsubsection
@@ -609,16 +666,121 @@ b) Describe briefly (preferably with a picture, not pseudo-code) how this
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
+Assuming that the database has no central disk, and that the disk space
+ of each process is also used to store the database, meaning that the processes
+ them selves are the database and therefore 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $S$
+\end_inset
+
+ are stored in the 
+\begin_inset Formula $p$
+\end_inset
+
+ processes and the joined relation 
+\begin_inset Formula $T$
+\end_inset
+
+ must be stored in the 
+\begin_inset Formula $p$
+\end_inset
+
+ processes.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
 status open
 
 \begin_layout Plain Layout
-TODO
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset space \hspace{}
+\length -3.8cm
+\end_inset
+
+
+\begin_inset Graphics
+	filename Figures/HashJoinDiagram_withcolor.png
+	lyxscale 25
+	scale 25
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+A diagram showing an overview of the parallel hash join algorithm.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:HashJoinDiagram"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In 
+\series bold
+Figure
+\series default
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:HashJoinDiagram"
+
+\end_inset
+
+ we can see that each process starts by bucketing its own partitions of
+ 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $S$
+\end_inset
+
+ by using the hash function 
+\begin_inset Formula $h_{1}$
+\end_inset
+
+ then it uses 
+\begin_inset Formula $h_{2}$
+\end_inset
+
+ to re-partition them to the computed destination processor.
+ Then when a process has received all its destined partitions of 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $S$
+\end_inset
+
+ it starts to join them bucket-wise and store the result on its own disk.
 \end_layout
 
 \begin_layout Subsubsection
@@ -645,16 +807,108 @@ d) Under the same assumption, how many messages do each processor send and
 \end_layout
 
 \begin_layout Standard
+Assuming that the relations 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $S$
+\end_inset
+
+ are uniformly spread out onto each process before the join, and that each
+ process does not send any message before it has finished hashing 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $S$
+\end_inset
+
+ into the buckets, and that it at worst case will fill all 
+\begin_inset Formula $k$
+\end_inset
+
+ buckets.
+ Furthermore I assume that the whole content of a single bucket can fit
+ in one message.
+ If also assumed that each process does not batch the messages, but instead
+ sends it immediately after using 
+\begin_inset Formula $h_{2}$
+\end_inset
+
+ to figure out which process must receive that specific bucket, and that
+ the process does not need to send the joined relation back somewhere then
+ each process sends at most 
+\begin_inset Formula $k$
+\end_inset
+
+ messages.
+ As their are 
+\begin_inset Formula $p$
+\end_inset
+
+ processes and the 
+\begin_inset Formula $k$
+\end_inset
+
+ buckets are uniformly spread out to all the processes then each process
+ receives 
+\begin_inset Formula $\frac{k}{p}$
+\end_inset
+
+ messages per process which is 
+\begin_inset Formula $\frac{k}{p}*p=k$
+\end_inset
+
+, i.e.
+ each process receives at most 
+\begin_inset Formula $k$
+\end_inset
+
+ messages.
+\end_layout
+
+\begin_layout Standard
+I also assume that messages send to your self is also considered a message
+ send and received
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-TODO
+re-place somewhere in the above
 \end_layout
 
 \end_inset
 
+.
+\end_layout
 
+\begin_layout Standard
+I assume that both 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $S$
+\end_inset
+
+ can be put inside the same 
+\begin_inset Formula $k$
+\end_inset
+
+ buckets and can send and received in the same messages, as one would be
+ able to add some tag to these parts to denote which relation they initially
+ belonged to.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+re-place somewhere in the above
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section

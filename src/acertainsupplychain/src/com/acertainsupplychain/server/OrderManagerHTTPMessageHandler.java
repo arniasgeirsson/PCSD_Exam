@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.acertainsupplychain.server;
 
 import java.io.IOException;
@@ -28,19 +25,22 @@ import com.acertainsupplychain.utility.ItemSupplierResponse;
 import com.acertainsupplychain.utility.ItemSupplierResult;
 import com.acertainsupplychain.utility.ItemSupplierUtility;
 
-//TODO Inspired by the course assignments
-
 /**
+ * This class is a message handler that should be associated with an
+ * OrderManager server and therefore includes an OrderManager object which must
+ * be initialized by sending the proper HTTP request first before it can be
+ * used.
  * 
- * MasterBookStoreHTTPMessageHandler implements the message handler class which
- * is invoked to handle messages received by the master book store HTTP server
- * It decodes the HTTP message and invokes the MasterCertainBookStore API
+ * @author Arni
  * 
  */
 public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 
 	private OrderManager orderManager;
 
+	/**
+	 * Initialize the OrderManagerHTTPMessageHandler object.
+	 */
 	public OrderManagerHTTPMessageHandler() {
 		orderManager = null;
 	}
@@ -286,7 +286,14 @@ public class OrderManagerHTTPMessageHandler extends AbstractHandler {
 
 	}
 
-	// TODO safe to use Object type instead of ItemSupplierResponse ?
+	/**
+	 * A wrapper function to prepare and write a resonse object to the HTTP
+	 * response.
+	 * 
+	 * @param response
+	 * @param responseObject
+	 * @throws IOException
+	 */
 	private void writeResponse(HttpServletResponse response,
 			Object responseObject) throws IOException {
 		response.getWriter().println(

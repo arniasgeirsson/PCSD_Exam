@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.acertainsupplychain.server;
 
 import java.net.InetAddress;
@@ -10,11 +7,10 @@ import java.net.UnknownHostException;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-//TODO Inspired by the weekly assignments
-
 /**
- * Utility methods to create Jetty server instances
+ * An utility class that is used to create Jetty server instances.
  * 
+ * This is taken from one of the course assignments.
  */
 public class ItemSupplierHTTPServerUtility {
 

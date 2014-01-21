@@ -1,12 +1,11 @@
-/**
- * 
- */
 package com.acertainsupplychain.server;
 
-//TODO Inspired by the weekly assignments
-
 /**
- * TODO Starts the master bookstore HTTP server.
+ * Class to start an OrderManager server with an OrderManagerHTTPMessageHandler,
+ * the server reads its destined port from the main function arguments.
+ * 
+ * @author Arni
+ * 
  */
 public class OrderManagerHTTPServer {
 

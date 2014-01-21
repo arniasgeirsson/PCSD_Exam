@@ -31,6 +31,13 @@ import com.acertainsupplychain.server.OrderManagerHTTPServer;
 import com.acertainsupplychain.utility.ItemSupplierUtility;
 import com.acertainsupplychain.utility.TestUtility;
 
+/**
+ * This JUnit test class tests the functionality of the OrderManagerHTTPProxy
+ * class and the underlying OrderManager and server.
+ * 
+ * @author Arni
+ * 
+ */
 public class OrderManagerAdvanced {
 
 	private static OrderManager orderManager;
@@ -92,17 +99,17 @@ public class OrderManagerAdvanced {
 
 	@After
 	public void tearDown() throws Exception {
+		orderManager.waitForJobsToFinish();
 		orderManager.clear();
-		// TODO why not also clear the item suppliers -> no need to as they wont
-		// effect any state in the orderManager
-		// -> wrong, we should also clear the suppliers, so we can be certain of
-		// their states, as these also matters in the determination of the
-		// correctness of the OrderManager
 		for (ItemSupplier supplier : allSuppliers.values()) {
 			supplier.clear();
 		}
 	}
 
+	/**
+	 * Just a wrapper function around the tearDown function if used and not
+	 * expecting an exception to occur.
+	 */
 	private void tearDownWrapper() {
 		try {
 			tearDown();
@@ -326,7 +333,9 @@ public class OrderManagerAdvanced {
 		}
 	}
 
-	// @Test Disabled
+	// Disabled as the OrderManager does not consider if a workflow contains a
+	// step with a null item.
+	// @Test
 	public final void testRegisterOrderWorkflow_NullItem() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
@@ -363,7 +372,9 @@ public class OrderManagerAdvanced {
 		}
 	}
 
-	// @Test Disabled
+	// Disabled as the OrderManager does not care if given workflow contains a
+	// step with an item with a non-positive item quantity.
+	// @Test
 	public final void testRegisterOrderWorkflow_NonPositiveQuantity() {
 		// Initialize the state of the orderManager pre exception and make sure
 		// it is in the state we expect
@@ -438,12 +449,8 @@ public class OrderManagerAdvanced {
 		}
 	}
 
-	// TODO split?
 	@Test
 	public final void testRegisterOrderWorkflow_Valid() {
-		// Make sure the OrderManager(<-how?) and the ItemSuppliers(<-how?) have
-		// the
-		// correct starting state
 		List<ItemQuantity> items = new ArrayList<ItemQuantity>();
 		List<ItemQuantity> localList = new ArrayList<ItemQuantity>();
 
@@ -938,7 +945,6 @@ public class OrderManagerAdvanced {
 		}
 	}
 
-	// TODO split?
 	@Test
 	public final void testGetOrderWorkflowStatus_Valid() {
 		// NOTE: Main focus is on making sure that the order is correct
@@ -977,7 +983,6 @@ public class OrderManagerAdvanced {
 
 		assertTrue(TestUtility.compareOrder(stepStatus,
 				TestUtility.getOrderWorkflowStatus(orderManager, workflowID)));
-		// assertEquals(stepStatus, getOrderWorkflowStatus(workflowID));
 
 		// 2. Register multiple valid steps and make sure they are in the
 		// correct order
@@ -1017,7 +1022,6 @@ public class OrderManagerAdvanced {
 
 		assertTrue(TestUtility.compareOrder(stepStatus,
 				TestUtility.getOrderWorkflowStatus(orderManager, workflowID)));
-		// assertEquals(stepStatus, getOrderWorkflowStatus(workflowID));
 
 		// 3. Register a mismatch of valid and invalid steps and make sure they
 		// are in the correct order
@@ -1057,23 +1061,14 @@ public class OrderManagerAdvanced {
 
 		assertTrue(TestUtility.compareOrder(stepStatus,
 				TestUtility.getOrderWorkflowStatus(orderManager, workflowID)));
-		// assertEquals(stepStatus, getOrderWorkflowStatus(workflowID));
 	}
 
 	@Test
 	public final void testJobGetSupplier() {
 		// 1. Test that all the suppliers created in BeforeClass are the same as
 		// the ones given when asked
-		// TODO cannot send ItemSupplierProxies over RPC..
-		// for (Integer supplierID : allSuppliers.keySet()) {
-		// try {
-		// assertEquals(allSuppliers.get(supplierID),
-		// orderManager.jobGetSupplier(supplierID));
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// fail();
-		// }
-		// }
+		// Note cannot do that as XStream has trouble serialize and de-serialize
+		// the proxy objects
 
 		// 2. Test that with a unknown supplier id the proper exception is
 		// thrown
@@ -1093,7 +1088,6 @@ public class OrderManagerAdvanced {
 
 	@Test
 	public final void testJobGetWorkflow() {
-
 		// 1. Test that a returned workflow returns the workflow given
 		List<OrderStep> workflowLocal = new ArrayList<OrderStep>();
 		workflowLocal.add(TestUtility.createRandomValidOrderStep(supplierIDs));
@@ -1124,7 +1118,7 @@ public class OrderManagerAdvanced {
 			fail();
 		}
 		// 3. Test that the workflow from test 1. still works
-		// TODO must also make sure that the state of the orderManager is the
+		// Must also make sure that the state of the orderManager is the
 		// correct one
 		try {
 			workflow = orderManager.jobGetWorkflow(workflowID);
@@ -1133,24 +1127,6 @@ public class OrderManagerAdvanced {
 		}
 
 		assertEquals(workflowLocal, workflow);
-	}
-
-	@Test
-	public final void testJobSetStatus() {
-		// TODO this cannot be done, but assumed to work, as the other tests
-		// does not fail
-	}
-
-	@Test
-	public final void testWaitForJobsToFinish() {
-		// TODO this cannot be done, but assumed to work, as the other tests
-		// does not fail
-	}
-
-	@Test
-	public final void testStopItemSupplierProxies() {
-		// TODO this cannot be done, but assumed to work, as the other tests
-		// does not fail
 	}
 
 }

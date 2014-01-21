@@ -14,8 +14,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import com.acertainsupplychain.InvalidItemException;
 import com.acertainsupplychain.ItemQuantity;
@@ -27,7 +25,13 @@ import com.acertainsupplychain.server.ItemSupplierHTTPServer;
 import com.acertainsupplychain.utility.ItemSupplierUtility;
 import com.acertainsupplychain.utility.TestUtility;
 
-@RunWith(JUnit4.class)
+/**
+ * This JUnit test class is used to test that the server side and proxy of an
+ * ItemSupplier works as intended.
+ * 
+ * @author Arni
+ * 
+ */
 public class ItemSupplierAdvanced {
 
 	private static ItemSupplier supplier;
@@ -52,13 +56,6 @@ public class ItemSupplierAdvanced {
 		supplier.clear();
 	}
 
-	// Testing clear
-	// @Test
-	// public void testClear() {
-	// // TODO doesn't make sense, just argue that it is correct.
-	// }
-
-	// TODO split it up ?
 	@Test
 	public final void testGetOrdersPerItem_Valid() {
 		List<ItemQuantity> localList = new ArrayList<ItemQuantity>();
@@ -81,7 +78,7 @@ public class ItemSupplierAdvanced {
 
 		assertEquals(localList, summedItems);
 
-		// 2. Test that an empty set still provies an empty list in a non-empty
+		// 2. Test that an empty set still provides an empty list in a non-empty
 		// supplier
 		supplier.clear();
 		localList.clear();
@@ -106,7 +103,6 @@ public class ItemSupplierAdvanced {
 
 		// 3. Test that with 3 items in stock only the correct one is returned
 		// when calling with one
-		// supplier.clear();
 		localList.clear();
 		itemIds.clear();
 		summedItems.clear();
@@ -124,7 +120,6 @@ public class ItemSupplierAdvanced {
 		assertEquals(localList, summedItems);
 
 		// 4. Test that all three items are returned if calling with all 3
-		// supplier.clear();
 		localList.clear();
 		itemIds.clear();
 		summedItems.clear();
@@ -223,7 +218,6 @@ public class ItemSupplierAdvanced {
 		assertEquals(localList, TestUtility.getOrdersPerItem(supplier, itemIds));
 	}
 
-	// TODO split it up ?
 	@Test
 	public final void testExecuteStep_Valid() {
 		List<ItemQuantity> localList = new ArrayList<ItemQuantity>();
@@ -292,28 +286,6 @@ public class ItemSupplierAdvanced {
 
 		assertEquals(localList, TestUtility.getOrdersPerItem(supplier, itemIds));
 
-		// // 4. Try to add with empty list
-		// // supplier.clear();
-		// items.clear();
-		// // localList.clear();
-		//
-		// // items.add(new ItemQuantity(0, 10));
-		// // items.add(new ItemQuantity(1, 20));
-		// // localList.add(new ItemQuantity(0, 10));
-		// // localList.add(new ItemQuantity(1, 20));
-		// // itemIds = extractItemIds(localList);
-		//
-		// step = new OrderStep(supplier.getSupplierID(), items);
-		//
-		// try {
-		// supplier.executeStep(step);
-		// } catch (Exception e) {
-		// fail();
-		// }
-		//
-		// assertEquals(localList, TestUtility.getOrdersPerItem(supplier,
-		// itemIds));
-
 		// 4. Try to add item with negative item id to show that it is allowed
 		supplier.clear();
 		items.clear();
@@ -334,14 +306,11 @@ public class ItemSupplierAdvanced {
 		assertEquals(localList, TestUtility.getOrdersPerItem(supplier, itemIds));
 	}
 
-	// TODO check out http://code.google.com/p/catch-exception/
-
 	// NOTE When checking that the state of the supplier is the same both before
 	// and after an exception I check by making sure that the quantities I have
 	// added before are the same as after the exception, and wont check that
 	// nothing else have slipped in.
 
-	// Testing executeStep/1
 	@Test
 	public final void testExecuteStep_NullOrderStep() {
 		// Initialize the state of the supplier pre exception and make sure it

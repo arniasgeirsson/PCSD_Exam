@@ -23,13 +23,14 @@ import com.acertainsupplychain.server.OrderManagerHTTPServer;
 import com.acertainsupplychain.utility.ItemSupplierUtility;
 import com.acertainsupplychain.utility.TestUtility;
 
+/**
+ * This JUnit test class is used to test that failure handling is done as
+ * expected.
+ * 
+ * @author Arni
+ * 
+ */
 public class FailureHandlingTests {
-
-	// private static Map<Integer, ItemSupplier> allSuppliers;
-	// private static Map<Integer, Process> allSupplierProcess;
-	//
-	// private static Map<Integer, OrderManager> allOrderManagers;
-	// private static Map<Integer, Process> allOrderManagerProcess;
 
 	private static ItemSupplier itemSupplier1;
 	private static ItemSupplier itemSupplier2;
@@ -73,52 +74,6 @@ public class FailureHandlingTests {
 				OrderManagerHTTPServer.class, true, Integer.toString(++port));
 		orderManager2 = new OrderManagerHTTPProxy(1, port, supplierProxyPorts);
 
-		// -
-		// -
-		// -
-		// -
-		// -
-
-		// TODO cannot come above 10
-		// Integer[] supplierIDs = new Integer[] { 0, 1 };
-		// // Integer[] orderManagerIDs = new Integer[] { 0, 1, 2, 4 };
-		//
-		// allSuppliers = new HashMap<Integer, ItemSupplier>();
-		// allSupplierProcess = new HashMap<Integer, Process>();
-		//
-		// allOrderManagers = new HashMap<Integer, OrderManager>();
-		// allOrderManagerProcess = new HashMap<Integer, Process>();
-		//
-		// Map<Integer, Integer> supplierProxyPorts = new HashMap<Integer,
-		// Integer>();
-
-		// for (Integer supplierID : supplierIDs) {
-		// // Start a new ItemSupplier server
-		// Process itemSupplierProcess = ItemSupplierUtility.startProcess(
-		// ItemSupplierHTTPServer.class, true,
-		// Integer.toString(++port));
-		// allSupplierProcess.put(supplierID, itemSupplierProcess);
-		//
-		// // Create a new local ItemSupplier proxy
-		// ItemSupplier supplier = new ItemSupplierHTTPProxy(supplierID, port);
-		// allSuppliers.put(supplierID, supplier);
-		//
-		// supplierProxyPorts.put(supplierID, port);
-		// }
-
-		// for (Integer orderManagerID : supplierIDs) { // orderManagerIDs) {
-		// // Start a new OrderManager server
-		// Process orderManagerProcess = ItemSupplierUtility.startProcess(
-		// OrderManagerHTTPServer.class, true,
-		// Integer.toString(++port));
-		// allOrderManagerProcess.put(orderManagerID, orderManagerProcess);
-		//
-		// // Create a new local OrderManager proxy
-		// OrderManager orderManager = new OrderManagerHTTPProxy(
-		// orderManagerID, port, supplierProxyPorts);
-		// allOrderManagers.put(orderManagerID, orderManager);
-		// }
-
 	}
 
 	@AfterClass
@@ -160,58 +115,21 @@ public class FailureHandlingTests {
 		if (itemSupplierProcess2 != null) {
 			ItemSupplierUtility.stopProcess(itemSupplierProcess2);
 		}
-		// for (OrderManager orderManager : allOrderManagers.values()) {
-		// orderManager.stopItemSupplierProxies();
-		// if (orderManager instanceof OrderManagerHTTPProxy) {
-		// ((OrderManagerHTTPProxy) orderManager).stop();
-		// }
-		// }
-		//
-		// for (Process orderManagerProcess : allOrderManagerProcess.values()) {
-		// ItemSupplierUtility.stopProcess(orderManagerProcess);
-		// }
-		//
-		// for (ItemSupplier itemSupplier : allSuppliers.values()) {
-		// if (itemSupplier instanceof ItemSupplierHTTPProxy) {
-		// ((ItemSupplierHTTPProxy) itemSupplier).stop();
-		// }
-		// }
-		//
-		// for (Process itemSupplierProcess : allSupplierProcess.values()) {
-		// ItemSupplierUtility.stopProcess(itemSupplierProcess);
-		// }
 	}
-
-	// @Before
-	// public void setUp() throws Exception {
-	// }
-	//
-	// @After
-	// public void tearDown() throws Exception {
-	// }
 
 	@Test
 	public void testFailureHandling() {
 
 		List<ItemQuantity> items = new ArrayList<ItemQuantity>();
 		List<ItemQuantity> localList = new ArrayList<ItemQuantity>();
-
-		// List<OrderStep> workflow = new ArrayList<OrderStep>();
-		// OrderStep step = null;
 		List<StepStatus> stepStatus = new ArrayList<OrderManager.StepStatus>();
-		// Map<Integer, Map<Integer, List<StepStatus>>> expectedOMState = new
 		Map<Integer, List<StepStatus>> orderManager1State = new HashMap<Integer, List<StepStatus>>();
 		Map<Integer, List<StepStatus>> orderManager2State = new HashMap<Integer, List<StepStatus>>();
-
-		// Map<Integer, List<ItemQuantity>> expectedSUPState = new
-		// HashMap<Integer, List<ItemQuantity>>();
 		Integer workflowID;
+		Integer supplierID1 = itemSupplier1.getSupplierID();
+		Integer supplierID2 = itemSupplier2.getSupplierID();
+
 		// 1. Setup initial state of all components
-		// -> Create some random workflows, register them and wait for them to
-		// finish
-		// items.clear();
-		// localList.clear();
-		// stepStatus.clear();
 
 		// Initialize all the components (all to the same state to simplify the
 		// test)
@@ -221,14 +139,14 @@ public class FailureHandlingTests {
 
 		// Register the workflow at the first OrderManager
 		List<OrderStep> workflow = new ArrayList<OrderStep>();
-		workflow.add(new OrderStep(itemSupplier1.getSupplierID(), items));
+		workflow.add(new OrderStep(supplierID1, items));
 		workflowID = TestUtility.registerOrderWorkflow(orderManager1, workflow);
 		TestUtility.waitForJobsToFinish(orderManager1);
 		orderManager1State.put(workflowID, stepStatus);
 
 		// Register the workflow at the second OrderManager
 		workflow = new ArrayList<OrderStep>();
-		workflow.add(new OrderStep(itemSupplier2.getSupplierID(), items));
+		workflow.add(new OrderStep(supplierID2, items));
 		workflowID = TestUtility.registerOrderWorkflow(orderManager2, workflow);
 		TestUtility.waitForJobsToFinish(orderManager2);
 		orderManager2State.put(workflowID, stepStatus);
@@ -258,7 +176,6 @@ public class FailureHandlingTests {
 		}
 
 		// 2. Now shut down one of the ItemSupplier
-
 		if (itemSupplier2 instanceof ItemSupplierHTTPProxy) {
 			((ItemSupplierHTTPProxy) itemSupplier2).stop();
 		}
@@ -297,7 +214,7 @@ public class FailureHandlingTests {
 
 		// Register the workflow at the first OrderManager
 		workflow = new ArrayList<OrderStep>();
-		workflow.add(new OrderStep(itemSupplier1.getSupplierID(), items));
+		workflow.add(new OrderStep(supplierID1, items));
 		workflowID = TestUtility.registerOrderWorkflow(orderManager1, workflow);
 		TestUtility.waitForJobsToFinish(orderManager1);
 		orderManager1State.put(workflowID, stepStatus);
@@ -307,7 +224,7 @@ public class FailureHandlingTests {
 
 		// Register the workflow at the second OrderManager
 		workflow = new ArrayList<OrderStep>();
-		workflow.add(new OrderStep(1, items));
+		workflow.add(new OrderStep(supplierID2, items));
 		workflowID = TestUtility.registerOrderWorkflow(orderManager2, workflow);
 		TestUtility.waitForJobsToFinish(orderManager2);
 		orderManager2State.put(workflowID, stepStatus);
@@ -366,7 +283,7 @@ public class FailureHandlingTests {
 
 		// Register the workflow at the first OrderManager
 		workflow = new ArrayList<OrderStep>();
-		workflow.add(new OrderStep(itemSupplier1.getSupplierID(), items));
+		workflow.add(new OrderStep(supplierID1, items));
 		workflowID = TestUtility.registerOrderWorkflow(orderManager1, workflow);
 		TestUtility.waitForJobsToFinish(orderManager1);
 		orderManager1State.put(workflowID, stepStatus);
@@ -389,6 +306,6 @@ public class FailureHandlingTests {
 
 		// TODO
 		// 6. Bonus: Try and revive the dead components and see that they are
-		// now working again?
+		// now working again.
 	}
 }

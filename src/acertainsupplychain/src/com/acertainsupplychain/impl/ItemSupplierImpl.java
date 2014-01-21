@@ -46,7 +46,8 @@ public class ItemSupplierImpl implements ItemSupplier {
 		logIDLock = new ReentrantReadWriteLock();
 
 		fileLogger = new FileLogger(this.supplierID + "_Supplier_logfile", "");
-		fileLogger.logToFile("INITSUP " + this.supplierID + "\n", true);
+		fileLogger.logToFile("INITSUP " + this.supplierID
+						+ System.getProperty("line.separator"), true);
 	}
 
 	@Override
@@ -146,7 +147,8 @@ public class ItemSupplierImpl implements ItemSupplier {
 	private void addStepToSummedOrders(OrderStep step) {
 		int mylogID = getNextLogID();
 
-		fileLogger.logToFile("EXEC-START " + mylogID + "\n", true);
+		fileLogger.logToFile("EXEC-START " + mylogID
+					+ System.getProperty("line.separator"), true);
 
 		// To make sure that this function is atomic, we must 'prepare' how the
 		// map is going to be after this execution
@@ -176,10 +178,12 @@ public class ItemSupplierImpl implements ItemSupplier {
 		// just do the logging afterwards.
 		for (ItemQuantity item : step.getItems()) {
 			fileLogger.logToFile("WRT " + mylogID + " " + item.getItemId()
-					+ " " + item.getQuantity() + "\n", true);
+					+ " " + item.getQuantity()
+					+ System.getProperty("line.separator"), true);
 		}
 
-		fileLogger.logToFile("EXEC-DONE " + mylogID + "\n", true);
+		fileLogger.logToFile("EXEC-DONE " + mylogID
+					+ System.getProperty("line.separator"), true);
 		lockManager.releaseWriteLocks(itemIDs);
 	}
 
@@ -231,7 +235,8 @@ public class ItemSupplierImpl implements ItemSupplier {
 	public void clear() {
 		logID = 0;
 		summedOrders.clear();
-		fileLogger.logToFile("CLEARDONE\n", true);
+		fileLogger.logToFile("CLEARDONE" 
+				+ System.getProperty("line.separator"), true);
 	}
 
 	@Override

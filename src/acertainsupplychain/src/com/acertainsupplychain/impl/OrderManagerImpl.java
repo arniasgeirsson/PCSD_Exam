@@ -61,8 +61,8 @@ public class OrderManagerImpl implements OrderManager {
 		lockManager = new LockMapManager<Integer>();
 
 		fileLogger = new FileLogger(this.orderManagerID
-				+ "_OrderManager_logfile", "How to read this log file?\n");
-		fileLogger.logToFile("INITOM " + orderManagerID + "\n", true);
+				+ "_OrderManager_logfile", "How to read this log file?%n");
+		fileLogger.logToFile("INITOM " + orderManagerID + System.getProperty("line.separator"), true);
 	}
 
 	/**
@@ -175,7 +175,7 @@ public class OrderManagerImpl implements OrderManager {
 	private void logWorkflow(int workflowID, List<OrderStep> steps) {
 		String log = "REGISTER " + workflowID + " ";
 
-		log = log + createWorkflowString(steps) + "\n";
+		log = log + createWorkflowString(steps) + System.getProperty("line.separator");
 
 		fileLogger.logToFile(log, true);
 	}
@@ -244,9 +244,11 @@ public class OrderManagerImpl implements OrderManager {
 		String log = "UPDATE ";
 
 		if (status == null) {
-			log = log + workflowID + " " + stepIndex + " (null)\n";
+			log = log + workflowID + " " + stepIndex + " (null)"
+					+ System.getProperty("line.separator");
 		} else {
-			log = log + workflowID + " " + stepIndex + " " + status + "\n";
+			log = log + workflowID + " " + stepIndex + " " + status 
+					+ System.getProperty("line.separator");
 		}
 
 		fileLogger.logToFile(log, true);
@@ -333,7 +335,8 @@ public class OrderManagerImpl implements OrderManager {
 		// Must stop any working thread
 		scheduler.shutDown();
 		scheduler = new OrderManagerScheduler();
-		fileLogger.logToFile("CLEARDONE\n", true);
+		fileLogger.logToFile("CLEARDONE"
+				+ System.getProperty("line.separator"), true);
 	}
 
 	@Override

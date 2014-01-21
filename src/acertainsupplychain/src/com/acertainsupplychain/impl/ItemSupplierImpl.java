@@ -54,10 +54,6 @@ public class ItemSupplierImpl implements ItemSupplier {
 		// Validate the step before processing it.
 		validateStep(step);
 
-		// TODO must copy the step before adding it to the database.
-		// -> nah, I just assume no one alters the object while I use it to
-		// update the state
-
 		// Update the lockMap before executing the step to ensure that the
 		// needed locks exist
 		lockManager.addToLockMap(extractSortedItemIDs(step));

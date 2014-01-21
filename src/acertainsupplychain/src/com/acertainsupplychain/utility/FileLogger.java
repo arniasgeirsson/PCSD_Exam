@@ -19,7 +19,7 @@ public class FileLogger {
 	private final static String FILE_TYPE = "txt";
 
 	private final static String PROPERTY_PATH = "filepath.properties";
-	private final static String PROPERTY_NAME = "path";
+	private final static String PROPERTY_NAME = "logfilepath";
 	private final static String DEFAULT_FILENAME = "default_log";
 	private String initialContent;
 

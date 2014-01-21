@@ -7,6 +7,12 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Properties;
 
+/**
+ * Class used to appends strings to a text file.
+ * 
+ * @author Arni
+ * 
+ */
 public class FileLogger {
 
 	private final String fullPath;
@@ -17,7 +23,13 @@ public class FileLogger {
 	private final static String DEFAULT_FILENAME = "default_log";
 	private String initialContent;
 
-	// TODO Make custom exception instead of using root exception (Exception)
+	/**
+	 * Initialize the FileLogger object with a specific title of the log file
+	 * and the initial content of the file.
+	 * 
+	 * @param fileTitle
+	 * @param initialContent
+	 */
 	public FileLogger(String fileTitle, String initialContent) {
 		String title = fileTitle;
 		if (!validateFileTitle(fileTitle)) {
@@ -36,22 +48,30 @@ public class FileLogger {
 		logToFile("", false);
 	}
 
+	/**
+	 * Validates the given file title by returning true if it is valid.
+	 * 
+	 * @param title
+	 * @return
+	 */
 	private boolean validateFileTitle(String title) {
 		if (title == null)
-			// throw new
-			// Exception("FileLogger: The given title cannot be null.");
 			return false;
 		if (title.isEmpty())
-			// throw new
-			// Exception("FileLogger: The given title cannot be empty.");
 			return false;
-		if (title.endsWith("/")) // TODO must be system generic
-			// throw new Exception(
-			// "FileLogger: The given title cannot be a folder.");
+		if (title.endsWith(System.getProperty("file.separator")))
 			return false;
 		return true;
 	}
 
+	/**
+	 * This function creates the full file path specified by the given file
+	 * title, type and the property file.
+	 * 
+	 * @param fileTitle
+	 * @param type
+	 * @return
+	 */
 	private String createFullPath(String fileTitle, String type) {
 
 		Properties properties = new Properties();
@@ -83,13 +103,29 @@ public class FileLogger {
 		return appendTitleToFolder(System.getProperty("user.home"), fullTitle);
 	}
 
+	/**
+	 * Appends the file title to a folder path.
+	 * 
+	 * @param folder
+	 * @param title
+	 * @return
+	 */
 	private String appendTitleToFolder(String folder, String title) {
-		if (!folder.endsWith("/")) {// TODO must be system generic
-			folder = folder + "/";// TODO must be system generic
+		if (!folder.endsWith(System.getProperty("file.separator"))) {
+			folder = folder + System.getProperty("file.separator");
 		}
 		return folder + title;
 	}
 
+	/**
+	 * Log a string to the associated log file.
+	 * 
+	 * @param log
+	 *            , the string to log.
+	 * @param addTimeStamp
+	 *            , a boolean indicated whether or not a timestamp shall be
+	 *            automatically prepending to the given string.
+	 */
 	public void logToFile(String log, boolean addTimeStamp) {
 		String string = log;
 		if (addTimeStamp) {
@@ -98,12 +134,22 @@ public class FileLogger {
 		logToFile(string);
 	}
 
+	/**
+	 * Get a timestamp based on the current date and time.
+	 * 
+	 * @return a string representation of the timestamp.
+	 */
 	private String getTimeStamp() {
 		Date date = new Date();
 		return new Timestamp(date.getTime()).toString();
 	}
 
-	// TODO why is it synchronized?
+	/**
+	 * Log a string to the associated log file.
+	 * 
+	 * @param log
+	 *            , the string to log.
+	 */
 	synchronized public void logToFile(String log) {
 		String content = log;
 
@@ -122,7 +168,8 @@ public class FileLogger {
 			fileWriter = new FileWriter(file, true);
 			fileWriter.write(content);
 		} catch (Exception e) {
-			System.out.println("FileLogger: Could not write log to logfile.");
+			System.out.println("FileLogger: Could not write log to logfile"
+					+ " with path [" + fullPath + "]");
 			e.printStackTrace();
 		}
 		try {

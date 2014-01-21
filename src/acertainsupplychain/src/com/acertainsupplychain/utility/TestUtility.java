@@ -17,8 +17,22 @@ import com.acertainsupplychain.OrderManager;
 import com.acertainsupplychain.OrderManager.StepStatus;
 import com.acertainsupplychain.OrderStep;
 
+/**
+ * This is a utility class used by my test functions only, and is used to gather
+ * a set of common helper functions needed in the test classes.
+ * 
+ * @author Arni
+ * 
+ */
 public class TestUtility {
 
+	/**
+	 * Creates and sets a state for a given ItemSupplier and returns the
+	 * expected state.
+	 * 
+	 * @param supplier
+	 * @return
+	 */
 	public static List<ItemQuantity> setUpPreExceptionSupplierState(
 			ItemSupplier supplier) {
 		List<ItemQuantity> items = new ArrayList<ItemQuantity>();
@@ -42,6 +56,13 @@ public class TestUtility {
 		return localList;
 	}
 
+	/**
+	 * This function extracts the set of item IDs from a list of ItemQuantity
+	 * instances.
+	 * 
+	 * @param list
+	 * @return
+	 */
 	public static Set<Integer> extractItemIds(List<ItemQuantity> list) {
 		Set<Integer> itemIds = new HashSet<Integer>();
 
@@ -52,18 +73,32 @@ public class TestUtility {
 		return itemIds;
 	}
 
-	// This is a wrapper function whom intended use when you want to call the
-	// executeStep function but does not expect an exception to be thrown
+	/**
+	 * This function is merely a wrapper around the executeStep function in an
+	 * ItemSupplier when this is needed but the function is under no
+	 * circumstances expected to throw any exception.
+	 * 
+	 * @param supplier
+	 * @param step
+	 */
 	public static void executeStep(ItemSupplier supplier, OrderStep step) {
 		try {
 			supplier.executeStep(step);
 		} catch (Exception e) {
-			// e.printStackTrace();
+			e.printStackTrace();
 			fail();
 		}
 	}
 
-	// Same comment as above
+	/**
+	 * This function is merely a wrapper around the getOrdersPerItem function in
+	 * an ItemSupplier when this is needed but the function is under no
+	 * circumstances expected to throw any exception.
+	 * 
+	 * @param supplier
+	 * @param itemIds
+	 * @return
+	 */
 	public static List<ItemQuantity> getOrdersPerItem(ItemSupplier supplier,
 			Set<Integer> itemIds) {
 		try {
@@ -75,6 +110,15 @@ public class TestUtility {
 		return null;
 	}
 
+	/**
+	 * This function is merely a wrapper around the registerOrderWorkflow
+	 * function in an OrderManager when this is needed but the function is under
+	 * no circumstances expected to throw any exception.
+	 * 
+	 * @param orderManager
+	 * @param steps
+	 * @return
+	 */
 	public static int registerOrderWorkflow(OrderManager orderManager,
 			List<OrderStep> steps) {
 		try {
@@ -86,6 +130,15 @@ public class TestUtility {
 		return 0;
 	}
 
+	/**
+	 * This function is merely a wrapper around the getOrderWorkflowStatus
+	 * function in an OrderManager when this is needed but the function is under
+	 * no circumstances expected to throw any exception.
+	 * 
+	 * @param orderManager
+	 * @param orderWorkflowId
+	 * @return
+	 */
 	public static List<StepStatus> getOrderWorkflowStatus(
 			OrderManager orderManager, int orderWorkflowId) {
 		try {
@@ -105,7 +158,13 @@ public class TestUtility {
 		return createRandomValidOrderStep(Arrays.asList(supplierIDs));
 	}
 
-	// Valid means that it will pass the inspection at the OrderManagerImpl
+	/**
+	 * This function creates a random valid OrderStep. That the OrderStep is
+	 * valid means it will pass validation in OrderManagerImpl.
+	 * 
+	 * @param supplierIDs
+	 * @return
+	 */
 	public static OrderStep createRandomValidOrderStep(List<Integer> supplierIDs) {
 		int maxItems = 10;
 		int minItemID = -10;
@@ -126,7 +185,13 @@ public class TestUtility {
 				supplierIDs.size())), items);
 	}
 
-	// Defined as coded in ItemSupplierImpl
+	/**
+	 * Validates an OrderStep under the same validation rules in
+	 * ItemSupplierImpl.
+	 * 
+	 * @param step
+	 * @return
+	 */
 	public static boolean isStepValid(OrderStep step) {
 		if (step == null || step.getItems() == null
 				|| step.getItems().isEmpty())
@@ -138,13 +203,27 @@ public class TestUtility {
 		return true;
 	}
 
-	// A random int between n and m, including n excluding m where m > n
+	/**
+	 * Returns a random int between n and m, including n and excluding m. If m
+	 * >= n then n is returned.
+	 * 
+	 * @param n
+	 * @param m
+	 * @return
+	 */
 	public static int nextInt(int n, int m) {
 		if (n >= m)
 			return n;
 		return new Random().nextInt(m - n) + n;
 	}
 
+	/**
+	 * This function creates the expected StepStatus list that would returned by
+	 * the respective OrderManager after processing.
+	 * 
+	 * @param steps
+	 * @return
+	 */
 	public static List<StepStatus> createStepStatusList(List<OrderStep> steps) {
 		List<StepStatus> stepStatus = new ArrayList<StepStatus>();
 		for (OrderStep step : steps) {
@@ -158,6 +237,14 @@ public class TestUtility {
 		return stepStatus;
 	}
 
+	/**
+	 * Sets up a given OrderManager in some inital state and returns the
+	 * expected state.
+	 * 
+	 * @param orderManager
+	 * @param supplierIDs
+	 * @return
+	 */
 	public static Map<Integer, List<StepStatus>> setUpPreExceptionOrderManagerState(
 			OrderManager orderManager, Integer[] supplierIDs) {
 		List<OrderStep> workflow1 = new ArrayList<OrderStep>();
@@ -182,6 +269,13 @@ public class TestUtility {
 		return expectedState;
 	}
 
+	/**
+	 * Compares to lists and makes sure the order is the same.
+	 * 
+	 * @param list1
+	 * @param list2
+	 * @return
+	 */
 	public static <E> boolean compareOrder(List<E> list1, List<E> list2) {
 		int size = list1.size();
 		if (size != list2.size())
@@ -193,6 +287,13 @@ public class TestUtility {
 		return true;
 	}
 
+	/**
+	 * This function is merely a wrapper around the waitForJobsToFinish function
+	 * in an OrderManager when this is needed but the function is under no
+	 * circumstances expected to throw any exception.
+	 * 
+	 * @param orderManager
+	 */
 	public static void waitForJobsToFinish(OrderManager orderManager) {
 		try {
 			orderManager.waitForJobsToFinish();

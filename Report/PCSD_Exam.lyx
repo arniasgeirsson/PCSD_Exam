@@ -129,8 +129,532 @@ Exercises
 Question 1: Proximity
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Reconsider these first assumptions
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I assume that we are talking about merging two big data sets in a ordered
+ fashion, e.g.
+ like if we were to mergesort two arrays.
+\end_layout
+
+\begin_layout Standard
+I assume that one dataset contains N1 elements
+\end_layout
+
+\begin_layout Standard
+I assume that the other dataset contains N2 elements, where N1 and N2 may
+ or may not be equal
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I must honestly I do not understand why there is 
+\emph on
+two
+\emph default
+ datasets, i.e.
+ a fixed number, and how this correlates to a generic 
+\emph on
+d
+\emph default
+-way merging algorithm with focus on the costs of this generic algorithm,
+ and I therefore make the, possible dangerous, assumptions that the two
+ datasets are concatenated by appending one to the other before performing
+ the 
+\emph on
+d
+\emph default
+-way merging algorithm.
+\end_layout
+
+\begin_layout Standard
+Based on the assumption above I will now hence forth let 
+\begin_inset Formula $n$
+\end_inset
+
+ denote the size of the two datasets combined.
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I assume that the two data sets are unsorted before merging.
+ (does it matter that they are unsorted or sorted?)
+\end_layout
+
+\begin_layout Standard
+The two data sets might not be of equal size.
+\end_layout
+
+\begin_layout Standard
+k is less than or equal to L
+\end_layout
+
+\begin_layout Standard
+The whole size of a dataset is .count * L
+\end_layout
+
+\begin_layout Standard
+What is the d-way merging? basicly merge sorts
+\end_layout
+
+\begin_layout Subsubsection
+a) Analyse the CPU cost of this algorithm in terms of word operations.
+\end_layout
+
+\begin_layout Standard
+I assume that the word operations we are interested in are the ones spent
+ on comparing the elements to sort the dataset, and 'small' operations spent
+ on finding the length of the dataset and maintaining index pointers when
+ splitting the dataset are of no interest in this analyze.
+ These described operations that are left out of the equation are also used
+ to divide the problem.
+\end_layout
+
+\begin_layout Standard
+I furthermore assume that one comparison is one word operation.
+\end_layout
+
+\begin_layout Standard
+To sum it up; my goal is to try and analyze how many comparisons I must
+ make in a 
+\emph on
+d
+\emph default
+-way merge-sort algorithm.
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As mentioned I skip the divide-phase of my divide-and-conquer algorithm
+ I will try and only focus on the conquer-phase i.e.
+ the actual merging.
+ Now if we look at the created recursion tree, which can be seen in Figure
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Recursion-treeQ1a"
+
+\end_inset
+
+, we can see that it has the height of 
+\begin_inset Formula $log_{d}(n)$
+\end_inset
+
+ and as we merge upwards in the tree we must perform 
+\begin_inset Formula $n*(d-1)$
+\end_inset
+
+ comparisons per level in the tree, as it takes 
+\begin_inset Formula $(d-1)$
+\end_inset
+
+ operations to compare 
+\begin_inset Formula $1$
+\end_inset
+
+ element to 
+\begin_inset Formula $d$
+\end_inset
+
+ others and for each level of the tree we must do this 
+\begin_inset Formula $n$
+\end_inset
+
+ times.
+ Hence the CPU cost of this algorithm in terms of word operations, under
+ the given assumptions, is 
+\begin_inset Formula $\bigcirc(log_{d}(n)*n*(d-1))$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Recursion treeQ1a
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Recursion-treeQ1a"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+b) Analyse the I/O cost of this algorithm.
+ Use B to denote the size of the memory blocks (pages) transferred between
+ the disk and main memory and M to denote the size of main memory; both
+ measured in words.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+WHAT ABOUT M?!!?! -> It determines how quickly we start to need to replace
+ pages, if we assumed that main memory was empty before starting.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+First order of business is to try and take all the needed assumptions.
+\end_layout
+
+\begin_layout Standard
+I assume that one I/O is either the act of loading an element into the limited
+ sized main memory from the unlimited sized disk, if the element is not
+ already in main memory, or writing the element back to disk
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+<- are you sure?
+\end_layout
+
+\end_inset
+
+, and we are trying to find how many of these I/O operations are being made
+ during an execution of the described algorithm.
+\end_layout
+
+\begin_layout Standard
+I assume that 
+\begin_inset Formula $l\leq B$
+\end_inset
+
+.
+ Furthermore I assume that when one element is being fetched from disk,
+ it is not the single element that is brought up, but the whole page it
+ is contain one, hence I also assume that the machine uses pages (also what
+ the assignment text implies).
+ I do not assume that any extra I/O cost is associated with page replacement.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+What about page replacement strategy used?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+I assume that we are the only one using main memory, or just that I do not
+ consider extra I/O cost associated if someone else replaces our page and
+ we have to re-fetch it, if it could happen.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I assume that any I/O cost associated with doing the divide-phase is negligible
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+correct word?
+\end_layout
+
+\end_inset
+
+ in this analyze as well.
+ 
+\end_layout
+
+\begin_layout Standard
+I further assume that everything is on disk and not in main memory before
+ the algorithm starts.
+\end_layout
+
+\begin_layout Standard
+I do not make any assumptions on what page replacement strategy is used,
+ nor the actual implementation of the structure of the given dataset, but
+ I do assume that when a page is fetched from disk, then magically the whole
+ page is used and not needed again after it has been replaced.
+\end_layout
+
+\begin_layout Standard
+I assume that the merged dataset is written somewhere else and not necessarily
+ merged in-place.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+<- rephrase!
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If we from now on let 
+\begin_inset Formula $t$
+\end_inset
+
+ denote the total number of comparisons needed the perform the algorithm,
+ then we need to make a total of 
+\begin_inset Formula $t$
+\end_inset
+
+ reads from the disk, although as multiple elements can be on one page we
+ must divide 
+\begin_inset Formula $t$
+\end_inset
+
+ with the number of elements that can fit in one page, and then add 
+\begin_inset Formula $n$
+\end_inset
+
+ number of writes, as we must write each element once.
+ This provides us with the cost of 
+\begin_inset Formula $\bigcirc(\frac{t}{B/l})$
+\end_inset
+
+ and if we extend 
+\begin_inset Formula $t$
+\end_inset
+
+ we get 
+\begin_inset Formula $\bigcirc(\frac{log_{d}(n)*n*(d-1)}{B/l})$
+\end_inset
+
+, which is the I/O cost associated with the algorithm with the given assumptions.
+\end_layout
+
+\begin_layout Subsubsection
+c) Analyse the address-translation costs of this algorithm.
+ Use W to denote the size of the address- translation cache measured in
+ words and P to denote the branching factor of the nodes in the page table.
+\end_layout
+
+\begin_layout Standard
+When analyzing the cost of address-translation cost of this algorithm there
+ are indeed two different kinds of costs one might want to separate and
+ analyze, these are the CPU cost and the I/O cost, these two will be described
+ below in their respective subsections.
+\end_layout
+
+\begin_layout Paragraph
+CPU cost
+\end_layout
+
+\begin_layout Standard
+If we consider that we need to make 
+\begin_inset Formula $t$
+\end_inset
+
+ reads and 
+\begin_inset Formula $n$
+\end_inset
+
+ writes, based on the I/O analyze above, we could say that we need to translate
+ from virtual address space to physical address space 
+\begin_inset Formula $t+n$
+\end_inset
+
+ times, and if for each time we need to translate an address we must walk
+ through the page table, the cost must be the number of times we need to
+ translate an address multiplied by the cost of performing a single translation
+ by walking the page table.
+\end_layout
+
+\begin_layout Standard
+By considering a logarithmic tree similar to the one shown above we can
+ conclude that the cost of performing one translation must be the height
+ of the generated tree
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+why?
+\end_layout
+
+\end_inset
+
+, which is 
+\begin_inset Formula $log_{p}(n/B)$
+\end_inset
+
+ where we get the full cost to be 
+\begin_inset Formula $\bigcirc((t+n)*log_{p}(n/B))$
+\end_inset
+
+ and if we extend 
+\begin_inset Formula $t$
+\end_inset
+
+ we get the full address-translation CPU cost of this algorithm, under the
+ given assumptions, which can be written as 
+\begin_inset Formula $\bigcirc(((log_{d}(n)*n*(d-1))+n)*log_{p}(n/B))$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Paragraph
+I/O cost
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Question 2: Parallelism
+\end_layout
+
+\begin_layout Subsubsection
+a) Give explicitly what are the domains and ranges of the two hash functions.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+b) Describe briefly (preferably with a picture, not pseudo-code) how this
+ parallel hash-join algorithm works.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+c) Under the assumption of uniform hashing, how many I/O's do each processor
+ perform?
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+d) Under the same assumption, how many messages do each processor send and
+ receive?
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -897,6 +1421,11 @@ status collapsed
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+ADD: We cannot know if an itemsupplier has received the order or not if
+ we crashed before getting the reply.
 \end_layout
 
 \begin_layout Paragraph

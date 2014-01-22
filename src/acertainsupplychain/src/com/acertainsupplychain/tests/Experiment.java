@@ -38,7 +38,7 @@ public class Experiment {
 		List<OrderManagerThread> threads = null;
 
 		// Scale this number to scale the number of OrderManagers.
-		int numberOfOrderManagers = 1000;
+		int numberOfOrderManagers = 2000;
 
 		ExecutorService executor = Executors
 				.newFixedThreadPool(numberOfOrderManagers);
@@ -49,16 +49,20 @@ public class Experiment {
 		items.add(new ItemQuantity(1, 10));
 		items.add(new ItemQuantity(2, 10));
 		items.add(new ItemQuantity(3, 10));
-		OrderStep step = new OrderStep(supplier.getSupplierID(), items);
-		workflow.add(step);
+		workflow.add(new OrderStep(supplier.getSupplierID(), items));
+		workflow.add(new OrderStep(supplier.getSupplierID(), items));
+		workflow.add(new OrderStep(supplier.getSupplierID(), items));
+		workflow.add(new OrderStep(supplier.getSupplierID(), items));
 
 		Integer numberOfClients = null;
 		Integer numberOfOps = null;
 		Integer numberOfExecuteSteps = null;
 		Integer numberOfGetOrdersPerItem = 0;
-		Long totalRunTimeInNS = 0l;
+//		Long totalRunTimeInNS = 0l;
 		Integer numberOfDifItemIDs = TestUtility.extractItemIds(items).size();
 
+		Long totalTestTimeInNS = 0l;
+		
 		futures.clear();
 		numberOfClients = numberOfOrderManagers;
 		numberOfOps = numberOfClients * workflow.size();
@@ -69,6 +73,7 @@ public class Experiment {
 				workflow);
 
 		// Now 'start' them
+		totalTestTimeInNS = System.nanoTime();
 		for (OrderManagerThread thread : threads) {
 			futures.add(executor.submit(thread));
 		}
@@ -76,16 +81,18 @@ public class Experiment {
 		// Now wait for them to be finished
 		for (Future<Long> futureResult : futures) {
 			try {
-				totalRunTimeInNS += futureResult.get();
+//				totalRunTimeInNS += futureResult.get();
+				futureResult.get();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-
+		totalTestTimeInNS = System.nanoTime() - totalTestTimeInNS;
+		
 		// Log the result
 		PerformanceLogImpl log = new PerformanceLogImpl(numberOfClients,
 				numberOfOps, numberOfExecuteSteps, numberOfGetOrdersPerItem,
-				totalRunTimeInNS, numberOfDifItemIDs);
+				totalTestTimeInNS, numberOfDifItemIDs);
 		logger.writeLog(log);
 	}
 

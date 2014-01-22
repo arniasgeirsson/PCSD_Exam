@@ -101,24 +101,50 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-- Introduction to this report
+The following is a report written as an answer to the final exam in PCSD
+ DIKU 2014 January.
 \end_layout
 
 \begin_layout Standard
-- Introduction to the given assignment
+I assume that the reader has knowledge and understanding of the assignment
+ text and the same principles and concepts as are expected of us.
 \end_layout
 
 \begin_layout Standard
-- Overview of the hand-in.
+In the first part of the report I will try and answer the posted theory
+ exercises.
+ The next part of the report will focus on the programming task and will
+ have the same order as the questions asked in the assignment text.
 \end_layout
 
 \begin_layout Standard
-- Overview of the appendix
+Along with this report a zip file has also been handed in.
+ This compressed file contains the Eclipse project which contains the source
+ code and should be eligible to be directly imported into Eclipse and run.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ An greater overview of my hand in can be found in 
+\series bold
+Appendix
+\series default
+ A.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-- How is the general structure of this report? (does it make sense in this
- one?)
+As the assignment text implies then this report will not be a thorough descripti
+on and assessment of each piece of my code, but rather instead a set of
+ discussions on the design and decisions I have considered and made during
+ the development of the supply chain system.
+ I will therefore suggest the reader to look at the source code, comments
+ and documentation if the reader desires a greater insight into my actual
+ implementations.
 \end_layout
 
 \begin_layout Section
@@ -130,31 +156,30 @@ Question 1: Proximity
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Reconsider these first assumptions
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 I assume that we are talking about merging two big data sets in a ordered
  fashion, e.g.
- like if we were to mergesort two arrays.
+ like if we were to merge-sort two arrays.
 \end_layout
 
 \begin_layout Standard
-I assume that one dataset contains N1 elements
-\end_layout
+I assume that one dataset contains 
+\begin_inset Formula $N_{1}$
+\end_inset
 
-\begin_layout Standard
-I assume that the other dataset contains N2 elements, where N1 and N2 may
- or may not be equal
+ elements and that the other dataset contains 
+\begin_inset Formula $N_{2}$
+\end_inset
+
+ elements, where 
+\begin_inset Formula $N_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $N_{2}$
+\end_inset
+
+ may or may not be equal.
+ I assume that the two data sets are unsorted before merging.
 \end_layout
 
 \begin_layout Standard
@@ -165,7 +190,7 @@ I assume that the other dataset contains N2 elements, where N1 and N2 may
 \end_layout
 
 \begin_layout Standard
-I must honestly I do not understand why there is 
+I must honestly say that I do not understand why there are 
 \emph on
 two
 \emph default
@@ -175,9 +200,8 @@ two
 d
 \emph default
 -way merging algorithm with focus on the costs of this generic algorithm,
- and I therefore make the, possible dangerous, assumptions that the two
- datasets are concatenated by appending one to the other before performing
- the 
+ and I therefore make the, possible dangerous, assumption that the two datasets
+ are concatenated by appending one to the other before performing the 
 \emph on
 d
 \emph default
@@ -192,36 +216,8 @@ Based on the assumption above I will now hence forth let
  denote the size of the two datasets combined.
 \end_layout
 
-\begin_layout Standard
-\begin_inset space ~
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-I assume that the two data sets are unsorted before merging.
- (does it matter that they are unsorted or sorted?)
-\end_layout
-
-\begin_layout Standard
-The two data sets might not be of equal size.
-\end_layout
-
-\begin_layout Standard
-k is less than or equal to L
-\end_layout
-
-\begin_layout Standard
-The whole size of a dataset is .count * L
-\end_layout
-
-\begin_layout Standard
-What is the d-way merging? basicly merge sorts
-\end_layout
-
 \begin_layout Subsubsection
-a) Analyse the CPU cost of this algorithm in terms of word operations.
+a) Analyze the CPU cost of this algorithm in terms of word operations.
 \end_layout
 
 \begin_layout Standard
@@ -229,8 +225,9 @@ I assume that the word operations we are interested in are the ones spent
  on comparing the elements to sort the dataset, and 'small' operations spent
  on finding the length of the dataset and maintaining index pointers when
  splitting the dataset are of no interest in this analyze.
- These described operations that are left out of the equation are also used
- to divide the problem.
+ These described operations that are left out of the equation are also the
+ ones used to divide the problem, and therefore I will not consider the
+ divide-phase of the divide-and-conquer algorithm.
 \end_layout
 
 \begin_layout Standard
@@ -254,8 +251,8 @@ d
 \end_layout
 
 \begin_layout Standard
-As mentioned I skip the divide-phase of my divide-and-conquer algorithm
- I will try and only focus on the conquer-phase i.e.
+As mentioned before I skip the divide-phase of my divide-and-conquer algorithm
+ and therefore I will try and only focus on the conquer-phase i.e.
  the actual merging.
  Now if we look at the created recursion tree, which can be seen in 
 \series bold
@@ -342,12 +339,12 @@ name "fig:Recursion-treeQ1a"
 \end_layout
 
 \begin_layout Subsubsection
-b) Analyse the I/O cost of this algorithm.
+b) Analyze the I/O cost of this algorithm.
  Use B to denote the size of the memory blocks (pages) transferred between
  the disk and main memory and M to denote the size of main memory; both
  measured in words.
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 WHAT ABOUT M?!!?! -> It determines how quickly we start to need to replace
@@ -368,7 +365,7 @@ I assume that one I/O is either the act of loading an element into the limited
  sized main memory from the unlimited sized disk, if the element is not
  already in main memory, or writing the element back to disk
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 <- are you sure?
@@ -387,26 +384,12 @@ I assume that
 
 .
  Furthermore I assume that when one element is being fetched from disk,
- it is not the single element that is brought up, but the whole page it
- is contain one, hence I also assume that the machine uses pages (also what
- the assignment text implies).
+ it is not the single element that is brought back up, but the whole page
+ it is contained in, hence I also assume that the machine uses paging (also
+ what the assignment text implies).
  I do not assume that any extra I/O cost is associated with page replacement.
- 
 \begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-What about page replacement strategy used?
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 I assume that we are the only one using main memory, or just that I do not
@@ -421,15 +404,6 @@ I assume that we are the only one using main memory, or just that I do not
 
 \begin_layout Standard
 I assume that any I/O cost associated with doing the divide-phase is negligible
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-correct word?
-\end_layout
-
-\end_inset
-
  in this analyze as well.
  
 \end_layout
@@ -450,7 +424,7 @@ I do not make any assumptions on what page replacement strategy is used,
 I assume that the merged dataset is written somewhere else and not necessarily
  merged in-place.
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 <- rephrase!
@@ -473,7 +447,7 @@ If we from now on let
 \begin_inset Formula $t$
 \end_inset
 
- denote the total number of comparisons needed the perform the algorithm,
+ denote the total number of comparisons needed to perform the algorithm,
  then we need to make a total of 
 \begin_inset Formula $t$
 \end_inset
@@ -500,17 +474,18 @@ If we from now on let
 \begin_inset Formula $\bigcirc(\frac{log_{d}(n)*n*(d-1)}{B/l})$
 \end_inset
 
-, which is the I/O cost associated with the algorithm with the given assumptions.
+, which is the I/O cost associated with described algorithm with the given
+ assumptions.
 \end_layout
 
 \begin_layout Subsubsection
-c) Analyse the address-translation costs of this algorithm.
+c) Analyze the address-translation costs of this algorithm.
  Use W to denote the size of the address- translation cache measured in
  words and P to denote the branching factor of the nodes in the page table.
 \end_layout
 
 \begin_layout Standard
-When analyzing the cost of address-translation cost of this algorithm there
+When analyzing the cost of address-translation during this algorithm there
  are indeed two different kinds of costs one might want to separate and
  analyze, these are the CPU cost and the I/O cost, these two will be described
  below in their respective subsections.
@@ -545,7 +520,7 @@ By considering a logarithmic tree similar to the one shown above we can
  conclude that the cost of performing one translation must be the height
  of the generated tree
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 why?
@@ -575,9 +550,6 @@ why?
 
 \begin_layout Paragraph
 I/O cost
-\end_layout
-
-\begin_layout Standard
 \begin_inset Note Note
 status open
 
@@ -590,6 +562,12 @@ TODO
 
 \end_layout
 
+\begin_layout Standard
+I must honestly say that I do not have an answer to this, and after a lot
+ of thinking and failed analyzing attempts, I decided to move on and spend
+ my time on some of the other parts of the exam.
+\end_layout
+
 \begin_layout Subsection
 Question 2: Parallelism
 \end_layout
@@ -599,16 +577,23 @@ a) Give explicitly what are the domains and ranges of the two hash functions.
 \end_layout
 
 \begin_layout Standard
-As the first hash function has 
+As the first hash function 
 \begin_inset Formula $h_{1}$
 \end_inset
 
- must be able to accept R and S (and anything they contain) the domain of
- 
+ must be able to accept 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $S$
+\end_inset
+
+ as input (and anything they contain) the domain of 
 \begin_inset Formula $h_{1}$
 \end_inset
 
- is 
+ must be 
 \begin_inset Formula $\{R,S\}$
 \end_inset
 
@@ -675,8 +660,8 @@ b) Describe briefly (preferably with a picture, not pseudo-code) how this
 
 \begin_layout Standard
 Assuming that the database has no central disk, and that the disk space
- of each process is also used to store the database, meaning that the processes
- them selves are the database and therefore 
+ of each process is also used to store the database content, meaning that
+ the processes them selves are the database and therefore 
 \begin_inset Formula $R$
 \end_inset
 
@@ -704,10 +689,6 @@ Assuming that the database has no central disk, and that the disk space
 wide false
 sideways false
 status collapsed
-
-\begin_layout Plain Layout
-
-\end_layout
 
 \begin_layout Plain Layout
 \begin_inset space \hspace{}
@@ -775,7 +756,8 @@ reference "fig:HashJoinDiagram"
 \begin_inset Formula $h_{1}$
 \end_inset
 
- then it uses 
+.
+ Then it uses 
 \begin_inset Formula $h_{2}$
 \end_inset
 
@@ -794,9 +776,6 @@ reference "fig:HashJoinDiagram"
 \begin_layout Subsubsection
 c) Under the assumption of uniform hashing, how many I/O's do each processor
  perform?
-\end_layout
-
-\begin_layout Standard
 \begin_inset Note Note
 status open
 
@@ -807,6 +786,12 @@ TODO
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Again I must honestly say that I do not have an answer to this, and after
+ a lot of thinking and failed analyzing attempts, I decided to move on and
+ spend my time on some of the other parts of the exam.
 \end_layout
 
 \begin_layout Subsubsection
@@ -824,7 +809,7 @@ Assuming that the relations
 \end_inset
 
  are uniformly spread out onto each process before the join, and that each
- process does not send any message before it has finished hashing 
+ process does not send any messages before it has finished hashing 
 \begin_inset Formula $R$
 \end_inset
 
@@ -840,18 +825,45 @@ Assuming that the relations
  Furthermore I assume that the whole content of a single bucket can fit
  in one message.
  If also assumed that each process does not batch the messages, but instead
- sends it immediately after using 
+ sends them immediately after using 
 \begin_inset Formula $h_{2}$
 \end_inset
 
  to figure out which process must receive that specific bucket, and that
- the process does not need to send the joined relation back somewhere then
- each process sends at most 
+ the process does not need to send the joined relation back to someone or
+ somewhere.
+ I also assume a message send to your self is also considered a message
+ send and received.
+\end_layout
+
+\begin_layout Standard
+I assume that both 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $S$
+\end_inset
+
+ can be put inside the same 
+\begin_inset Formula $k$
+\end_inset
+
+ buckets and can send and received in the same messages, as one would be
+ able to add some tag to these parts to denote which relation they initially
+ belonged to.
+\end_layout
+
+\begin_layout Standard
+Given the described assumptions then each process sends at most 
 \begin_inset Formula $k$
 \end_inset
 
  messages.
- As their are 
+\end_layout
+
+\begin_layout Standard
+As their are 
 \begin_inset Formula $p$
 \end_inset
 
@@ -876,49 +888,6 @@ Assuming that the relations
  messages.
 \end_layout
 
-\begin_layout Standard
-I also assume that messages send to your self is also considered a message
- send and received
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-re-place somewhere in the above
-\end_layout
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-I assume that both 
-\begin_inset Formula $R$
-\end_inset
-
- and 
-\begin_inset Formula $S$
-\end_inset
-
- can be put inside the same 
-\begin_inset Formula $k$
-\end_inset
-
- buckets and can send and received in the same messages, as one would be
- able to add some tag to these parts to denote which relation they initially
- belonged to.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-re-place somewhere in the above
-\end_layout
-
-\end_inset
-
-.
-\end_layout
-
 \begin_layout Section
 Programming Task
 \end_layout
@@ -928,351 +897,160 @@ Development Environment
 \end_layout
 
 \begin_layout Standard
-I use JDK 6
+I use JDK 6 and have used Eclipse Kepler to developing the exam.
 \end_layout
 
 \begin_layout Standard
-Developed in Eclipse version Kepler ?
+I have used JUnit version 4.1.1 for my tests and Jetty version 8.1.13 and XStream
+ version 1.4.6.
+ For logging to an excel document I also added some Apache POI, dom4j and
+ XmlBean JARs.
+ The JARs are included in the hand in, but if the reader wants to download
+ and add them themselves they can do that, although I do not guarantee that
+ my project will work with any other versions of the ones provided.
 \end_layout
 
-\begin_layout Standard
-JUnit version for my tests?
+\begin_layout Paragraph
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Paragraph
+File logging
 \end_layout
 
-\begin_layout Standard
-I use Jetty version 9.1.1v20140108
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-Download link http://download.eclipse.org/jetty/stable-9/dist/
+\begin_layout Paragraph
+Performance logging
 \end_layout
 
 \end_inset
 
- -> No, I use the ones from assignment 4 (same as all assignments)
-\end_layout
 
-\begin_layout Standard
-Use xsteam 1.4.5, same as assignments (actually 1.4.6 atm)
-\end_layout
-
-\begin_layout Paragraph
-Additions to the provided API (what and why)
-\end_layout
-
-\begin_layout Paragraph
-Additions to the handed out code (what and why)
-\end_layout
-
-\begin_layout Paragraph
-Where and how does logging happen?
-\end_layout
-
-\begin_layout Paragraph
-Where and how does performance logging happen?
-\end_layout
-
-\begin_layout Paragraph
-Assumptions taken
-\end_layout
-
-\begin_layout Standard
-- What step-status describes for instance
-\end_layout
-
-\begin_layout Paragraph
-High-Level Design Decisions and Modularity
-\end_layout
-
-\begin_layout Standard
-First, you will document the main organization of modules and data in your
- system.
 \end_layout
 
 \begin_layout Subsection
-Question 1 (LG1, LG2, LG3, LG5): Describe your overall implementation of
- the OrderManager and ItemSupplier, including the following aspects in your
- answer:
+Question 1
 \end_layout
 
 \begin_layout Subsubsection
-(1) Considering your use of logging, what RPC semantics are effectively
- implemented between clients and OrderManager or ItemSupplier? What RPC
- semantics are effectively implemented between OrderManager and ItemSupplier?
- Explain.
-\end_layout
-
-\begin_layout Paragraph
-Logging
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-My use of logging?
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Paragraph
 RPC semantics
-\end_layout
-
-\begin_layout Paragraph
-- Which ones are there?
-\end_layout
-
-\begin_layout Paragraph
-* (Global) Clients to OrderManager
-\end_layout
-
-\begin_layout Paragraph
-+ registerOrderWorkflow
 \end_layout
 
 \begin_layout Standard
 When a client is trying to register an order workflow with an OrderManager
- through RPC then the semantics used is at-most-once, as the message is
- only send once and if the communication failed then it is not retried automatic
-ally.
+ through RPC then the semantics used is 
+\emph on
+at-most-once
+\emph default
+, as the message is only send once and if the communication fails then it
+ is not retried automatically.
  The reason for the chosen semantics is that it is okay if the workflow
- does not get registered opposed to exactly-once semantics, but it is not
- okay that the workflow gets registered twice, which could be a situation
- with at-least-once semantics.
-\end_layout
-
-\begin_layout Paragraph
-+ getOrderWorkflowStatus 
+ does not get registered opposed to 
+\emph on
+exactly-once
+\emph default
+ semantics, but it is not okay if the workflow gets registered twice, which
+ could be a situation with the 
+\emph on
+at-least-once
+\emph default
+ semantics.
 \end_layout
 
 \begin_layout Standard
 The same goes for when a client is trying to get an order workflow status,
- then the RPC also has the semantics of at-most-once since the call is not
- automatically retried.
-\end_layout
-
-\begin_layout Paragraph
-* (Local) Clients to ItemSupplier
-\end_layout
-
-\begin_layout Paragraph
-+ executeStep
-\end_layout
-
-\begin_layout Standard
-When a client is trying to execute a step in a ItemSupplier over RPC the
- semantics used is once again at-most-once, the same reasoning as when a
- client tries to register an order workflow at an OrderManager also goes
- here.
-\end_layout
-
-\begin_layout Paragraph
-+ getOrdersPerItem
-\end_layout
-
-\begin_layout Standard
-The RPC semantics used when a client tries to get the list of orders per
- item in an ItemSupplier is also effectively implemented as at-most-once
- as the RPC call is not retried by force.
-\end_layout
-
-\begin_layout Paragraph
-* OrderManager to ItemSupplier
-\end_layout
-
-\begin_layout Paragraph
-+ executeStep
-\end_layout
-
-\begin_layout Standard
-As the assignment text specifies the RPC semantics for executeStep when
- it is an OrderManger that tries to execute a step at an ItemSupplier should
- be exactly-once as the OrderManager should keep trying until it gets a
- response from the ItemSupplier, but does not spam the message until it
- gets a response.
- Although I have decided that in my implementation I use the at-most-once
- semantics as this allows me to make testing of failures more simple and
- easier.
- I have made a comment in the code (OrderManagerJob.java) where one can flip
- the semantics to be exactly-once instead of at-most-once.
-\end_layout
-
-\begin_layout Subsubsection
-(1) How did you make workflow processing asynchronous at the OrderManager?
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-- Explain short the idea/concept
-\end_layout
-
-\begin_layout Plain Layout
-- Show figure and talk about the concrete design
-\end_layout
-
-\begin_layout Plain Layout
-+ How exactly does this design make the OrderManager workflow processing
- asynchronous?
-\end_layout
-
-\begin_layout Plain Layout
-+ Make a note on the assumptions on why a thread only works on one workflow
- and no other touches this.
-\end_layout
-
-\begin_layout Plain Layout
-- Make a note on the possible performance concern in this design
-\end_layout
-
+ then the RPC also has the semantics of 
+\emph on
+at-most-once
+\emph default
+ since the call is not automatically retried.
+\begin_inset Newline newline
 \end_inset
 
 
 \end_layout
 
-\begin_layout Paragraph
-- Explain short the idea/concept
+\begin_layout Standard
+When a client is trying to execute a step in a ItemSupplier over RPC then
+ the semantics used is once again 
+\emph on
+at-most-once
+\emph default
+, the same reasoning, as when a client tries to register an order workflow
+ at an OrderManager, also applies here.
+\end_layout
+
+\begin_layout Standard
+The RPC semantics used when a client tries to get the list of orders per
+ item in an ItemSupplier is also effectively implemented as
+\emph on
+ at-most-once
+\emph default
+ as the RPC call is not retried by force.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As the assignment text specifies, then the RPC semantics for executeStep
+ when it is an OrderManger that tries to execute a step at an ItemSupplier,
+ should be 
+\emph on
+exactly-once
+\emph default
+ as the OrderManager should keep trying until it gets a response from the
+ ItemSupplier, but does not spam the message until it gets a response.
+ Although I have decided that in my implementation I use the 
+\emph on
+at-most-once
+\emph default
+ semantics as this allows me to make testing of failures more simple and
+ tangible.
+ I have made a comment in the code (OrderManagerJob.java) where one can flip
+ the semantics to be 
+\emph on
+exactly-once
+\emph default
+ instead of 
+\emph on
+at-most-once
+\emph default
+ and vice-versa.
+\end_layout
+
+\begin_layout Subsubsection
+Asynchronous OrderManager
 \end_layout
 
 \begin_layout Standard
 My overall idea to make the workflow processing asynchronous at the OrderManager
- is to have a thread pool which the OrderManager schedules a workflow processing
+ is to have a threadpool which the OrderManager schedules a workflow processing
  to, after it has durably stored the workflow to some datastructure/database
  and log.
- The scheduler then makes sure to create a new thread and workflow processes
+ The scheduler then makes sure to create a new thread and workflow process
  asynchronous so the OrderManager can return to taking registrations.
  
 \end_layout
 
-\begin_layout Paragraph
-- Show figure and talk about the concrete design
-\end_layout
-
 \begin_layout Standard
-Figure 
+
+\series bold
+Figure
+\series default
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:OrderManagerAsyncDiagram"
 
 \end_inset
 
- shows in details my design of the OrderManager.
- The figure is a diagram showing how a request from a Global Client gets
- propagated through an OrderManager and properly processed.
+ shows in greater details my design of the OrderManager.
+ The diagram shows how a request from a Global Client gets propagated through
+ an OrderManager and properly processed.
  What is worth mentioning is that the asynchronously link happens when the
  OrderManagerImpl object schedules a new workflow process and the scheduler
  submits a new job to its work pool.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-<- Do I need to say more, than that?
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-#From here...
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The database in the diagram is implemented as the two Map datastructures
- inside OrderManagerImpl.
- One contains all the registered workflows and the other all the current
- status on each step in each workflow.
- In my implementation the Map containing the workflows could easily be avoided
- my simply passing along the workflow to be processed to the spawned thread,
- instead of the workflow ID, but when making the design I decided to think
- of the system as it would be implemented in a more real-world situation.
- Although to try and limit the overhead a little bit, the OrderManagerJob
- thread fetches the whole workflow the first time, and not only a single
- step at the time.
-\end_layout
-
-\begin_layout Standard
-\begin_inset space ~
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-It is worth noting that this design has focus on making the OrderManager
- asynchronously with an easy implementation and understanding and not so
- much on performance as currently in my implementation an OrderManagerJob
- thread only handles a single workflow and a workflow is only handled by
- a single OrderManagerJob thread which is a very bad design in some situations.
- Such a situation could be if a single very big workflow was registered,
- but every step of the workflow was intended to a different ItemSupplier,
- then a lot of waiting time could be saved by scheduling several more threads
- and allow them to all work on the same workflow.
- As it seemed like that performance of the OrderManager was not of great
- focus in this assignment I decided not to dwell much in finding the ultimate
- solution, but instead make note on some of the other options and state
- that my solution is not optimal in many cases and this area has a great
- opportunity for optimization.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Needs to be spell corrected.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset space ~
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Other options could be to spawn a new thread to each step, but might create
- an overhead of having so many threads, yet another option could be to have
- as many threads a live as their are steps intended for different suppliers,
- and then let each thread process each a supplier, this would be a more
- preferred solution and very doable in my overall design, although I decided
- not to do this in my implementation due to the reasons stated above.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-#..
- to here, has actual nothing to do the supposed question? Move it down somewhere
- else?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -1319,73 +1097,74 @@ name "fig:OrderManagerAsyncDiagram"
 
 \end_layout
 
-\begin_layout Paragraph
-+ How exactly does this design make the OrderManager workflow processing
- asynchronous?
+\begin_layout Standard
+The database in the diagram is implemented as the two Map datastructures
+ inside OrderManagerImpl.
+ One contains all the registered workflows and the other all the current
+ status on each step in each workflow.
+ In my implementation the Map containing the workflows could easily be avoided
+ by simply passing along the workflow, to be processed, to the spawned thread,
+ instead of the workflow ID, but when making the design I decided to think
+ of the system as it would be implemented in a more real-world implementation.
+ Although to try and limit the overhead a little bit, the OrderManagerJob
+ thread fetches the whole workflow the first time, and not only a single
+ step at the time.
 \end_layout
 
 \begin_layout Standard
-This design allows the working OrderManagerJob threads to work in the background
- while the OrderManagerImpl can keep on register workflows, without spending
- time processing the workflows.
-\end_layout
+\begin_inset space ~
+\end_inset
 
-\begin_layout Paragraph
-+ Make a note on the assumptions on why a thread only works on one workflow
- and no other touches this.
+
 \end_layout
 
 \begin_layout Standard
--> already done in the above
-\end_layout
-
-\begin_layout Paragraph
-- Make a note on the possible performance concern in this design
-\end_layout
-
-\begin_layout Standard
--> already done in the above
+It is worth noting that this design has focus on making the OrderManager
+ asynchronously with an easy implementation and understanding and not so
+ much on performance as currently in my implementation an OrderManagerJob
+ thread only handles a single workflow and a workflow is only handled by
+ a single OrderManagerJob thread which is a very bad design in some situations,
+ especially if the 
+\emph on
+exactly-once
+\emph default
+ semantic is used as this would mean that the rest of the workflow would
+ not be processed until a failed ItemSupplier was back online.
+ Another situation could be if a single very big workflow was registered,
+ but every step of the workflow was intended to a different ItemSupplier,
+ then a lot of waiting time could be saved by scheduling several more threads
+ and allow them to all work on the same workflow.
+ Although as it seemed like that performance of the OrderManager was not
+ of great focus in this assignment I decided not to dwell much in finding
+ the ultimate solution, but instead make note on some of the other options
+ and state that my solution is not optimal in many cases and this area has
+ a great opportunity for optimization.
 \end_layout
 
 \begin_layout Subsubsection
-(1) How did you handle failures of individual components? In particular,
- how do you handle failure propagation?
+Failing components
 \end_layout
 
 \begin_layout Standard
 I have subclassed OrderProcessingException and created a class called NetworkExc
 eption which is thrown if an network exception occurs.
- The exception class is used to tell if a component fails as we assume that
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-bla bla
-\end_layout
-
-\end_inset
-
- , and therefore can assume that if receive a NetworkException then the
- component is deemed failed.
+ The exception class is used to tell if a component has failed as we assume
+ that network partitions do not occur, and a component do not timeout because
+ it has become out of reach or is too slow to respond in time, and therefore
+ can assume that if I receive a NetworkException then the component is deemed
+ failed.
  If the OrderManagerJob thread catches such an exception then, as opposed
- to the statement in the assignment text 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-quote?
-\end_layout
-
-\end_inset
-
-, then the thread does not retry to talk to the ItemSupplier, but gives
- up the first time, this decision is taken to simplify implementation and
- testing.
+ to the statement in the assignment text, then the thread does not retry
+ request to the ItemSupplier, but gives up the first time, this decision
+ is taken to simplify implementation and testing.
  The thread then marks the step as FAILED and continues its work.
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
 If an OrderManager fails when waiting for response from an ItemSupplier
  then 
 \begin_inset Note Note
@@ -1401,12 +1180,12 @@ Yeah, what then happens? does the message handler fail when trying to reply
 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 When an OrderManager fails then used proxy will be unable to connect to
  the server and be rendered useless, but no one else will be effected.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 \begin_inset Note Note
 status collapsed
 
@@ -1423,44 +1202,17 @@ WORK (add failure handling and propagation)
 
 \end_layout
 
-\begin_layout Paragraph
-Atomicity and Fault-Tolerance
-\end_layout
-
-\begin_layout Standard
-Now, you will argue for your implementation and testing choices regarding
- atomicity and fault-tolerance.
-\end_layout
-
-\begin_layout Subsection
-Question 2 (LG3, LG4, LG5): An ItemSupplier executes operations originated
- at multiple instances of OrderManager as well as local clients.
- Describe how you ensured atomicity of these operations.
- In particular, mention the following aspects in your answer:
-\end_layout
-
-\begin_layout Standard
-NOTE: The method you design for atomicity does not need to be complex, as
- long as you argue convincingly for its correctness, its trade-off in complexity
- of implementation and performance, and how it fits in the system as a whole.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Hm, they just mentioned they want to know about atomicity, but they only
- asks for locks?
-\end_layout
-
 \end_inset
 
 
 \end_layout
 
+\begin_layout Subsection
+Question 2
+\end_layout
+
 \begin_layout Subsubsection
-(1) Which method did you use for ensuring serializability at each item supplier
- (e.g., locking, optimistic approach, or simple queueing of operations)? Describe
- your method at a high level.
+Ensuring serializability at each item supplier
 \end_layout
 
 \begin_layout Standard
@@ -1469,21 +1221,19 @@ I decided to use readwrite locks to ensure serializability at each item
  Each item supplier keeps a map of readwrite locks where one lock maps to
  one specific item ID.
  When an OrderStep is to be executed the item supplier creates the missing
- locks if the OrderStep carries item ID's which the item supplier has not
- seen yet.
- Then when actually executing (summing) the order then the item supplier
- locks all write locks associated with the item ID's in the given step in
- an ascending order, and once the step has been executed then the locks
- are released in the reverse order they where taken.
- Then when getOrdersPerItem/1 is called then the same procedure is performed
+ locks, if the OrderStep carries any item IDs which the item supplier has
+ not seen yet.
+ Then when actually executing the order then the item supplier locks all
+ write locks associated with the item IDs in the given step in an ascending
+ order, and once the step has been executed then the locks are released
+ in the reverse order they where taken.
+ Then when getOrdersPerItem is called then the same procedure is performed
  except now the item supplier locks and unlocks read locks instead of write
  locks.
 \end_layout
 
 \begin_layout Subsubsection
-(1) Argue for the correctness of your method; to do so, show how your method
- is logically equivalent to a trivial solution based on a single global
- lock or to a well-known locking protocol (e.g., a variant of two-phase locking).
+Correctness of my method
 \end_layout
 
 \begin_layout Standard
@@ -1491,13 +1241,13 @@ I decided to try and make my design similar to strict two-phase locking
  (2PL) and will therefore argue for the correctness of my method by comparing
  it to that specific variant of 2PL.
  I assume that the reader is familiar with 2PL and its variants and will
- therefore not dwell in its definition.
+ therefore not dwell in its definitions.
  My method conforms to strict 2PL since I take exclusive locks on objects
- that are modified and get shared locks on objects that are only read.
+ that are modified and take shared locks on objects that are only read.
  Furthermore I only take a lock if a need it, and I wait as long as possible
  before acquiring the lock and when releasing the locks I make sure to release
  them all at once, i.e.
- I do not acquire any locks after I have released one lock.
+ I do not acquire any lock(s) after I have released one lock.
 \end_layout
 
 \begin_layout Standard
@@ -1514,16 +1264,6 @@ Due to time constraints, deadline approaching..
 \end_inset
 
 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-This is still subject to change.
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -1535,69 +1275,48 @@ Since strict 2PL allows for deadlocks I decided to only acquire locks in
 \begin_layout Standard
 The same method is used both in ItemSupplierImpl and OrderManagerImpl even
  though the OrderManagerImpl is much simpler than ItemSupplierImpl and only
- one lock is taken at the time.
+ takes one lock at the time.
 \end_layout
 
 \begin_layout Subsubsection
-(2) Argue for the performance of your method; to do so, explain your assumptions
- about the workload the service is exposed to and why you believe other
- alternatives you considered (e.g.., locking, optimistic approach, or simple
- queueing of operations) would be better or worse than your choice.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Somewhat incomplete, must rethink my locking strategy first...
-\end_layout
-
-\end_inset
-
-
+Performance of my method
 \end_layout
 
 \begin_layout Standard
 Early in my development phase I decided to use locks and try and implement
- something that was logically equal to strict 2PL as this protocol allows
- almost full parallelism of the locks and is a rather simply and straightforward
- approach.
+ something that was logically equivalent to strict 2PL as this protocol
+ allows almost full parallelism of the locks and is a rather simply and
+ straightforward approach.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-this line and the one above, seems rather unconnected
-\end_layout
-
-\end_inset
-
-When designing and developing my method my focus has been on parallelism
- of the ItemSupplier and how to utilities the ItemSupplier the most in a
- concurrent way.
+As hinted in the above when designing and developing my method my focus
+ has been on parallelism of the ItemSupplier and how to utilities the ItemSuppli
+er the most in a concurrent way.
  Of course I could have achieved a lot more parallelism by not using 
 \emph on
 strict
 \emph default
  2PL but simple 2PL although this made it harder for me to assure that the
- executeStep/1 function in the ItemSupplierImpl class is be atomic.
+ executeStep function in the ItemSupplierImpl class is atomic due to my
+ use of ConcurrentHashMap.
 \end_layout
 
 \begin_layout Standard
-I assume that the most workload will occur in executeStep/1 method ...
- And that each supplier will be more or less specialized in a small set
- of items or a specific type of items, which would imply that they would
- have a small set of high end items that are ordered a lot and then a larger
- subset of items that are not as frequently ordered.
+I assume that the most workload will occur in the executeStep method, and
+ that each supplier will be more or less specialized in a small set of items
+ or a specific type of items, which would imply that they would have a small
+ set of high end items that are ordered a lot and then a larger subset of
+ items that are not as frequently ordered.
 \end_layout
 
 \begin_layout Standard
 One performance issue that might arise when an ItemSupplier is heavily used
- is that acquiring and releasing locks are CPU expensive operations and
+ is that acquiring and releasing locks are CPU expensive operations, and
  performing many much operations might cause an overhead that is not worth
  it in the long run
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 also called lock thrashing?
@@ -1608,147 +1327,52 @@ also called lock thrashing?
 .
  Where as an optimistic approach or a queuing method would avoid a big part
  of this overhead.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Then how would those methods be worse than my method?
-\end_layout
-
-\end_inset
-
  Although the optimistic approach might cause a greater overhead if a lot
- of threads are ordering the same high-end item, since a lot of abort control
+ of threads are ordering the same high end items, since a lot of abort control
  and fixing would be needed, but would be a great approach if the workload
  of the ItemSupplier was more spread out and the ItemSupplier was not as
  frequently used.
 \end_layout
 
 \begin_layout Subsection
-Question 3 (LG4, LG5): In your implementation, you were not required to
- implement a procedure for log-based recovery of individual components.
- Explain how you would recover from a failure of:
+Question 3
 \end_layout
 
 \begin_layout Standard
-For each of the two scenarios, explain any necessary interaction with other
- components to achieve recovery by replaying the log.
- Also explain how you would use the log during recovery, i.e., how is the
- information in the log used to rebuild data structures in main memory,
- and why is it sufficient.
+I have tried to design my log files to allow for easy recovery and did not
+ have a great focus on human-readability, except that a timestamp is included
+ which could be avoided in a real-world deployment.
+ In the shown log file snippets then the timestamps is replaced with a log
+ line number.
+\end_layout
+
+\begin_layout Standard
+I am pretending that the implemented clear() function is non-existent when
+ going through my log files, as I only added this function to ease testing
+ of the components.
 \end_layout
 
 \begin_layout Subsubsection
-(1) an OrderManager
+OrderManager
 \end_layout
 
 \begin_layout Standard
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
-- How would I do it?
-\end_layout
-
-\begin_layout Plain Layout
-+ What state must be restored? Assuming an OrderManager failed and is now
- trying to recover?
-\end_layout
-
-\begin_layout Plain Layout
-+ What (minimum amount of) information is needed to recover?
-\end_layout
-
-\begin_layout Plain Layout
-+ Make note on the look of the log file -> I have more info than needed
- (reason-> to make it more readable and debug-able)
-\end_layout
-
-\begin_layout Plain Layout
-++ Show how should it look like in a deployed version
-\end_layout
-
-\begin_layout Plain Layout
-+ How would I use the log to recover? How technically would I do it?
-\end_layout
-
-\begin_layout Plain Layout
-++ Show some pseudocode?
-\end_layout
-
-\begin_layout Plain Layout
-+++ Implement it?
+ADD: We cannot know if an itemsupplier has received the order or not if
+ we crashed before getting the reply.
 \end_layout
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-ADD: We cannot know if an itemsupplier has received the order or not if
- we crashed before getting the reply.
-\end_layout
-
-\begin_layout Paragraph
-- How would I do it?
-\end_layout
-
-\begin_layout Paragraph
-+ What state must be restored? Assuming an OrderManager failed and is now
- trying to recover?
 \end_layout
 
 \begin_layout Standard
 After a failure in an OrderManager then the state that must be recovered
  is the registered workflows and all the updated step statuses.
-\end_layout
-
-\begin_layout Paragraph
-+ What (minimum amount of) information is needed to recover?
-\end_layout
-
-\begin_layout Standard
-To recover to this state we must therefore be able to read all the workflows
- that has been registered and the updates to step statuses.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-<- Seems very very redundant.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Paragraph
-+ Make note on the look of the log file -> I have more info than needed
- (reason-> to make it more readable and debug-able)
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Not valid anymore
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Paragraph
-++ Show how should it look like in a deployed version
-\end_layout
-
-\begin_layout Standard
-I have tried to design my log file to allow for easy recovery and not human-read
-ability, except that a time-stamp is included which could be avoided in
- a real-world deployment.
 \end_layout
 
 \begin_layout Standard
@@ -1760,17 +1384,19 @@ The snippet shown below is an example of an OrderManager log file.
 \end_layout
 
 \begin_layout LyX-Code
-3 INITOM 1                                      // INITOM orderManagerID
+3 INITOM 1                     // INITOM orderManagerID
 \end_layout
 
 \begin_layout LyX-Code
-4 REGISTER 0 [2,(1,12),(4,33)]                  // REGISTER new_workflowID
- [supplierID,(itemID,itemQuantity),..] ..
+4 REGISTER 0 [2,(1,12),(4,33)]
 \end_layout
 
 \begin_layout LyX-Code
-5 UPDATE 0 0 SUCCESSFUL                         // UPDATE workflowID stepIndex
- new_status
+      // REGISTER new_workflowID [supplierID,(itemID,itemQuantity),..] ..
+\end_layout
+
+\begin_layout LyX-Code
+5 UPDATE 0 0 SUCCESSFUL        // UPDATE workflowID stepIndex new_status
 \end_layout
 
 \begin_layout LyX-Code
@@ -1795,19 +1421,10 @@ The snippet shown below is an example of an OrderManager log file.
 
 \begin_layout Standard
 Here we can see that the OrderManager starts by logging an initialization
- line with its ID then if an workflow is to be registered then it is logged
- to the file along with its assigned workflow ID and needed information
- to recreate the workflow.
-\end_layout
-
-\begin_layout Paragraph
-+ How would I use the log to recover? How technically would I do it?
-\end_layout
-
-\begin_layout Standard
-NOTE: I am pretending that the implemented clear() function is non-existent
- and therefore should not be considered, as I only added this function to
- ease testing of the component it self.
+ line with its ID.
+ Then if a workflow is to be registered then it is logged to the file along
+ with its assigned workflow ID and other needed information to recreate
+ the workflow.
 \end_layout
 
 \begin_layout Standard
@@ -1818,8 +1435,8 @@ As I assume that someone will be monitoring the OrderManager instance, this
 \end_layout
 
 \begin_layout Standard
-When recovering an OrderManager must look through the log file from the
- highest log line, ie.
+When an OrderManager recovers it must look through the log file from the
+ highest log line, i.e.
  most recent log line, to the oldest line and find the first occurrence
  of an initialization line and read the OrderManager ID from there, then
  from that log line down to the most recent log line, the OrderManager must
@@ -1829,153 +1446,38 @@ r and therefore when everything has been redone, then the OrderManager is
  back in business.
 \end_layout
 
-\begin_layout Paragraph
-++ Show some pseudocode?
-\end_layout
-
-\begin_layout Paragraph
-+++ Implement it?
+\begin_layout Standard
+Although it must be stated that the only thing this log file is not capable
+ of recovering is the situation where an ItemSupplier gets the executeStep
+ request and completes it, but the OrderManager fails before receiving the
+ reply.
+ This can be fixed if each step also has its own ID and the ItemSupplier
+ can discard any already processed steps.
 \end_layout
 
 \begin_layout Subsubsection
-(1) an ItemSupplier
+ItemSupplier
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-- How would I do it?
-\end_layout
-
-\begin_layout Plain Layout
-+ What state must be restored? Assuming an ItemSupplier failed and is now
- trying to recover?
-\end_layout
-
-\begin_layout Plain Layout
-+ What (minimum amount of) information is needed to recover?
-\end_layout
-
-\begin_layout Plain Layout
-+ Make note on the look of the log file -> I have more info than needed
- (reason-> to make it more readable and debug-able)
-\end_layout
-
-\begin_layout Plain Layout
-++ Show how should it look like in a deployed version
-\end_layout
-
-\begin_layout Plain Layout
-+ How would I use the log to recover? How technically would I do it?
-\end_layout
-
-\begin_layout Plain Layout
-++ Show some pseudocode?
-\end_layout
-
-\begin_layout Plain Layout
-+++ Implement it?
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Paragraph
-- How would I do it?
-\end_layout
-
-\begin_layout Paragraph
-+ What state must be restored? Assuming an ItemSupplier failed and is now
- trying to recover?
+First order of business is to define what state the ItemSupplier must recover;
+ which is the supplier ID and the summed orders of the orders that has been
+ fully successfully executed within the ItemSupplier, where I assume that
+ if an order is fully executed then it has also been written to log.
 \end_layout
 
 \begin_layout Standard
-First order of business is to assume
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-is 'define' a better wording?
-\end_layout
-
-\end_inset
-
- what state of the ItemSupplier must be recovered; which is the supplier
- ID and the summed orders of the orders that has been fully successfully
- executed within the ItemSupplier, where I assume that if an order is fully
- executed then it has also been written to log.
-\end_layout
-
-\begin_layout Paragraph
-+ What (minimum amount of) information is needed to recover?
+To be able to recover to the assumed state we need to log the provided supplier
+ ID and each successfully executed order step.
+ I therefore see no reason to log any failed steps, i.e.
+ incoming steps that are not valid, or any calls to getOrdersPerItem as
+ these do not alter any defined state in the ItemSupplier.
 \end_layout
 
 \begin_layout Standard
-To be able to recover to the assumed state when we need to log the provided
- supplier ID and each successfully executed order step.
- I therefore see no reason to log any failed steps, ie.
- incoming steps that are not valid, or any calls to getOrdersPerItem/1 as
- these do not alter any assumed state in the ItemSupplier.
- I am not saying that these situations are not interesting in many other
- cases, they are just not needed for recovery.
-\end_layout
-
-\begin_layout Paragraph
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-This is now not correct any more ->
-\end_layout
-
-\begin_layout Paragraph
-+ Make note on the look of the log file -> I have more info than needed
- (reason-> to make it more readable and debug-able)
-\end_layout
-
-\begin_layout Plain Layout
-I have made the log file more human-readable than needed for easier debugging
- and reading.
-\end_layout
-
-\begin_layout LyX-Code
-[2014-01-19 15:31:46.895] Supplier with ID [0] executed OrderStep: [0,(0,10),(1,1
-1),(2,12)]
-\end_layout
-
-\begin_layout Plain Layout
-The above shows a possible log line in a ItemSupplier log file.
- In a real world application the human-readable words could be skipped and
- the timestamp likewise, so the file is easier to parse.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Paragraph
-++ Show how should it look like in a deployed version
-\end_layout
-
-\begin_layout Standard
-I have tried to design my log file to allow for easy recovery and not human-read
-ability, except that a time-stamp is included which could be avoided in
- a real-world deployment.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-<- copy-pasted from above
-\end_layout
-
-\end_inset
-
-
+I am not saying that these situations and informations are not interesting
+ in many other cases, they are just not needed for recovering the defined
+ state.
 \end_layout
 
 \begin_layout LyX-Code
@@ -2033,57 +1535,31 @@ The snippet above shows a subset of an ItemSupplier log file, where as I
 \end_inset
 
  line and some comments to try and describe the form.
- The first shown line is logged when a ItemSupplier is initialized the first
- time and is given a supplier ID and is not trying to recover from a failure.
+ The first shown line is logged when a ItemSupplier is initialized and is
+ given a supplier ID and is not trying to recover from a failure.
  When a valid OrderStep is to be executed, then it is assigned a log ID
  which is used to determine which OrderStep a write belongs to and be able
  to log that an OrderStep has been fully successfully executed.
-\end_layout
-
-\begin_layout Paragraph
-+ How would I use the log to recover? How technically would I do it?
-\end_layout
-
-\begin_layout Standard
-NOTE: I am pretending that the implemented clear() function is non-existent
- and therefore should not be considered, as I only added this function to
- ease testing of the component it self.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-<- copy-pasted from above
-\end_layout
-
+\begin_inset Newline newline
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-As I assume that someone will be monitoring the ItemSupplier, this someone
- will also be able to tell the failed ItemSupplier that it must now recover
- after reboot.
- For instance calling another constructor which will start recovering
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Also assumed above in OrderManager
-\end_layout
-
-\end_inset
-
-.
+As above I assume that someone will be monitoring the ItemSupplier, this
+ someone will also be able to tell the failed ItemSupplier that it must
+ now recover after reboot.
+ For instance calling another constructor which will start the recover phase.
  In such case the ItemSupplier would start reading the log from bottom up
- (ie.
+ (i.e.
  start by the highest log line and then read towards the smallest) until
- it hits an initialization line which contains the supplier ID and the marks
- the beginning of the lifetime of the ItemSupplier, from it would be able
- to move downwards again and redos every WRT line from the INIT line and
- downwards, and in the mean time as it goes down the list, the ItemSupplier
- keeps track of all the OrderSteps that has been started but was never able
- to finish before a failure, those 
+ it hits an initialization line which contains the supplier ID and marks
+ the beginning of the lifetime of the ItemSupplier.
+ From there on it would be able to move downwards again and redo every WRT
+ line from the INIT line and downwards, and in the mean time as it goes
+ down the list, the ItemSupplier keeps track of all the OrderSteps that
+ has been started but was never able to finish before a failure, those 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2091,7 +1567,7 @@ EXEC-START logID
 \begin_inset Quotes erd
 \end_inset
 
- that does not have an accompany 
+ line that does not have an accompany 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2102,7 +1578,7 @@ EXEC-DONE logID
  line.
  When the bottom has been reached and all steps have been redone, then all
  the unfinished OrderSteps must be undone before the ItemSupplier has regained
- its assumed state.
+ its defined state.
 \end_layout
 
 \begin_layout Standard
@@ -2112,48 +1588,12 @@ In the recovery phase nothing is needed to be added to the log file as the
  recovery attempts are ignorable.
 \end_layout
 
-\begin_layout Paragraph
-++ Show some pseudocode?
-\end_layout
-
-\begin_layout Paragraph
-+++ Implement it?
-\end_layout
-
-\begin_layout Paragraph
-Testing
-\end_layout
-
 \begin_layout Subsection
-Question 4 (LG4, LG5): Describe your high-level strategy to test your implementa
-tion.
- In particular, mention the following aspects in your answer:
+Question
 \end_layout
 
 \begin_layout Subsubsection
-(1) How you tested execution of workflows by the OrderManager, considering
- asynchronicity of execution.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-- Explain how I decided to test my OrderManager implementation
-\end_layout
-
-\begin_layout Plain Layout
-+ How I assert the state, and when I do that, and why (why do I wait)
-\end_layout
-
-\begin_layout Plain Layout
-- Explain the 'valid' tests
-\end_layout
-
-\end_inset
-
-
+Test of OrderManager with asynchronic workflow processing
 \end_layout
 
 \begin_layout Standard
@@ -2163,18 +1603,12 @@ As the OrderManager uses asynchronic execution of registered steps then
  By the nature of asynchronicity this is hard to do.
  I therefore decided that I would only assert the state of a OrderManager
  or an underlying ItemSupplier either before a workflow is registered or
- after a registered workflow have finished execution of all its steps.
- As the RPC semantics when executing a step between an OrderManager and
- an ItemSupplier is at-most-once
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-insert cross-reference?
-\end_layout
-
-\end_inset
-
+ after a registered workflow has finished execution of all its steps.
+ As the RPC semantics, when executing a step between an OrderManager and
+ an ItemSupplier, is 
+\emph on
+at-most-once
+\emph default
 , this is possible.
 \end_layout
 
@@ -2185,29 +1619,32 @@ g ItemSuppliers by register a set of workflows and then assert the expected
 \end_layout
 
 \begin_layout Standard
-To perform the waiting I have added the waitForJobsToFinish/0 method to
- the OrderManager.java interface which waits for any ongoing execution threads
+To perform the waiting I have added the waitForJobsToFinish method to the
+ OrderManager.java interface which waits for any ongoing processing threads
  to finish before returning.
  By then I can be sure that it is not 'random' which state the OrderManager
- or ItemSupplier's will be in.
+ or ItemSupplier's will be in when their states are being asserted.
 \end_layout
 
 \begin_layout Subsubsection
-(1) How you tested that operations were indeed atomic at the ItemSupplier.
+Test of atomicity in executeStep
 \end_layout
 
 \begin_layout Standard
-To test that the executeStep/1 in the ItemSupplierImpl.java class is indeed
- atomic I decided to make what I call a 'stress' test.
+To test that the executeStep function in the ItemSupplierImpl.java class
+ is indeed atomic I decided to make what I call a 'stress' test.
  I try and put pressure on the property to see if I can break it.
- My setup is as follows; I create a single ItemSupplierImpl instance and
+\end_layout
+
+\begin_layout Standard
+My setup is as follows; I create a single ItemSupplierImpl instance and
  then a number of Runner threads whom have one job and that is to execute
  steps to the item supplier instance.
  Before starting the Runner threads I create a Checker thread which repeatedly
- calls getOrdersPerItem/1 and asserts the return value with an expected
- value, and if the return value is something unexpected at any point then
- the test fails.
- All of which happens within the same JVM/process.
+ calls getOrdersPerItem and asserts the return value with an expected value,
+ and if the return value is something unexpected at any point then the test
+ fails.
+ All of which happens within the same JVM-process.
  The Runners and the Checker is then started, and I wait until they are
  all done and see if the Checker at one point deemed the test to be a fail.
  If the test succeeded I try again with a greater number of threads and
@@ -2217,38 +1654,27 @@ To test that the executeStep/1 in the ItemSupplierImpl.java class is indeed
 
 \begin_layout Standard
 The downside of this test is that it does not guarantee that my implementation
- of executeStep in ItemSupplierImpl is indeed atomic, but it does greatly
- hint that my implementation might be correct.
+ of executeStep in ItemSupplierImpl is indeed 
+\emph on
+all-or-nothing
+\emph default
+ and 
+\emph on
+before-and-after
+\emph default
+ atomic, but it does greatly hint that my implementation might be correct.
 \end_layout
 
 \begin_layout Standard
 Furthermore as I try to always develop with the test-driven development
- mindset I created this test before ensuring/implementing atomicity in the
- executeStep/1 function, and the function failed horribly every time, after
- implementing my method of atomicity the test has yet to fail, still after
- countless of test runs.
+ mindset, I created this test before ensuring/implementing atomicity in
+ the executeStep function, and the function failed horribly every time,
+ after implementing my method of atomicity the test has yet to fail, still
+ after countless of test runs.
 \end_layout
 
 \begin_layout Subsubsection
-(1) How you tested error conditions and failures of the multiple components.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-- Describe how I have done that? What is my overall strategy and 'fremgang'
- when testing this (<- exception testing)
-\end_layout
-
-\begin_layout Plain Layout
-- Describe how my failure tests works and my strategy (<- failure testing)
-\end_layout
-
-\end_inset
-
-
+Test of error conditions and failures of the multiple components
 \end_layout
 
 \begin_layout Paragraph
@@ -2256,12 +1682,12 @@ Testing error conditions
 \end_layout
 
 \begin_layout Standard
-My general strategy when testing that the proper exceptions are thrown is
+My general strategy for testing that the proper exceptions are thrown is
  that I give the components that are under testing some initial state and
- assert that they are in this initial state, then a assert that the error
- occurs as expected and finally I assert that the components are still in
- the same state, or what ever is the expected state after the tested error
- condition.
+ assert that they are in this initial state.
+ Then I assert that the error occurs as expected and finally I assert that
+ the components are still in the same state, or what ever is the expected
+ state after the tested error condition.
 \end_layout
 
 \begin_layout Paragraph
@@ -2295,49 +1721,119 @@ What this strategy is not capable of handling is when a component fails
  care of this.
 \end_layout
 
-\begin_layout Paragraph
-Experiments
-\end_layout
-
-\begin_layout Standard
-Finally, you will evaluate the scalability of one component of your system
- experimentally.
-\end_layout
-
 \begin_layout Subsection
-Question 5 (LG6): Design, describe the setup for, and execute an experiment
- that shows how well your implementation of a single ItemSupplier behaves
- as concurrency is increased.
- You will need to argue for a basic workload mix involving calls from order
- managers as well as local clients.
- Given a mix, you should report how the throughtput of the service scales
- as more local clients / order managers are added.
- Remember to thoroughly document your setup.
- In particular, mention the following aspects in your answer:
-\end_layout
-
-\begin_layout Subsubsection
-(2) Setup: Document the hardware, data size and distribution, and workload
- characteristics you have used to make your measurements.
- In addition, describe your measurement procedure, e.g., procedure to generate
- workload calls, use of timers, and numbers of repetitions, along with short
- arguments for your decisions.
- Also make sure to document your hardware configuration and how you expect
- this configuration to affect the scalability results you obtain.
-\end_layout
-
-\begin_layout Subsubsection
-(1, + Figure) Results: According to your setup, show a graph with your throughpu
-t measurements for a single ItemSupplier on the y-axis and the number of
- local clients / order managers on the x-axis, maintaining the workload
- mix you argued for in your setup.
- How does the observed throughput scale with the number of local clients
- / order managers? Describe the trends observed and any other effects.
- Explain why you observe these trends and how much that matches your expectation
-s.
+Question 5
 \end_layout
 
 \begin_layout Standard
+As the time is now 6 minutes to deadline this chapter, very unfortunately
+ will not be one of the good ones...
+\end_layout
+
+\begin_layout Subsubsection
+Setup
+\end_layout
+
+\begin_layout Standard
+I refer to the Experiment.java class for a description of the test setup.
+\end_layout
+
+\begin_layout Subsubsection
+Results
+\end_layout
+
+\begin_layout Standard
+As we can in 
+\series bold
+Figure 
+\series default
+4 that when scaling the number of clients the average latency keeps something
+ that looks like a straight line, right until we hit a to big of a thread
+ overhead.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename Figures/Avg. Latency.png
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Avg.
+ Latency
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Avg.-Latency"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Agg.
+ throughput
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Agg.-throughput"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
 \begin_inset Newpage newpage
 \end_inset
 
@@ -2349,20 +1845,29 @@ Appendix A
 \end_layout
 
 \begin_layout Subsection
+Project overview
+\end_layout
+
+\begin_layout Plain Layout
+- How is my project structured and give a short description of each class.
+\end_layout
+
+\begin_layout Section
+Appendix B
+\end_layout
+
+\begin_layout Subsection
 Test overview
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 - What test are there, what do they test for, how good are they, and what
  can I assume based on these tests?
 \end_layout
 
-\begin_layout Subsection
-Project overview
-\end_layout
+\end_inset
 
-\begin_layout Standard
-- How is my project structured and give a short description of each class.
+
 \end_layout
 
 \end_body
